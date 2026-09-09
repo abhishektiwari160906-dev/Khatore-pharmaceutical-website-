@@ -304,19 +304,116 @@ function makeBranchPositions(count, height) {
   return positions;
 }
 
+/* ---- leaflets: two-row pinnate arrangement along a branch, with
+   occasional natural node-clustering rather than uniform spacing ---- */
+function addLeavesAlongBranch(branchCurve, leafPairs, toneBase, leaves, capsules, scale) {
+  for (let lp = 1; lp <= leafPairs; lp++) {
+    const s = clamp((lp / (leafPairs + 0.6)) * rand(0.94, 1.05), 0.03, 0.98);
+    placeLeafPair(branchCurve, s, toneBase, leaves, capsules, scale);
+    // ~22% of nodes carry a second, slightly offset pair — real nodal
+    // density is uneven, not a metronome
+    if (rng() < 0.11) {
+      const s2 = clamp(s + rand(-0.05, 0.05), 0.03, 0.98);
+      placeLeafPair(branchCurve, s2, toneBase, leaves, capsules, scale * rand(0.7, 0.92));
+    }
+  }
+}
+function placeLeafPair(branchCurve, s, toneBase, leaves, capsules, scale) {
+  const bPoint = branchCurve.getPointAt(s);
+  const bTangent = branchCurve.getTangentAt(s).normalize();
+  [1, -1].forEach((rowSign, rowIdx) => {
+    // darkest tone (index 0) reserved for roughly 1 in 5 leaves — enough
+    // for tonal depth without the canopy reading as black
+    const toneIndex = rng() < 0.2 ? 0 : clamp(toneBase - (rowIdx === 0 ? 0 : 1), 1, LEAF_TONES.length - 1);
+    leaves.push({
+      position: bPoint.clone(),
+      tangent: bTangent.clone(),
+      sideSign: rowSign * (rng() > 0.15 ? 1 : -1),
+      toneIndex,
+      scaleJitter: rand(0.78, 1.18) * scale,
+      asymJitter: rand(-1, 1),
+      phase: rand(0, Math.PI * 2),
+      speed: rand(0.35, 0.75),
+      amp: rand(0.035, 0.09),
+    });
+    // seed capsules cluster mid-branch, underside — mirrors the source art
+    if (s > 0.25 && s < 0.8 && rng() < 0.16) {
+      capsules.push({ position: bPoint.clone().addScaledVector(new THREE.Vector3(0, -1, 0), 0.03) });
+    }
+  });
+}
+
+/* ---- grows one branch off a stem (or a sub-branch off a branch) and,
+   for a fraction of qualifying branches, spawns 1-2 second-order
+   sub-branches so the canopy reads as one interconnected structure
+   with real mid-canopy richness rather than a comb of primary limbs ---- */
+function growBranch(originPoint, sideSign, zSign, t, lenScale, radiusBase, radiusTip, color, toneBase, branchCurves, leaves, capsules, allowSub, densityScale = 1) {
+  const azJitter = rand(-0.6, 0.6);
+  const baseAz = sideSign > 0 ? 0 : Math.PI;
+  const az = baseAz + azJitter + (zSign > 0 ? 0.42 : -0.42);
+  const riseAmt = rand(0.04, 0.30);
+  const outward = new THREE.Vector3(Math.cos(az) * (1 - riseAmt), riseAmt, Math.sin(az) * (1 - riseAmt)).normalize();
+
+  const lenFalloff = 1 - t * 0.6;
+  const branchLen = lenScale * lenFalloff * rand(0.68, 1.3);
+
+  const midPt = originPoint.clone()
+    .addScaledVector(outward, branchLen * 0.55)
+    .addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.10);
+  const tipPt = originPoint.clone()
+    .addScaledVector(outward, branchLen)
+    .addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.16 * rand(0.6, 1));
+
+  const branchCurve = new THREE.CatmullRomCurve3([originPoint.clone(), midPt, tipPt], false, 'catmullrom', 0.5);
+  branchCurves.push({ curve: branchCurve, radiusBase, radiusTip, color });
+
+  const leafPairs = Math.round(lerp(9, 4, t) * rand(0.85, 1.2) * densityScale);
+  addLeavesAlongBranch(branchCurve, leafPairs, toneBase, leaves, capsules, densityScale);
+
+  // ---- second-order sub-branches: concentrated in the mid-canopy,
+  // where a real specimen actually forks, not near the very base or tip ----
+  if (allowSub) {
+    const midCanopy = 1 - Math.abs(t - 0.45) / 0.45; // 0 at extremes, 1 at t=0.45
+    const subChance = clamp(midCanopy * 0.42, 0.08, 0.42);
+    let subCount = rng() < subChance ? 1 : 0;
+    if (subCount === 1 && rng() < 0.18) subCount = 2;
+    for (let i = 0; i < subCount; i++) {
+      const sAtt = rand(0.32, 0.78);
+      const subOrigin = branchCurve.getPointAt(sAtt);
+      const subSide = rng() > 0.5 ? 1 : -1;
+      const subZ = rng() > 0.5 ? 1 : -1;
+      growBranch(
+        subOrigin, subSide, subZ, rand(0.15, 0.55),
+        branchLen * rand(0.4, 0.62),
+        radiusBase * 0.5, Math.max(radiusTip * 0.5, 0.003),
+        color, clamp(toneBase + 1, 1, LEAF_TONES.length - 1),
+        branchCurves, leaves, capsules, false, // no third order — keeps this bounded
+        0.65 // sub-branches carry lighter foliage than primary limbs
+      );
+    }
+  }
+}
+
 function generatePlant() {
   const stems = []; // { curve, points, radiusBase, radiusTip, color, isMain }
-  const branchCurves = []; // same shape as stems, plus attachment ref
+  const branchCurves = []; // { curve, radiusBase, radiusTip, color }
   const leaves = []; // { position, tangent, sideSign, toneIndex, jitter }
   const capsules = []; // { position }
 
+  // A tight multi-stem crown (three primary stems close at the base,
+  // gently interweaving as they rise) plus two short basal shoots placed
+  // deliberately forward/back in Z — real Phyllanthus niruri tillers this
+  // way, and it gives an explicit foreground/background read instead of
+  // three parallel, evenly-spaced poles.
   const stemDefs = [
-    { baseX: 0.00, baseZ: 0.00, height: 6.35, branches: 13, radiusBase: 0.052, radiusTip: 0.010, xWanderAmp: 0.30, zWanderAmp: 0.38, lean: { x: 0.10, z: -0.10 }, color: GREEN_DK, isMain: true },
-    { baseX: -0.40, baseZ: 0.22, height: 4.15, branches: 8,  radiusBase: 0.032, radiusTip: 0.007, xWanderAmp: 0.26, zWanderAmp: 0.28, lean: { x: -0.72, z: 0.42 }, color: GREEN, isMain: false },
-    { baseX: 0.33, baseZ: -0.26, height: 5.35, branches: 10, radiusBase: 0.038, radiusTip: 0.008, xWanderAmp: 0.24, zWanderAmp: 0.32, lean: { x: 0.62, z: -0.48 }, color: GREEN, isMain: false },
+    { baseX: 0.00, baseZ: 0.00,  height: 6.35, branches: 16, radiusBase: 0.052, radiusTip: 0.010, xWanderAmp: 0.34, zWanderAmp: 0.42, lean: { x: 0.08, z: -0.08 }, color: GREEN_DK, isMain: true,  toneBase: 1 },
+    { baseX: -0.22, baseZ: 0.14, height: 4.35, branches: 11, radiusBase: 0.033, radiusTip: 0.007, xWanderAmp: 0.30, zWanderAmp: 0.32, lean: { x: -0.42, z: 0.30 }, color: GREEN,    isMain: false, toneBase: 2 },
+    { baseX: 0.19, baseZ: -0.16, height: 5.55, branches: 12, radiusBase: 0.039, radiusTip: 0.008, xWanderAmp: 0.28, zWanderAmp: 0.34, lean: { x: 0.36, z: -0.34 }, color: GREEN,    isMain: false, toneBase: 2 },
+    { baseX: -0.12, baseZ: 0.34, height: 3.05, branches: 8,  radiusBase: 0.022, radiusTip: 0.006, xWanderAmp: 0.22, zWanderAmp: 0.22, lean: { x: -0.30, z: 0.20 }, color: GREEN_LT, isMain: false, toneBase: 2, foreground: true },
+    { baseX: 0.14, baseZ: -0.38, height: 3.55, branches: 9,  radiusBase: 0.024, radiusTip: 0.006, xWanderAmp: 0.24, zWanderAmp: 0.24, lean: { x: 0.24, z: -0.22 }, color: GREEN_DK, isMain: false, toneBase: 1, background: true },
   ];
 
-  stemDefs.forEach((def, stemIdx) => {
+  stemDefs.forEach((def) => {
     const segments = 28;
     const points = buildStemPoints(rng, { ...def, segments });
     const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.4);
@@ -328,67 +425,18 @@ function generatePlant() {
 
     branchTs.forEach((t, bi) => {
       const stemPoint = curve.getPointAt(t);
-      const stemTangent = curve.getTangentAt(t).normalize();
-
       sideSign *= -1; // alternate left/right — matches the original's alternating fronds
       if (bi % 3 === 2) zPhase += 1; // every third branch also shifts forward/back in Z
       const zSign = (zPhase % 2 === 0) ? 1 : -1;
 
-      // outward direction: mostly horizontal, wraps partly around Z so the
-      // specimen has real volume rather than a flat left/right fan. Wide
-      // per-branch angular jitter breaks the "ladder rung" regularity that
-      // a fixed cone of directions produces.
-      const azJitter = rand(-0.55, 0.55); // radians, swings the branch off its nominal side
-      const baseAz = sideSign > 0 ? 0 : Math.PI;
-      const az = baseAz + azJitter + (zSign > 0 ? 0.4 : -0.4);
-      const riseAmt = rand(0.04, 0.30);
-      const outward = new THREE.Vector3(Math.cos(az) * (1 - riseAmt), riseAmt, Math.sin(az) * (1 - riseAmt)).normalize();
-
-      const lenFalloff = 1 - t * 0.62; // branches shorten toward the tip
-      const branchLen = (def.height * 0.30) * lenFalloff * rand(0.7, 1.25);
-
-      const midPt = stemPoint.clone()
-        .addScaledVector(outward, branchLen * 0.55)
-        .addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.10);
-      const tipPt = stemPoint.clone()
-        .addScaledVector(outward, branchLen)
-        .addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.16 * rand(0.6, 1));
-
-      const branchPts = [stemPoint.clone(), midPt, tipPt];
-      const branchCurve = new THREE.CatmullRomCurve3(branchPts, false, 'catmullrom', 0.5);
-
       const radiusBase = lerp(def.radiusBase, def.radiusTip, t) * 0.62;
       const radiusTip = Math.max(radiusBase * 0.28, 0.0035);
-      const toneBase = def.isMain ? 1 : 2; // main stem skews mid, secondary stems skew lighter/frontmost
-      branchCurves.push({ curve: branchCurve, radiusBase, radiusTip, color: def.isMain ? GREEN : GREEN_LT });
 
-      // ---- leaflets: two-row pinnate arrangement along the branch ----
-      const leafPairs = Math.round(lerp(9, 4, t) * rand(0.85, 1.15));
-      for (let lp = 1; lp <= leafPairs; lp++) {
-        const s = clamp((lp / (leafPairs + 0.6)) * rand(0.94, 1.05), 0.04, 0.97);
-        const bPoint = branchCurve.getPointAt(s);
-        const bTangent = branchCurve.getTangentAt(s).normalize();
-        [1, -1].forEach((rowSign, rowIdx) => {
-          // darkest tone (index 0) reserved for roughly 1 in 5 leaves —
-          // enough for tonal depth without the canopy reading as black
-          const toneIndex = rng() < 0.2 ? 0 : clamp(toneBase - (rowIdx === 0 ? 0 : 1), 1, LEAF_TONES.length - 1);
-          leaves.push({
-            position: bPoint.clone(),
-            tangent: bTangent.clone(),
-            sideSign: rowSign * (rng() > 0.15 ? 1 : -1),
-            toneIndex,
-            scaleJitter: rand(0.78, 1.18),
-            asymJitter: rand(-1, 1),
-            phase: rand(0, Math.PI * 2),
-            speed: rand(0.35, 0.75),
-            amp: rand(0.035, 0.09),
-          });
-          // seed capsules cluster mid-branch, underside — mirrors the source art
-          if (s > 0.25 && s < 0.8 && rng() < 0.16) {
-            capsules.push({ position: bPoint.clone().addScaledVector(new THREE.Vector3(0, -1, 0), 0.03) });
-          }
-        });
-      }
+      growBranch(
+        stemPoint, sideSign, zSign, t, def.height * 0.31,
+        radiusBase, radiusTip, def.isMain ? GREEN : GREEN_LT, def.toneBase,
+        branchCurves, leaves, capsules, true
+      );
     });
   });
 
