@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhui Amla — Scroll-Growth Story Prototype</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+  GROWTH PROTOTYPE — the Stage 2B Bhui Amla specimen turned into
+  a scroll-driven growth mechanic (roots -> stem -> branches ->
+  leaves -> full canopy), each stage mapped to a beat of the
+  Khatore story. Isolated test harness — not wired into
+  khatore-homepage-v6-1.html. The source-of-truth Stage 2B file
+  (bhui-amla-hero-prototype.html) is untouched.
+
+  SCROLL = GROWTH. DRAG = EXAMINATION. These stay independent:
+  scroll only ever moves camera distance/height + reveals
+  geometry; drag/idle only ever move rotation.
+============================================================ */
+:root {
+  --blue:      #1B3C87;
+  --blue-dark: #12296B;
+  --green:     #3D7835;
+  --green-dk:  #2B5625;
+  --green-lt:  #4F9543;
+  --ink:       #0F1724;
+  --ink-mid:   #2C3B5A;
+  --paper:     #F5F7FC;
+  --off:       #EAEEF7;
+  --rule:      #C8D0E4;
+  --muted:     #6874A0;
+  --muted-lt:  #9BA5C5;
+  --white:     #FFFFFF;
+
+  --sans:  'DM Sans', system-ui, sans-serif;
+  --mono:  'DM Mono', monospace;
+  --serif: 'Playfair Display', Georgia, serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* overflow-x: hidden (not overflow-x: clip) on html/body would break
+   position: sticky below — per the CSS Overflow spec, setting only
+   overflow-x to a non-visible value forces overflow-y to compute as
+   auto, which turns body into its own scroll container and detaches
+   sticky from the real document/viewport scroll. clip avoids that
+   (no new scroll container) while still preventing horizontal scroll. */
+html, body { background: var(--paper); overflow-x: clip; }
+body { font-family: var(--sans); color: var(--ink); }
+
+.proto-tag {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  background: var(--ink); color: var(--off);
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em;
+  text-transform: uppercase; text-align: center; padding: 0.45rem 1rem;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ---------- lead-in / lead-out framing so the growth section
+   doesn't feel like the entire page ---------- */
+.lead {
+  max-width: 640px; margin: 0 auto; padding: 6rem 2rem 3rem;
+  text-align: center;
+}
+.lead-eyebrow {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 1rem;
+}
+.lead h1 {
+  font-family: var(--sans); font-weight: 200; font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.25; color: var(--ink);
+}
+.lead p { margin-top: 1rem; font-size: 0.92rem; line-height: 1.8; color: var(--muted); }
+
+.lead-out {
+  max-width: 640px; margin: 0 auto; padding: 4rem 2rem 8rem; text-align: center;
+}
+.lead-out p { font-size: 0.84rem; line-height: 1.8; color: var(--muted); }
+
+/* ---------- the tall growth section: canvas pinned via sticky,
+   story advances as the visitor scrolls through its height ---------- */
+.growth-wrap { position: relative; height: 460vh; background: var(--paper); }
+.growth-sticky {
+  position: sticky; top: 0; height: 100vh; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.gstage {
+  position: relative; width: 100%; height: 100%;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.gstage.is-dragging { cursor: grabbing; }
+
+#gCanvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; z-index: 2;
+  opacity: 0; transition: opacity 1.1s var(--ease);
+}
+#gCanvas.is-ready { opacity: 1; }
+#gFallback2d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 2; }
+
+.g-ground {
+  position: absolute; left: 50%; bottom: 12%;
+  width: 220px; height: 26px;
+  transform: translateX(-50%);
+  background: var(--ink-mid); opacity: 0.08; border-radius: 50%; filter: blur(12px);
+  z-index: 1; pointer-events: none;
+}
+
+/* ---------- scroll hint (first screen only) ---------- */
+.g-hint {
+  position: absolute; left: 50%; bottom: 2.75rem; transform: translateX(-50%);
+  z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+.g-hint-line { width: 1px; height: 26px; background: var(--rule); position: relative; overflow: hidden; }
+.g-hint-line::after {
+  content: ''; position: absolute; left: 0; top: -100%; width: 100%; height: 100%;
+  background: var(--blue); animation: gHintDrip 1.8s ease-in-out infinite;
+}
+@keyframes gHintDrip { 0% { top: -100%; } 100% { top: 100%; } }
+
+/* ---------- stage caption: ONE slot, content swapped/crossfaded —
+   not five stacked UI cards ---------- */
+.g-caption {
+  position: absolute; left: 2.5rem; bottom: 3.25rem; z-index: 5;
+  max-width: 380px; pointer-events: none;
+}
+/* legibility scrim — the specimen can grow directly behind this text
+   (that's the point, type + plant coexisting in depth), so the text
+   needs its own quiet ground underneath it regardless of what's
+   behind it in the canvas, on every breakpoint but especially the
+   tighter mobile framing */
+.g-caption::before {
+  content: '';
+  position: absolute; left: -1.5rem; right: -1.75rem; top: -1.75rem; bottom: -1.75rem;
+  background: radial-gradient(ellipse 115% 100% at 15% 65%, var(--paper) 0%, rgba(245,247,252,0.92) 48%, rgba(245,247,252,0) 82%);
+  z-index: -1;
+}
+.g-caption-num {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted-lt); display: block; margin-bottom: 0.5rem;
+}
+.g-caption-eyebrow {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--blue); display: block; margin-bottom: 0.6rem;
+  opacity: 0; transform: translateY(6px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.g-caption-eyebrow.on { opacity: 1; transform: none; }
+.g-caption-body {
+  font-family: var(--serif); font-style: italic; font-size: clamp(1rem, 1.5vw, 1.24rem);
+  line-height: 1.6; color: var(--ink-mid);
+  opacity: 0; transform: translateY(6px); transition: opacity 0.7s var(--ease) 0.05s, transform 0.7s var(--ease) 0.05s;
+}
+.g-caption-body.on { opacity: 1; transform: none; }
+.g-caption-body strong { font-style: normal; font-weight: 500; color: var(--green-dk); }
+
+/* ---------- progress rail: quiet, editorial — a ruled line filling,
+   not a UI progress bar ---------- */
+.g-rail { position: absolute; right: 2.5rem; top: 50%; transform: translateY(-50%); z-index: 5; height: 160px; width: 1px; background: var(--rule); }
+.g-rail-fill { position: absolute; left: 0; top: 0; width: 1px; background: var(--blue); height: 0%; }
+.g-rail-label {
+  position: absolute; right: 12px; top: 0; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.14em; color: var(--muted-lt);
+  white-space: nowrap;
+}
+
+.g-meta {
+  position: absolute; top: 1.5rem; left: 1.75rem; z-index: 5;
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); pointer-events: none;
+}
+.g-meta strong { color: var(--blue); font-weight: 500; }
+
+.perf-hud {
+  position: absolute; bottom: 0.75rem; left: 1.75rem; z-index: 5;
+  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.08em;
+  color: var(--muted-lt); pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .g-caption { left: 1.25rem; right: 1.25rem; bottom: 2.5rem; max-width: none; }
+  .g-rail { display: none; }
+  .g-meta { top: 1.1rem; left: 1.25rem; }
+  .g-hint { bottom: 2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="proto-tag">Growth Prototype · Scroll = Story · Drag = Examine · Not Integrated</div>
+
+<div class="lead">
+  <span class="lead-eyebrow">Botanical Study — Working Prototype</span>
+  <h1>Scroll to grow the specimen Khatore's formulation lineage begins with.</h1>
+  <p>What follows is one continuous botanical study — the same Bhui Amla (Phyllanthus niruri) specimen approved in Stage 2B, now unfolding as you scroll.</p>
+</div>
+
+<div class="growth-wrap" id="growthWrap">
+  <div class="growth-sticky">
+    <div class="gstage" id="gStage">
+      <div class="g-meta"><strong>Botanical Study</strong> &nbsp;·&nbsp; Phyllanthus niruri</div>
+      <div class="g-ground"></div>
+      <canvas id="gCanvas" aria-hidden="true"></canvas>
+      <canvas id="gFallback2d" hidden aria-hidden="true"></canvas>
+      <p class="sr-only">A scroll-driven growth study of Bhui Amla (Phyllanthus niruri): roots, then stem, then alternating branches, then two-row leaflets and seed capsules, mapped to Khatore's founding story from 1984 through to its present global reach.</p>
+
+      <div class="g-hint" id="gHint">
+        <span>Scroll to trace the growth</span>
+        <span class="g-hint-line"></span>
+      </div>
+
+      <div class="g-caption" id="gCaption">
+        <span class="g-caption-num" id="gCaptionNum">Stage 01 / 05</span>
+        <span class="g-caption-eyebrow" id="gCaptionEyebrow">1984 — Foundation</span>
+        <p class="g-caption-body" id="gCaptionBody">The roots run deep. Khatore began with a commitment to Ayurvedic knowledge that has continued across generations.</p>
+      </div>
+
+      <div class="g-rail">
+        <div class="g-rail-fill" id="gRailFill"></div>
+        <div class="g-rail-label" id="gRailLabel" style="top:0%">Roots</div>
+      </div>
+
+      <div class="perf-hud" id="perfHud"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lead-out">
+  <p>The full specimen is now the botanical source behind Kamalahar — Khatore's flagship formulation. Drag the specimen above at any point to examine its branching structure directly.</p>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ============================================================
+   0. SEEDED RNG — same seed philosophy as Stage 2B: reproducible
+   asymmetry between renders.
+============================================================ */
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rng = mulberry32(19840917);
+const rand = (a = 0, b = 1) => a + rng() * (b - a);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = THREE.MathUtils.lerp;
+const smooth01 = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const degToRad = THREE.MathUtils.degToRad;
+
+const GREEN_DK = new THREE.Color('#2B5625');
+const GREEN    = new THREE.Color('#3D7835');
+const GREEN_LT = new THREE.Color('#4F9543');
+const LEAF_TONES = [ new THREE.Color('#2B5625'), new THREE.Color('#3D7835'), new THREE.Color('#4F9543') ];
+const CAPSULE_TONE = new THREE.Color('#2B5625');
+const ROOT_TONE = new THREE.Color('#2B5625');
+
+/* ============================================================
+   1. GROWTH-SEGMENTED BOTANICAL SKELETON
+
+   Same structural design as Stage 2B (3-stem clump + 2 basal
+   shoots + alternating branches + mid-canopy sub-branches + two-
+   row leaflets + seed capsules), but every stem/branch/sub-branch
+   is now split into pieces at the points where children attach,
+   and pushed into ONE ordered `growthUnits` array in depth-first
+   growth order (a unit's own base-to-tip segments, interleaved
+   with each child's full subtree at the point it attaches).
+
+   That single ordering is what makes scroll-driven growth cheap:
+   the merged wood mesh's index buffer is built in that exact
+   order, so revealing the plant is just geometry.setDrawRange(0,
+   N) with N walking from 0 to the total index count — one
+   number, one draw call, no per-branch timers. Leaves/capsules
+   get a `growthThreshold` (0..1 in that same index-count space)
+   computed from which unit they attach to and where along it.
+============================================================ */
+const growthUnits = [];   // { curve, sStart, sEnd, radiusBase, radiusEnd, color, pathSegments, radialSegments, isRoot, isMainSpine, indexCount, cumStart, cumEnd }
+const leavesOut = [];     // { position, tangent, sideSign, toneIndex, scaleJitter, asymJitter, phase, speed, amp, unitRef, localS }
+const capsulesOut = [];
+
+function pushUnit(curve, sStart, sEnd, radiusAtStart, radiusAtEnd, color, pathSegments, radialSegments, flags) {
+  const unit = { curve, sStart, sEnd, radiusBase: radiusAtStart, radiusEnd: radiusAtEnd, color, pathSegments, radialSegments, ...flags };
+  growthUnits.push(unit);
+  return unit;
+}
+
+function placeLeafPair(curve, s, toneBase, unit, localS, scale) {
+  const bPoint = curve.getPointAt(s);
+  const bTangent = curve.getTangentAt(s).normalize();
+  [1, -1].forEach((rowSign, rowIdx) => {
+    const toneIndex = rng() < 0.2 ? 0 : clamp(toneBase - (rowIdx === 0 ? 0 : 1), 1, LEAF_TONES.length - 1);
+    leavesOut.push({
+      position: bPoint.clone(), tangent: bTangent.clone(),
+      sideSign: rowSign * (rng() > 0.15 ? 1 : -1), toneIndex,
+      scaleJitter: rand(0.78, 1.18) * scale, asymJitter: rand(-1, 1),
+      phase: rand(0, Math.PI * 2), speed: rand(0.35, 0.75), amp: rand(0.035, 0.09),
+      unitRef: unit, localS,
+    });
+    if (s > 0.25 && s < 0.8 && rng() < 0.16) {
+      capsulesOut.push({ position: bPoint.clone().addScaledVector(new THREE.Vector3(0, -1, 0), 0.03), unitRef: unit, localS });
+    }
+  });
+}
+
+// leaves for one segment's own s-range [sStart,sEnd] of a curve, referencing that segment's unit
+function addLeavesInRange(curve, sStart, sEnd, leafPairs, toneBase, unit, densityScale) {
+  const span = sEnd - sStart;
+  if (span <= 1e-5 || leafPairs <= 0) return;
+  for (let lp = 1; lp <= leafPairs; lp++) {
+    const frac = clamp((lp / (leafPairs + 0.6)) * rand(0.94, 1.05), 0.02, 0.99);
+    const s = sStart + frac * span;
+    placeLeafPair(curve, s, toneBase, unit, frac, densityScale);
+    if (rng() < 0.11) {
+      const frac2 = clamp(frac + rand(-0.05, 0.05) / Math.max(span, 0.05), 0.02, 0.99);
+      placeLeafPair(curve, sStart + frac2 * span, toneBase, unit, frac2, densityScale * rand(0.7, 0.92));
+    }
+  }
+}
+
+/**
+ * Splits `curve` into segments at each child's attachment s (ascending),
+ * pushing wood units + that segment's own leaf share in growth order,
+ * recursing into each child immediately after the segment that ends at
+ * its attachment point — giving the interleaved depth-first order the
+ * single draw-range reveal depends on.
+ */
+function growSegmented(curve, radiusBase, radiusTip, color, toneBase, leafPairsTotal, densityScale, children, pathSegTotal, radialSegments, flags) {
+  const sorted = children.slice().sort((a, b) => a.s - b.s);
+  let prevS = 0;
+  const boundaries = sorted.map(c => c.s).concat([1]);
+  boundaries.forEach((boundS, i) => {
+    const segStart = prevS, segEnd = Math.max(boundS, prevS + 1e-4);
+    const segSpan = segEnd - segStart;
+    if (segSpan > 1e-4) {
+      const segPathSegs = Math.max(2, Math.round(pathSegTotal * segSpan));
+      const rAtStart = lerp(radiusBase, radiusTip, segStart);
+      const rAtEnd = lerp(radiusBase, radiusTip, segEnd);
+      const unit = pushUnit(curve, segStart, segEnd, rAtStart, rAtEnd, color, segPathSegs, radialSegments,
+        { isRoot: !!flags?.isRoot });
+      const segLeafPairs = Math.round(leafPairsTotal * segSpan);
+      addLeavesInRange(curve, segStart, segEnd, segLeafPairs, toneBase, unit, densityScale);
+    }
+    if (i < sorted.length) sorted[i].spawn();
+    prevS = boundS;
+  });
+}
+
+function makeBranchPositions(count, height) {
+  const gap0 = height / (count * 0.62);
+  const decay = 0.965;
+  const positions = [];
+  let h = height * 0.085;
+  let gap = gap0;
+  for (let i = 0; i < count; i++) {
+    positions.push(clamp(h / height, 0.04, 0.965));
+    gap *= decay * rand(0.78, 1.28);
+    h += gap;
+  }
+  return positions;
+}
+
+function buildStemPoints({ baseX, baseZ, height, segments, xWanderAmp, zWanderAmp, lean }) {
+  const pts = [];
+  const freqA = rand(0.55, 0.85), freqB = rand(1.3, 1.9);
+  const phaseA = rand(0, Math.PI * 2), phaseB = rand(0, Math.PI * 2);
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const wob = Math.sin(t * Math.PI * freqA + phaseA) * xWanderAmp + Math.sin(t * Math.PI * freqB + phaseB) * xWanderAmp * 0.35;
+    const wobZ = Math.cos(t * Math.PI * (freqA * 0.8) + phaseB) * zWanderAmp + Math.cos(t * Math.PI * (freqB * 0.6) + phaseA) * zWanderAmp * 0.4;
+    pts.push(new THREE.Vector3(baseX + wob + lean.x * t, t * height, baseZ + wobZ + lean.z * t));
+  }
+  return pts;
+}
+
+function spawnBranch(originPoint, sideSign, zSign, t, lenScale, radiusBase, radiusTip, color, toneBase, densityScale, allowSub) {
+  const azJitter = rand(-0.6, 0.6);
+  const baseAz = sideSign > 0 ? 0 : Math.PI;
+  const az = baseAz + azJitter + (zSign > 0 ? 0.42 : -0.42);
+  const riseAmt = rand(0.04, 0.30);
+  const outward = new THREE.Vector3(Math.cos(az) * (1 - riseAmt), riseAmt, Math.sin(az) * (1 - riseAmt)).normalize();
+  const lenFalloff = 1 - t * 0.6;
+  const branchLen = lenScale * lenFalloff * rand(0.68, 1.3);
+  const midPt = originPoint.clone().addScaledVector(outward, branchLen * 0.55).addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.10);
+  const tipPt = originPoint.clone().addScaledVector(outward, branchLen).addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.16 * rand(0.6, 1));
+  const branchCurve = new THREE.CatmullRomCurve3([originPoint.clone(), midPt, tipPt], false, 'catmullrom', 0.5);
+
+  const leafPairsTotal = Math.round(lerp(9, 4, t) * rand(0.85, 1.2) * densityScale);
+  const children = [];
+  if (allowSub) {
+    const midCanopy = 1 - Math.abs(t - 0.45) / 0.45;
+    const subChance = clamp(midCanopy * 0.42, 0.08, 0.42);
+    let subCount = rng() < subChance ? 1 : 0;
+    if (subCount === 1 && rng() < 0.18) subCount = 2;
+    for (let i = 0; i < subCount; i++) {
+      const sAtt = rand(0.32, 0.78);
+      const subSide = rng() > 0.5 ? 1 : -1;
+      const subZ = rng() > 0.5 ? 1 : -1;
+      children.push({
+        s: sAtt,
+        spawn: () => spawnBranch(
+          branchCurve.getPointAt(sAtt), subSide, subZ, rand(0.15, 0.55),
+          branchLen * rand(0.4, 0.62), radiusBase * 0.5, Math.max(radiusTip * 0.5, 0.003),
+          color, clamp(toneBase + 1, 1, LEAF_TONES.length - 1), densityScale * 0.65, false
+        ),
+      });
+    }
+  }
+  growSegmented(branchCurve, radiusBase, radiusTip, color, toneBase, leafPairsTotal, densityScale, children, 8, 5, {});
+}
+
+function spawnStem(def) {
+  const segments = 28;
+  const points = buildStemPoints({ ...def, segments });
+  const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.4);
+  const branchTs = makeBranchPositions(def.branches, def.height);
+  let sideSign = rng() > 0.5 ? 1 : -1;
+  let zPhase = 0;
+  const children = branchTs.map((t, bi) => {
+    sideSign *= -1;
+    if (bi % 3 === 2) zPhase += 1;
+    const zSign = (zPhase % 2 === 0) ? 1 : -1;
+    const capturedSide = sideSign, capturedZ = zSign;
+    return {
+      s: t,
+      spawn: () => {
+        const stemPoint = curve.getPointAt(t);
+        const radiusBase = lerp(def.radiusBase, def.radiusTip, t) * 0.62;
+        const radiusTip = Math.max(radiusBase * 0.28, 0.0035);
+        spawnBranch(stemPoint, capturedSide, capturedZ, t, def.height * 0.31, radiusBase, radiusTip, def.isMain ? GREEN : GREEN_LT, def.toneBase, 1, true);
+      },
+    };
+  });
+  growSegmented(curve, def.radiusBase, def.radiusTip, def.color, def.toneBase, 0, 1, children, 26, 7, { isMainSpine: !!def.isMain });
+  return { curve, height: def.height };
+}
+
+// roots: 6 short tapering tendrils spreading down/outward from the
+// crown at the origin — grown FIRST so progress≈0 shows only these.
+function spawnRoots() {
+  const count = 6;
+  for (let i = 0; i < count; i++) {
+    const az = (i / count) * Math.PI * 2 + rand(-0.35, 0.35);
+    const depth = rand(0.55, 0.95);
+    const spread = rand(0.35, 0.75);
+    const dir = new THREE.Vector3(Math.cos(az) * spread, -1, Math.sin(az) * spread).normalize();
+    const mid = new THREE.Vector3(0, -0.02, 0).addScaledVector(dir, depth * 0.5).addScaledVector(new THREE.Vector3(0, -1, 0), depth * 0.12);
+    const tip = new THREE.Vector3(0, -0.02, 0).addScaledVector(dir, depth);
+    const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0.02, 0), mid, tip], false, 'catmullrom', 0.45);
+    growSegmented(curve, 0.026, 0.004, ROOT_TONE, 0, 0, 1, [], 6, 5, { isRoot: true });
+  }
+}
+
+function generatePlant() {
+  spawnRoots();
+  const stemDefs = [
+    { baseX: 0.00, baseZ: 0.00,  height: 6.35, branches: 16, radiusBase: 0.052, radiusTip: 0.010, xWanderAmp: 0.34, zWanderAmp: 0.42, lean: { x: 0.08, z: -0.08 }, color: GREEN_DK, isMain: true,  toneBase: 1 },
+    { baseX: -0.22, baseZ: 0.14, height: 4.35, branches: 11, radiusBase: 0.033, radiusTip: 0.007, xWanderAmp: 0.30, zWanderAmp: 0.32, lean: { x: -0.42, z: 0.30 }, color: GREEN,    isMain: false, toneBase: 2 },
+    { baseX: 0.19, baseZ: -0.16, height: 5.55, branches: 12, radiusBase: 0.039, radiusTip: 0.008, xWanderAmp: 0.28, zWanderAmp: 0.34, lean: { x: 0.36, z: -0.34 }, color: GREEN,    isMain: false, toneBase: 2 },
+    { baseX: -0.12, baseZ: 0.34, height: 3.05, branches: 8,  radiusBase: 0.022, radiusTip: 0.006, xWanderAmp: 0.22, zWanderAmp: 0.22, lean: { x: -0.30, z: 0.20 }, color: GREEN_LT, isMain: false, toneBase: 2 },
+    { baseX: 0.14, baseZ: -0.38, height: 3.55, branches: 9,  radiusBase: 0.024, radiusTip: 0.006, xWanderAmp: 0.24, zWanderAmp: 0.24, lean: { x: 0.24, z: -0.22 }, color: GREEN_DK, isMain: false, toneBase: 1 },
+  ];
+  const stems = stemDefs.map(spawnStem);
+  const maxHeight = Math.max(...stemDefs.map(d => d.height));
+
+  // ---- second pass: assign cumulative index-count thresholds ----
+  let cum = 0;
+  growthUnits.forEach(u => {
+    u.indexCount = u.pathSegments * u.radialSegments * 6;
+    u.cumStart = cum; cum += u.indexCount; u.cumEnd = cum;
+  });
+  const total = cum;
+  leavesOut.forEach(l => { l.growthThreshold = (l.unitRef.cumStart + l.localS * (l.unitRef.cumEnd - l.unitRef.cumStart)) / total; });
+  capsulesOut.forEach(c => { c.growthThreshold = (c.unitRef.cumStart + c.localS * (c.unitRef.cumEnd - c.unitRef.cumStart)) / total; });
+
+  // ---- growth envelope lookup: sampled bounding box (minY, maxY, maxR)
+  // of everything grown so far, at each unit boundary — drives the camera ----
+  const envelope = [{ p: 0, minY: 0, maxY: 0.05, maxR: 0.1 }];
+  let minY = Infinity, maxY = -Infinity, maxR = 0;
+  growthUnits.forEach(u => {
+    const p0 = u.cumStart / total, p1 = u.cumEnd / total;
+    [u.sStart, u.sEnd].forEach(s => {
+      const pt = u.curve.getPointAt(s);
+      minY = Math.min(minY, pt.y); maxY = Math.max(maxY, pt.y);
+      maxR = Math.max(maxR, Math.hypot(pt.x, pt.z));
+    });
+    envelope.push({ p: p1, minY, maxY, maxR });
+  });
+  envelope.push({ p: 1, minY, maxY: Math.max(maxY, maxHeight), maxR });
+
+  return { growthUnits, leaves: leavesOut, capsules: capsulesOut, maxHeight, totalIndexCount: total, envelope };
+}
+
+function envelopeAt(envelope, p) {
+  p = clamp(p, 0, 1);
+  for (let i = 1; i < envelope.length; i++) {
+    if (p <= envelope[i].p) {
+      const a = envelope[i - 1], b = envelope[i];
+      const t = b.p > a.p ? (p - a.p) / (b.p - a.p) : 0;
+      return { minY: lerp(a.minY, b.minY, t), maxY: lerp(a.maxY, b.maxY, t), maxR: lerp(a.maxR, b.maxR, t) };
+    }
+  }
+  return envelope[envelope.length - 1];
+}
+
+/* ============================================================
+   2. TAPERED TUBE GEOMETRY (unchanged technique from Stage 2B —
+      per-vertex radius taper, merged into one draw call)
+============================================================ */
+function makeTaperedTubeGeometry(curve, sStart, sEnd, radiusStart, radiusEnd, color, pathSegments, radialSegments) {
+  const positions = [], normals = [], colors = [], indices = [];
+  let prevNormal = new THREE.Vector3(0, 0, 1);
+  for (let i = 0; i <= pathSegments; i++) {
+    const t = lerp(sStart, sEnd, i / pathSegments);
+    const center = curve.getPointAt(t);
+    const tangent = curve.getTangentAt(t).normalize();
+    let normal = new THREE.Vector3().crossVectors(prevNormal, tangent);
+    if (normal.lengthSq() < 1e-8) normal = prevNormal.clone(); else normal.crossVectors(tangent, normal).normalize();
+    if (normal.lengthSq() < 1e-8) {
+      const fallbackUp = Math.abs(tangent.y) > 0.98 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+      normal = new THREE.Vector3().crossVectors(tangent, fallbackUp).normalize();
+    }
+    const binormal = new THREE.Vector3().crossVectors(tangent, normal).normalize();
+    prevNormal = normal;
+    const radius = lerp(radiusStart, radiusEnd, i / pathSegments);
+    for (let k = 0; k < radialSegments; k++) {
+      const angle = (k / radialSegments) * Math.PI * 2;
+      const nx = Math.cos(angle), ny = Math.sin(angle);
+      const vx = normal.x * nx + binormal.x * ny, vy = normal.y * nx + binormal.y * ny, vz = normal.z * nx + binormal.z * ny;
+      positions.push(center.x + vx * radius, center.y + vy * radius, center.z + vz * radius);
+      normals.push(vx, vy, vz);
+      colors.push(color.r, color.g, color.b);
+    }
+  }
+  for (let i = 0; i < pathSegments; i++) {
+    const a0 = i * radialSegments, b0 = (i + 1) * radialSegments;
+    for (let k = 0; k < radialSegments; k++) {
+      const k2 = (k + 1) % radialSegments;
+      indices.push(a0 + k, b0 + k, b0 + k2);
+      indices.push(a0 + k, b0 + k2, a0 + k2);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geo.setIndex(indices);
+  return geo;
+}
+
+/* ============================================================
+   3. LEAF SHAPE (unchanged from Stage 2B)
+============================================================ */
+function buildLeafShape() {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0);
+  s.quadraticCurveTo(0.30, 0.25, 0.63, 0.20);
+  s.quadraticCurveTo(0.93, 0.15, 1.02, 0.0);
+  s.quadraticCurveTo(0.91, -0.17, 0.57, -0.19);
+  s.quadraticCurveTo(0.25, -0.21, 0, 0);
+  return s;
+}
+function computeLeafBasis(point, tangent, sideSign) {
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let xAxis = new THREE.Vector3().crossVectors(tangent, worldUp);
+  if (xAxis.lengthSq() < 1e-6) xAxis.set(1, 0, 0);
+  xAxis.normalize().multiplyScalar(sideSign);
+  let zAxis = new THREE.Vector3().lerpVectors(worldUp, tangent.clone().negate(), 0.18).normalize();
+  let yAxis = new THREE.Vector3().crossVectors(zAxis, xAxis).normalize();
+  zAxis = new THREE.Vector3().crossVectors(xAxis, yAxis).normalize();
+  const m = new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis);
+  return new THREE.Quaternion().setFromRotationMatrix(m);
+}
+
+/* ============================================================
+   4. FEATURE DETECTION + STAGE COPY
+============================================================ */
+function supportsWebGL() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+  } catch (e) { return false; }
+}
+const reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+let reducedMotion = reduceMotionMQ.matches;
+reduceMotionMQ.addEventListener?.('change', (e) => { reducedMotion = e.matches; });
+
+const STAGES = [
+  { p: 0.00, num: 'Stage 01 / 05', eyebrow: '1984 — Foundation', body: 'The roots run deep. Khatore began with a commitment to Ayurvedic knowledge that has continued across generations.', rail: 'Roots' },
+  { p: 0.17, num: 'Stage 02 / 05', eyebrow: 'Knowledge — Khatore', body: 'A single stem carries that knowledge forward — <strong>discipline</strong>, continuity, decades of formulation practice.', rail: 'Stem' },
+  { p: 0.38, num: 'Stage 03 / 05', eyebrow: 'Formulations + Research', body: 'Branches extend outward — each one a <strong>formulation</strong>, an Ayurvedic principle, a line of research.', rail: 'Branches' },
+  { p: 0.62, num: 'Stage 04 / 05', eyebrow: 'Knowledge + Products', body: 'Foliage fills in — the breadth of Khatore\'s <strong>products</strong> and the botanical evidence behind them.', rail: 'Leaves' },
+  { p: 0.85, num: 'Stage 05 / 05', eyebrow: 'Trust + Global Reach', body: 'The full specimen — the same botanical study behind <strong>Kamalahar</strong>, trusted in 30+ countries.', rail: 'Full Canopy' },
+];
+
+const stage = document.getElementById('gStage');
+const hint = document.getElementById('gHint');
+const captionNum = document.getElementById('gCaptionNum');
+const captionEyebrow = document.getElementById('gCaptionEyebrow');
+const captionBody = document.getElementById('gCaptionBody');
+const railFill = document.getElementById('gRailFill');
+const railLabel = document.getElementById('gRailLabel');
+const perfHud = document.getElementById('perfHud');
+const growthWrap = document.getElementById('growthWrap');
+
+let currentStageIdx = -1;
+function updateCaption(progress) {
+  let idx = 0;
+  for (let i = 0; i < STAGES.length; i++) if (progress >= STAGES[i].p) idx = i;
+  if (idx !== currentStageIdx) {
+    currentStageIdx = idx;
+    const st = STAGES[idx];
+    captionEyebrow.classList.remove('on'); captionBody.classList.remove('on');
+    requestAnimationFrame(() => {
+      captionNum.textContent = st.num;
+      captionEyebrow.innerHTML = st.eyebrow;
+      captionBody.innerHTML = st.body;
+      requestAnimationFrame(() => { captionEyebrow.classList.add('on'); captionBody.classList.add('on'); });
+    });
+  }
+  railFill.style.height = (progress * 100).toFixed(1) + '%';
+  const activeRailLabel = STAGES[idx].rail;
+  if (railLabel.textContent !== activeRailLabel) railLabel.textContent = activeRailLabel;
+  railLabel.style.top = (progress * 100).toFixed(1) + '%';
+  hint.style.opacity = progress > 0.035 ? '0' : '1';
+}
+
+const plant = generatePlant();
+
+if (supportsWebGL()) {
+  initWebGL();
+} else {
+  initFallback2D();
+}
+
+/* ============================================================
+   5. WEBGL PATH
+============================================================ */
+function initWebGL() {
+  const canvas = document.getElementById('gCanvas');
+  const isMobile = window.matchMedia('(max-width: 640px)').matches;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 50);
+
+  const hemi = new THREE.HemisphereLight(0xf5f7fc, 0x2c3b5a, 1.25);
+  scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xfff8ec, 3.1);
+  key.position.set(3.2, 5.5, 4.0);
+  scene.add(key);
+  const fillLight = new THREE.DirectionalLight(0xdfe6f5, 0.95);
+  fillLight.position.set(-3.5, 2.0, -2.5);
+  scene.add(fillLight);
+
+  const rotGroup = new THREE.Group();
+  scene.add(rotGroup);
+
+  // ---- wood: one merged, indexed, growth-ordered mesh ----
+  const tubeGeoms = plant.growthUnits.map(u =>
+    makeTaperedTubeGeometry(u.curve, u.sStart, u.sEnd, u.radiusBase, u.radiusEnd, u.color, u.pathSegments, u.radialSegments)
+  );
+  const woodGeo = mergeGeometries(tubeGeoms, false);
+  const woodMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0.02 });
+  const woodMesh = new THREE.Mesh(woodGeo, woodMat);
+  woodMesh.geometry.setDrawRange(0, 0);
+  rotGroup.add(woodMesh);
+
+  // ---- leaves: instanced, growth-gated via per-instance scale ----
+  const leafShape = buildLeafShape();
+  const leafGeo = new THREE.ShapeGeometry(leafShape, 6);
+  leafGeo.computeVertexNormals();
+  const leafMat = new THREE.MeshStandardMaterial({
+    vertexColors: true, roughness: 0.7, metalness: 0, side: THREE.DoubleSide,
+    emissive: new THREE.Color('#3D7835'), emissiveIntensity: 0.16,
+  });
+  const leafCount = plant.leaves.length;
+  const leafMesh = new THREE.InstancedMesh(leafGeo, leafMat, leafCount);
+  leafMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(leafCount * 3), 3);
+
+  const leafBase = new Array(leafCount);
+  const tmpMatrix = new THREE.Matrix4();
+  const tmpQuat = new THREE.Quaternion();
+  const swayAxis = new THREE.Vector3(0, 1, 0.2).normalize();
+  const swayQuat = new THREE.Quaternion();
+
+  plant.leaves.forEach((leaf, i) => {
+    const baseLen = lerp(0.30, 0.18, i / leafCount) * leaf.scaleJitter;
+    const quat = computeLeafBasis(leaf.position, leaf.tangent, leaf.sideSign);
+    const jitterEuler = new THREE.Euler(degToRad(leaf.asymJitter * 10), degToRad(leaf.asymJitter * 6), degToRad(leaf.asymJitter * 14));
+    quat.multiply(new THREE.Quaternion().setFromEuler(jitterEuler));
+    leafBase[i] = {
+      position: leaf.position.clone().addScaledVector(new THREE.Vector3(0, -1, 0), 0.012),
+      quaternion: quat, scale: new THREE.Vector3(baseLen, baseLen * rand(0.85, 1.08), baseLen),
+      phase: leaf.phase, speed: leaf.speed, amp: leaf.amp, threshold: leaf.growthThreshold,
+    };
+    const tone = LEAF_TONES[leaf.toneIndex];
+    leafMesh.setColorAt(i, tone);
+  });
+  if (leafMesh.instanceColor) leafMesh.instanceColor.needsUpdate = true;
+  // Unlike Stage 2B, instance matrices here are only ever set inside the
+  // animate loop (never at setup, since growth-reveal needs the current
+  // progress) — so Three.js's cached bounding sphere for this
+  // InstancedMesh would otherwise be based on stale/default transforms
+  // and can wrongly frustum-cull every instance. Disabling it costs
+  // nothing meaningful at this instance count.
+  leafMesh.frustumCulled = false;
+  rotGroup.add(leafMesh);
+
+  // ---- seed capsules: same growth-gated instancing pattern ----
+  const capGeo = new THREE.SphereGeometry(1, 6, 5);
+  const capMat = new THREE.MeshStandardMaterial({ color: CAPSULE_TONE, roughness: 0.75 });
+  const capCount = Math.max(plant.capsules.length, 1);
+  const capMesh = new THREE.InstancedMesh(capGeo, capMat, capCount);
+  const capBase = plant.capsules.map(c => ({ position: c.position, threshold: c.growthThreshold }));
+  if (plant.capsules.length === 0) capBase.push({ position: new THREE.Vector3(), threshold: 2 });
+  capMesh.frustumCulled = false;
+  rotGroup.add(capMesh);
+
+  // ---- typography plane — same z-buffer-integrated technique as Stage 2B ----
+  let typePlane = null;
+  function buildTypeTexture() {
+    const tw = 2048, th = 1024;
+    const tc = document.createElement('canvas');
+    tc.width = tw; tc.height = th;
+    const ctx = tc.getContext('2d');
+    ctx.clearRect(0, 0, tw, th);
+    ctx.font = '200 420px "DM Sans", system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#C8D0E4'; ctx.fillStyle = 'rgba(255,255,255,0.94)';
+    ctx.fillText('BHUI AMLA', tw / 2, th / 2 + 30);
+    ctx.strokeText('BHUI AMLA', tw / 2, th / 2 + 30);
+    const tex = new THREE.CanvasTexture(tc);
+    tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true;
+    const planeH = plant.maxHeight * 0.32;
+    const planeW = planeH * (tw / th);
+    const geo = new THREE.PlaneGeometry(planeW, planeH);
+    // opaque alpha-cutout (not transparent) so this plane keeps
+    // writing real depth and stays correctly z-buffer-occluded by the
+    // plant, exactly like Stage 2B — the reveal below is done via
+    // scale, not opacity, specifically to avoid switching this into
+    // the transparent queue and breaking that occlusion.
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: false, alphaTest: 0.08, toneMapped: false });
+    typePlane = new THREE.Mesh(geo, mat);
+    typePlane.position.set(0, plant.maxHeight * 0.46, -0.05);
+    rotGroup.add(typePlane);
+  }
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.load('200 420px "DM Sans"').catch(() => {}).finally(() => document.fonts.ready.then(buildTypeTexture).catch(buildTypeTexture));
+  } else { buildTypeTexture(); }
+
+  // ---- camera framing ----
+  function frameCamera(w, h) {
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+  frameCamera(stage.clientWidth, stage.clientHeight);
+
+  // ---- rotation: drag + idle sway ONLY — never touched by scroll ----
+  const BASE_YAW = -10, BASE_PITCH = 5;
+  const YAW_RANGE = 40, PITCH_RANGE = 13;
+  let dragYaw = 0, dragPitch = 0;
+  let dragging = false, lastX = 0, lastY = 0;
+  let idleT0 = null, resumeIdleAt = 0;
+
+  function applyRotation(idleYawDelta) {
+    const yaw = clamp(BASE_YAW + dragYaw + (idleYawDelta || 0), BASE_YAW - YAW_RANGE, BASE_YAW + YAW_RANGE);
+    const pitch = clamp(BASE_PITCH + dragPitch, BASE_PITCH - PITCH_RANGE, BASE_PITCH + PITCH_RANGE);
+    rotGroup.rotation.y = degToRad(yaw);
+    rotGroup.rotation.x = degToRad(pitch);
+  }
+  applyRotation(0);
+
+  function pointerDown(e) {
+    dragging = true; stage.classList.add('is-dragging');
+    lastX = e.touches ? e.touches[0].clientX : e.clientX;
+    lastY = e.touches ? e.touches[0].clientY : e.clientY;
+    e.preventDefault?.();
+  }
+  function pointerMove(e) {
+    if (!dragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const dx = x - lastX, dy = y - lastY; lastX = x; lastY = y;
+    dragYaw = clamp(dragYaw + dx * 0.26, -YAW_RANGE, YAW_RANGE);
+    dragPitch = clamp(dragPitch - dy * 0.16, -PITCH_RANGE, PITCH_RANGE);
+    applyRotation(0);
+    e.preventDefault?.();
+  }
+  function pointerUp() {
+    if (!dragging) return;
+    dragging = false; stage.classList.remove('is-dragging');
+    idleT0 = null; resumeIdleAt = performance.now() + 1800;
+  }
+  stage.addEventListener('pointerdown', pointerDown);
+  window.addEventListener('pointermove', pointerMove, { passive: false });
+  window.addEventListener('pointerup', pointerUp);
+  stage.addEventListener('touchstart', pointerDown, { passive: true });
+  window.addEventListener('touchmove', pointerMove, { passive: false });
+  window.addEventListener('touchend', pointerUp);
+
+  // ---- visibility gating ----
+  let isVisible = true;
+  const io = new IntersectionObserver((entries) => { entries.forEach(e => { isVisible = e.isIntersecting; }); }, { threshold: 0.02 });
+  io.observe(stage);
+  document.addEventListener('visibilitychange', () => { isVisible = isVisible && document.visibilityState === 'visible'; });
+
+  window.addEventListener('resize', () => frameCamera(stage.clientWidth, stage.clientHeight));
+
+  // ---- SCROLL = GROWTH: one progress value drives draw-range,
+  // leaf/capsule reveal, camera framing, and stage captions.
+  // Never touches rotGroup.rotation. ----
+  let targetProgress = reducedMotion ? 1 : 0;
+  let smoothProgress = targetProgress;
+  function readScrollProgress() {
+    if (reducedMotion) return 1;
+    const rect = growthWrap.getBoundingClientRect();
+    const total = rect.height - window.innerHeight;
+    if (total <= 0) return 1;
+    return clamp(-rect.top / total, 0, 1);
+  }
+
+  let camPos = new THREE.Vector3(0, 0.35, 3.6);
+  let camTarget = new THREE.Vector3(0, 0.3, 0);
+
+  // The resting state (p=0, before any scroll) must never be an empty
+  // frame — "there is something here" only works if something is
+  // actually visible. This floor guarantees roots (and the very base
+  // of the stem) are always at least minimally grown, even at p=0;
+  // everything growth-driven (draw range, leaf/capsule reveal, camera
+  // envelope) reads this remapped value. Story captions and the scroll
+  // hint stay on the raw scroll fraction — they should track the
+  // visitor's actual position, not an artificially-floored one.
+  const GROWTH_FLOOR = 0.035;
+  let currentEffP = GROWTH_FLOOR;
+
+  function applyGrowth(p) {
+    const effP = lerp(GROWTH_FLOOR, 1, p);
+    currentEffP = effP;
+    const drawCount = Math.floor((effP * plant.totalIndexCount) / 6) * 6;
+    woodMesh.geometry.setDrawRange(0, drawCount);
+
+    const env = envelopeAt(plant.envelope, effP);
+    const focusY = lerp(env.minY * 0.3, env.maxY, 0.72);
+    const span = Math.max(env.maxY - env.minY, 0.35);
+    const dist = clamp(span * 1.3 + env.maxR * 1.15 + 1.35, 3.9, 9.4);
+    const wantPos = new THREE.Vector3(0, focusY + dist * 0.09, dist);
+    const wantTarget = new THREE.Vector3(0, focusY, 0);
+    camPos.lerp(wantPos, reducedMotion ? 1 : 0.16);
+    camTarget.lerp(wantTarget, reducedMotion ? 1 : 0.16);
+    camera.position.copy(camPos);
+    camera.lookAt(camTarget);
+
+    if (typePlane) typePlane.scale.setScalar(Math.max(smooth01(0.22, 0.42, p), 0.001));
+    updateCaption(p);
+  }
+
+  // ---- animation loop ----
+  let frameSkip = 0, frameCount = 0, fpsT0 = performance.now(), lastFps = 0;
+  let raf;
+  function animate(now) {
+    raf = requestAnimationFrame(animate);
+    if (!isVisible) return;
+
+    targetProgress = readScrollProgress();
+    smoothProgress += (targetProgress - smoothProgress) * (reducedMotion ? 1 : 0.22);
+    applyGrowth(smoothProgress);
+
+    if (!reducedMotion && !dragging && now > resumeIdleAt) {
+      if (idleT0 === null) idleT0 = now;
+      const elapsed = (now - idleT0) / 1000;
+      applyRotation(Math.sin(elapsed * 0.12) * 8);
+    } else if (dragging || reducedMotion) {
+      applyRotation(0);
+    }
+
+    if (!reducedMotion) {
+      frameSkip = (frameSkip + 1) % (isMobile ? 2 : 1);
+      if (frameSkip === 0) {
+        const t = now * 0.001;
+        for (let i = 0; i < leafCount; i++) {
+          const b = leafBase[i];
+          const reveal = smooth01(b.threshold - 0.025, b.threshold, currentEffP);
+          if (reveal <= 0.001) { tmpMatrix.makeScale(0, 0, 0); leafMesh.setMatrixAt(i, tmpMatrix); continue; }
+          const sway = Math.sin(t * b.speed + b.phase) * b.amp;
+          swayQuat.setFromAxisAngle(swayAxis, sway);
+          tmpQuat.copy(b.quaternion).multiply(swayQuat);
+          tmpMatrix.compose(b.position, tmpQuat, tmpScale.copy(b.scale).multiplyScalar(reveal));
+          leafMesh.setMatrixAt(i, tmpMatrix);
+        }
+        leafMesh.instanceMatrix.needsUpdate = true;
+        for (let i = 0; i < capBase.length; i++) {
+          const c = capBase[i];
+          const reveal = smooth01(c.threshold - 0.02, c.threshold, currentEffP);
+          tmpMatrix.compose(c.position, ZERO_QUAT, TMP_CAP_SCALE.set(0.028, 0.022, 0.028).multiplyScalar(reveal));
+          capMesh.setMatrixAt(i, tmpMatrix);
+        }
+        capMesh.instanceMatrix.needsUpdate = true;
+      }
+    } else {
+      // reduced motion: full reveal, computed once effectively (cheap to just keep doing it every frame at reveal=1)
+      for (let i = 0; i < leafCount; i++) {
+        const b = leafBase[i];
+        tmpMatrix.compose(b.position, b.quaternion, b.scale);
+        leafMesh.setMatrixAt(i, tmpMatrix);
+      }
+      leafMesh.instanceMatrix.needsUpdate = true;
+      for (let i = 0; i < capBase.length; i++) {
+        tmpMatrix.compose(capBase[i].position, ZERO_QUAT, TMP_CAP_SCALE.set(0.028, 0.022, 0.028));
+        capMesh.setMatrixAt(i, tmpMatrix);
+      }
+      capMesh.instanceMatrix.needsUpdate = true;
+      reducedMotionDoneOnce = true;
+    }
+
+    renderer.render(scene, camera);
+
+    frameCount++;
+    if (now - fpsT0 > 1000) {
+      lastFps = Math.round((frameCount * 1000) / (now - fpsT0));
+      frameCount = 0; fpsT0 = now;
+      if (perfHud) perfHud.textContent = lastFps + ' fps · ' + leafCount + ' leaves · ' + plant.growthUnits.length + ' units · p=' + smoothProgress.toFixed(2);
+    }
+  }
+  const tmpScale = new THREE.Vector3();
+  const ZERO_QUAT = new THREE.Quaternion();
+  const TMP_CAP_SCALE = new THREE.Vector3();
+  let reducedMotionDoneOnce = false;
+  raf = requestAnimationFrame(animate);
+  canvas.classList.add('is-ready');
+}
+
+/* ============================================================
+   6. NO-WEBGL FALLBACK — static full-grown skeleton (matches the
+      reduced-motion "sensible static/full-state" behaviour), same
+      shared generation data, drawn once on canvas 2D.
+============================================================ */
+function initFallback2D() {
+  const canvas = document.getElementById('gFallback2d');
+  canvas.hidden = false;
+  document.getElementById('gCanvas').hidden = true;
+  updateCaption(1);
+  hint.style.opacity = '0';
+
+  const ctx = canvas.getContext('2d');
+  function project(p) { return { x: p.x - p.z * 0.32, y: -p.y - p.z * 0.16 }; }
+  function draw() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const scale = h / (plant.maxHeight * 1.5);
+    const originX = w / 2, originY = h * 0.82;
+    const toScreen = (p) => { const pr = project(p); return { x: originX + pr.x * scale, y: originY + pr.y * scale }; };
+
+    ctx.save();
+    ctx.font = `200 ${Math.round(h * 0.2)}px "DM Sans", system-ui, sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.strokeStyle = '#C8D0E4'; ctx.lineWidth = 1.5;
+    ctx.fillText('BHUI AMLA', w / 2, originY - plant.maxHeight * 0.46 * scale);
+    ctx.strokeText('BHUI AMLA', w / 2, originY - plant.maxHeight * 0.46 * scale);
+    ctx.restore();
+
+    ctx.lineCap = 'round';
+    plant.growthUnits.forEach(u => {
+      ctx.strokeStyle = '#' + u.color.getHexString();
+      const segs = Math.max(2, Math.round(u.pathSegments));
+      for (let i = 0; i < segs; i++) {
+        const t0 = lerp(u.sStart, u.sEnd, i / segs), t1 = lerp(u.sStart, u.sEnd, (i + 1) / segs);
+        const p0 = toScreen(u.curve.getPointAt(t0)), p1 = toScreen(u.curve.getPointAt(t1));
+        ctx.lineWidth = Math.max(1, lerp(u.radiusBase, u.radiusEnd, 0.5) * scale * 2.2);
+        ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
+      }
+    });
+    plant.leaves.forEach(leaf => {
+      const p = toScreen(leaf.position);
+      ctx.fillStyle = '#' + LEAF_TONES[leaf.toneIndex].getHexString();
+      ctx.save(); ctx.translate(p.x, p.y);
+      ctx.rotate(Math.atan2(-leaf.tangent.y, leaf.tangent.x * leaf.sideSign) * 0.4);
+      ctx.beginPath(); ctx.ellipse(0, 0, 0.11 * scale, 0.045 * scale, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    });
+    plant.capsules.forEach(c => {
+      const p = toScreen(c.position);
+      ctx.fillStyle = '#2B5625';
+      ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1, 0.03 * scale), 0, Math.PI * 2); ctx.fill();
+    });
+    canvas.classList.add('is-ready');
+  }
+  draw();
+  window.addEventListener('resize', draw);
+}
+</script>
+</body>
+</html>
