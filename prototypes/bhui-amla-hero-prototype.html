@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhui Amla — 3D Botanical Specimen (Stage 2 Prototype)</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+  STAGE 2 PROTOTYPE — real 3D Bhui Amla specimen (Three.js)
+  This page is an isolated test harness. It reuses the production
+  Khatore brand tokens and the botanical section's surrounding
+  editorial layout (copy column, pull quote, meta labels) so the
+  specimen can be judged in a realistic frame, but it is NOT wired
+  into khatore-homepage-v6-1.html. Integration happens in Stage 3
+  only after this composition is approved.
+============================================================ */
+:root {
+  --blue:      #1B3C87;
+  --blue-dark: #12296B;
+  --green:     #3D7835;
+  --green-dk:  #2B5625;
+  --green-lt:  #4F9543;
+  --ink:       #0F1724;
+  --ink-mid:   #2C3B5A;
+  --paper:     #F5F7FC;
+  --off:       #EAEEF7;
+  --rule:      #C8D0E4;
+  --muted:     #6874A0;
+  --muted-lt:  #9BA5C5;
+  --white:     #FFFFFF;
+
+  --sans:  'DM Sans', system-ui, sans-serif;
+  --mono:  'DM Mono', monospace;
+  --serif: 'Playfair Display', Georgia, serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--paper); overflow-x: hidden; }
+body { font-family: var(--sans); color: var(--ink); }
+
+.proto-tag {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  background: var(--ink); color: var(--off);
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em;
+  text-transform: uppercase; text-align: center; padding: 0.45rem 1rem;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ---------- Botanical section shell (matches production tokens) ---------- */
+.botanical { position: relative; background: var(--paper); padding-top: 2.4rem; }
+.botanical-scene { position: relative; max-width: 1440px; margin: 0 auto; padding: 3.5rem 2.5rem 4rem; }
+
+.botanical-meta {
+  position: absolute; top: 3.75rem; right: 2.5rem; z-index: 2;
+  text-align: right; pointer-events: none;
+}
+.botanical-meta-line {
+  font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.2em;
+  color: var(--muted-lt); text-transform: uppercase; display: block; line-height: 2;
+}
+
+.botanical-body {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 0.78fr 1.22fr; gap: 2.5rem; align-items: start;
+}
+.botanical-textcol { padding-top: 0.5rem; }
+.botanical-pull {
+  display: grid; grid-template-columns: 3px 1fr; gap: 1.5rem;
+  padding-bottom: 2.5rem; margin-bottom: 2.5rem; border-bottom: 1px solid var(--rule);
+}
+.botanical-pull-bar { background: var(--green); }
+.botanical-pull-q {
+  font-family: var(--serif); font-size: clamp(0.95rem, 1.5vw, 1.18rem);
+  font-style: italic; line-height: 1.7; color: var(--ink-mid);
+}
+.botanical-pull-q strong { font-style: normal; font-weight: 500; color: var(--green-dk); }
+.botanical-pull-attr {
+  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.16em;
+  color: var(--muted-lt); text-transform: uppercase; margin-top: 1rem; display: block;
+}
+.botanical-eyebrow {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--blue); margin-bottom: 1rem; display: block;
+}
+.botanical-copy h3 {
+  font-family: var(--sans); font-weight: 200; font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  line-height: 1.2; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 1.3rem;
+}
+.botanical-copy p { font-size: 0.84rem; line-height: 1.8; color: var(--muted); max-width: 44ch; }
+.botanical-copy p + p { margin-top: 1rem; }
+
+/* ---------- 3D stage ---------- */
+.botanical-stage {
+  position: relative; z-index: 3;
+  height: 780px;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.botanical-stage:active { cursor: grabbing; }
+.botanical-stage.is-dragging { cursor: grabbing; }
+
+.botanical-stage-tag {
+  position: absolute; top: 1.5rem; left: 1.75rem; z-index: 4;
+  display: flex; flex-direction: column; gap: 0.2rem;
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.14em;
+  text-transform: uppercase; pointer-events: none; transition: opacity 0.6s ease;
+}
+.botanical-stage-tag strong { color: var(--blue); font-weight: 500; letter-spacing: 0.14em; }
+.botanical-stage-tag em { font-style: normal; color: var(--muted); }
+.botanical-stage-tag span { color: var(--muted-lt); }
+.botanical-stage-tag.is-hidden { opacity: 0; }
+
+.botanical-ground {
+  position: absolute; left: 50%; bottom: 66px;
+  width: 250px; height: 30px;
+  transform: translateX(-50%);
+  background: var(--ink-mid); opacity: 0.09; border-radius: 50%; filter: blur(13px);
+  z-index: 1;
+}
+
+#bhCanvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; z-index: 2;
+  opacity: 0; transition: opacity 1.1s var(--ease);
+}
+#bhCanvas.is-ready { opacity: 1; }
+
+#bhFallback2d {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 2;
+}
+
+.perf-hud {
+  position: absolute; bottom: 0.75rem; left: 1.75rem; z-index: 4;
+  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.08em;
+  color: var(--muted-lt); pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+  .botanical-scene { padding: 2.75rem 2rem 3rem; }
+  .botanical-body { grid-template-columns: 1fr; gap: 0; }
+  .botanical-stage { order: -1; height: 620px; margin-bottom: 1.25rem; }
+}
+@media (max-width: 640px) {
+  .botanical-scene { padding: 2rem 1.25rem 2.25rem; }
+  .botanical-meta { top: 1.65rem; right: 1.25rem; }
+  .botanical-meta-line { font-size: 0.5rem; }
+  .botanical-stage { height: 460px; }
+  .botanical-ground { bottom: 40px; width: 170px; height: 20px; }
+  .botanical-stage-tag { top: 1.1rem; left: 1.25rem; }
+  .botanical-pull { grid-template-columns: 3px 1fr; gap: 1rem; padding-bottom: 1.75rem; margin-bottom: 1.75rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="proto-tag">Stage 2 Prototype · Real 3D Bhui Amla Specimen · Not Integrated</div>
+
+<section class="botanical" id="botanical">
+  <div class="botanical-scene">
+
+    <div class="botanical-meta" aria-hidden="true">
+      <span class="botanical-meta-line">Phyllanthus niruri</span>
+      <span class="botanical-meta-line">The botanical behind Kamalahar</span>
+    </div>
+
+    <div class="botanical-body">
+      <div class="botanical-textcol">
+        <div class="botanical-pull">
+          <div class="botanical-pull-bar"></div>
+          <div>
+            <p class="botanical-pull-q">
+              In classical Ayurvedic texts, <strong>Bhui Amla</strong> — literally "ground amla" — is described as a liver-supportive herb that carries its seed capsules on the underside of each leaf, close to the ground it grows from. It is one of the botanicals in Khatore's traditional formulation lineage.
+            </p>
+            <span class="botanical-pull-attr">Traditional Ayurvedic Materia Medica</span>
+          </div>
+        </div>
+        <div class="botanical-copy">
+          <span class="botanical-eyebrow">The Ingredient Study</span>
+          <h3>Sourced faithfully. Prepared the traditional way.</h3>
+          <p>Khatore's formulation philosophy begins with the plant — sourcing Bhui Amla according to its traditional use, and carrying that botanical lineage forward into the finished formulation.</p>
+          <p>The study alongside is a working botanical model, not a photograph. Drag to examine its branching structure and the arrangement of its leaflets.</p>
+        </div>
+      </div>
+
+      <div class="botanical-stage" id="bhStage">
+        <span class="botanical-stage-tag" id="bhTag">
+          <strong>Botanical Study</strong>
+          <em>Phyllanthus niruri</em>
+          <span>Drag to rotate</span>
+        </span>
+        <div class="botanical-ground"></div>
+        <canvas id="bhCanvas" aria-hidden="true"></canvas>
+        <canvas id="bhFallback2d" hidden aria-hidden="true"></canvas>
+        <p class="sr-only">Interactive 3D study of Bhui Amla (Phyllanthus niruri): a central stem with alternating lateral branches, two-row leaflet arrangement, and seed capsules on the underside of the leaves.</p>
+        <div class="perf-hud" id="perfHud"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Three.js r180, pinned exact version, loaded as native ES modules via
+     import map (no bundler, no build step — matches the file's existing
+     single-HTML-file delivery model). See Stage 2 report for why this
+     version and this loading mechanism were chosen. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ============================================================
+   0. SEEDED RNG — reproducible asymmetry between renders
+============================================================ */
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rng = mulberry32(19840917); // seed: Khatore founding year, arbitrary but fixed
+const rand = (a = 0, b = 1) => a + rng() * (b - a);
+const pick = (arr) => arr[Math.floor(rng() * arr.length)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = THREE.MathUtils.lerp;
+const degToRad = THREE.MathUtils.degToRad;
+
+/* ============================================================
+   1. BRAND TONES (used for both WebGL vertex colours and the
+      2D canvas fallback, so both renderers share one palette)
+============================================================ */
+const GREEN_DK = new THREE.Color('#2B5625');
+const GREEN    = new THREE.Color('#3D7835');
+const GREEN_LT = new THREE.Color('#4F9543');
+// Only the three locked brand greens — no invented tones.
+const LEAF_TONES = [
+  new THREE.Color('#2B5625'), // reserved for backmost/shadowed leaves only
+  new THREE.Color('#3D7835'),
+  new THREE.Color('#4F9543'),
+];
+const CAPSULE_TONE = new THREE.Color('#2B5625');
+
+/* ============================================================
+   2. PROCEDURAL BOTANICAL SKELETON
+   Renderer-agnostic: produces plain THREE.Vector3-based data
+   consumed by BOTH the WebGL path and the 2D fallback path.
+   Structural logic reused from the site's existing authored
+   SVG geometry: an upright central stem, alternating lateral
+   fronds with decreasing spacing toward the tip, two-row
+   leaflet pairs along each frond, occasional seed capsules on
+   the underside near mid-frond. Z-depth (true volume) is new —
+   the 2D source had none — generated procedurally per the
+   brief's instruction to translate the structural logic into
+   genuine 3D geometry, not to invent a new plant.
+============================================================ */
+function buildStemPoints(rng, { baseX, baseZ, height, segments, xWanderAmp, zWanderAmp, lean }) {
+  const pts = [];
+  const freqA = rand(0.55, 0.85), freqB = rand(1.3, 1.9);
+  const phaseA = rand(0, Math.PI * 2), phaseB = rand(0, Math.PI * 2);
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const wob = Math.sin(t * Math.PI * freqA + phaseA) * xWanderAmp
+              + Math.sin(t * Math.PI * freqB + phaseB) * xWanderAmp * 0.35;
+    const wobZ = Math.cos(t * Math.PI * (freqA * 0.8) + phaseB) * zWanderAmp
+               + Math.cos(t * Math.PI * (freqB * 0.6) + phaseA) * zWanderAmp * 0.4;
+    pts.push(new THREE.Vector3(
+      baseX + wob + lean.x * t,
+      t * height,
+      baseZ + wobZ + lean.z * t
+    ));
+  }
+  return pts;
+}
+
+function makeBranchPositions(count, height) {
+  // Decreasing gap toward the tip (denser branching near top), mirrors
+  // the original artwork's spacing (66,61,57...25 units on a 660-tall stem).
+  const gap0 = height / (count * 0.62);
+  const decay = 0.965;
+  const positions = [];
+  let h = height * 0.085; // first branch a little above the base
+  let gap = gap0;
+  for (let i = 0; i < count; i++) {
+    // real specimens don't space branches on a metronome — jitter each
+    // gap so the rhythm reads as grown, not printed
+    positions.push(clamp(h / height, 0.04, 0.965));
+    gap *= decay * rand(0.78, 1.28);
+    h += gap;
+  }
+  return positions;
+}
+
+function generatePlant() {
+  const stems = []; // { curve, points, radiusBase, radiusTip, color, isMain }
+  const branchCurves = []; // same shape as stems, plus attachment ref
+  const leaves = []; // { position, tangent, sideSign, toneIndex, jitter }
+  const capsules = []; // { position }
+
+  const stemDefs = [
+    { baseX: 0.00, baseZ: 0.00, height: 6.35, branches: 13, radiusBase: 0.052, radiusTip: 0.010, xWanderAmp: 0.30, zWanderAmp: 0.38, lean: { x: 0.10, z: -0.10 }, color: GREEN_DK, isMain: true },
+    { baseX: -0.40, baseZ: 0.22, height: 4.15, branches: 8,  radiusBase: 0.032, radiusTip: 0.007, xWanderAmp: 0.26, zWanderAmp: 0.28, lean: { x: -0.72, z: 0.42 }, color: GREEN, isMain: false },
+    { baseX: 0.33, baseZ: -0.26, height: 5.35, branches: 10, radiusBase: 0.038, radiusTip: 0.008, xWanderAmp: 0.24, zWanderAmp: 0.32, lean: { x: 0.62, z: -0.48 }, color: GREEN, isMain: false },
+  ];
+
+  stemDefs.forEach((def, stemIdx) => {
+    const segments = 28;
+    const points = buildStemPoints(rng, { ...def, segments });
+    const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.4);
+    stems.push({ curve, radiusBase: def.radiusBase, radiusTip: def.radiusTip, color: def.color });
+
+    const branchTs = makeBranchPositions(def.branches, def.height);
+    let sideSign = rng() > 0.5 ? 1 : -1;
+    let zPhase = 0;
+
+    branchTs.forEach((t, bi) => {
+      const stemPoint = curve.getPointAt(t);
+      const stemTangent = curve.getTangentAt(t).normalize();
+
+      sideSign *= -1; // alternate left/right — matches the original's alternating fronds
+      if (bi % 3 === 2) zPhase += 1; // every third branch also shifts forward/back in Z
+      const zSign = (zPhase % 2 === 0) ? 1 : -1;
+
+      // outward direction: mostly horizontal, wraps partly around Z so the
+      // specimen has real volume rather than a flat left/right fan. Wide
+      // per-branch angular jitter breaks the "ladder rung" regularity that
+      // a fixed cone of directions produces.
+      const azJitter = rand(-0.55, 0.55); // radians, swings the branch off its nominal side
+      const baseAz = sideSign > 0 ? 0 : Math.PI;
+      const az = baseAz + azJitter + (zSign > 0 ? 0.4 : -0.4);
+      const riseAmt = rand(0.04, 0.30);
+      const outward = new THREE.Vector3(Math.cos(az) * (1 - riseAmt), riseAmt, Math.sin(az) * (1 - riseAmt)).normalize();
+
+      const lenFalloff = 1 - t * 0.62; // branches shorten toward the tip
+      const branchLen = (def.height * 0.30) * lenFalloff * rand(0.7, 1.25);
+
+      const midPt = stemPoint.clone()
+        .addScaledVector(outward, branchLen * 0.55)
+        .addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.10);
+      const tipPt = stemPoint.clone()
+        .addScaledVector(outward, branchLen)
+        .addScaledVector(new THREE.Vector3(0, 1, 0), branchLen * 0.16 * rand(0.6, 1));
+
+      const branchPts = [stemPoint.clone(), midPt, tipPt];
+      const branchCurve = new THREE.CatmullRomCurve3(branchPts, false, 'catmullrom', 0.5);
+
+      const radiusBase = lerp(def.radiusBase, def.radiusTip, t) * 0.62;
+      const radiusTip = Math.max(radiusBase * 0.28, 0.0035);
+      const toneBase = def.isMain ? 1 : 2; // main stem skews mid, secondary stems skew lighter/frontmost
+      branchCurves.push({ curve: branchCurve, radiusBase, radiusTip, color: def.isMain ? GREEN : GREEN_LT });
+
+      // ---- leaflets: two-row pinnate arrangement along the branch ----
+      const leafPairs = Math.round(lerp(9, 4, t) * rand(0.85, 1.15));
+      for (let lp = 1; lp <= leafPairs; lp++) {
+        const s = clamp((lp / (leafPairs + 0.6)) * rand(0.94, 1.05), 0.04, 0.97);
+        const bPoint = branchCurve.getPointAt(s);
+        const bTangent = branchCurve.getTangentAt(s).normalize();
+        [1, -1].forEach((rowSign, rowIdx) => {
+          // darkest tone (index 0) reserved for roughly 1 in 5 leaves —
+          // enough for tonal depth without the canopy reading as black
+          const toneIndex = rng() < 0.2 ? 0 : clamp(toneBase - (rowIdx === 0 ? 0 : 1), 1, LEAF_TONES.length - 1);
+          leaves.push({
+            position: bPoint.clone(),
+            tangent: bTangent.clone(),
+            sideSign: rowSign * (rng() > 0.15 ? 1 : -1),
+            toneIndex,
+            scaleJitter: rand(0.78, 1.18),
+            asymJitter: rand(-1, 1),
+            phase: rand(0, Math.PI * 2),
+            speed: rand(0.35, 0.75),
+            amp: rand(0.035, 0.09),
+          });
+          // seed capsules cluster mid-branch, underside — mirrors the source art
+          if (s > 0.25 && s < 0.8 && rng() < 0.16) {
+            capsules.push({ position: bPoint.clone().addScaledVector(new THREE.Vector3(0, -1, 0), 0.03) });
+          }
+        });
+      }
+    });
+  });
+
+  const maxHeight = Math.max(...stemDefs.map(d => d.height));
+  return { stems, branchCurves, leaves, capsules, maxHeight };
+}
+
+/* ============================================================
+   3. TAPERED TUBE GEOMETRY (custom — stock TubeGeometry has no
+      per-length radius function, and this keeps the render to a
+      single merged mesh / one draw call for all stem + branch
+      geometry, matching the "no unnecessary draw calls" directive)
+============================================================ */
+function makeTaperedTubeGeometry(curve, radiusStart, radiusEnd, color, pathSegments = 16, radialSegments = 6) {
+  const positions = [];
+  const normals = [];
+  const colors = [];
+  const indices = [];
+
+  let prevNormal = new THREE.Vector3(0, 0, 1);
+  const ringsX = [];
+
+  for (let i = 0; i <= pathSegments; i++) {
+    const t = i / pathSegments;
+    const center = curve.getPointAt(t);
+    const tangent = curve.getTangentAt(t).normalize();
+
+    let normal = new THREE.Vector3().crossVectors(prevNormal, tangent);
+    if (normal.lengthSq() < 1e-8) normal = prevNormal.clone();
+    else normal.crossVectors(tangent, normal).normalize();
+    if (normal.lengthSq() < 1e-8) {
+      const fallbackUp = Math.abs(tangent.y) > 0.98 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+      normal = new THREE.Vector3().crossVectors(tangent, fallbackUp).normalize();
+    }
+    const binormal = new THREE.Vector3().crossVectors(tangent, normal).normalize();
+    prevNormal = normal;
+
+    const radius = lerp(radiusStart, radiusEnd, t);
+    const ring = [];
+    for (let k = 0; k < radialSegments; k++) {
+      const angle = (k / radialSegments) * Math.PI * 2;
+      const nx = Math.cos(angle), ny = Math.sin(angle);
+      const vx = normal.x * nx + binormal.x * ny;
+      const vy = normal.y * nx + binormal.y * ny;
+      const vz = normal.z * nx + binormal.z * ny;
+      positions.push(center.x + vx * radius, center.y + vy * radius, center.z + vz * radius);
+      normals.push(vx, vy, vz);
+      colors.push(color.r, color.g, color.b);
+    }
+    ringsX.push(ring);
+  }
+
+  for (let i = 0; i < pathSegments; i++) {
+    const a0 = i * radialSegments, b0 = (i + 1) * radialSegments;
+    for (let k = 0; k < radialSegments; k++) {
+      const k2 = (k + 1) % radialSegments;
+      indices.push(a0 + k, b0 + k, b0 + k2);
+      indices.push(a0 + k, b0 + k2, a0 + k2);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geo.setIndex(indices);
+  return geo;
+}
+
+/* ============================================================
+   4. LEAF SHAPE — one shared, slightly asymmetric oblong
+      leaflet (base at origin, length axis +X), matching the
+      oval two-row leaflet silhouette of the source SVG paths.
+      Reused across every leaf instance via InstancedMesh.
+============================================================ */
+function buildLeafShape() {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0);
+  s.quadraticCurveTo(0.30, 0.25, 0.63, 0.20);
+  s.quadraticCurveTo(0.93, 0.15, 1.02, 0.0);
+  s.quadraticCurveTo(0.91, -0.17, 0.57, -0.19);
+  s.quadraticCurveTo(0.25, -0.21, 0, 0);
+  return s;
+}
+
+function computeLeafBasis(point, tangent, sideSign) {
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let xAxis = new THREE.Vector3().crossVectors(tangent, worldUp);
+  if (xAxis.lengthSq() < 1e-6) xAxis.set(1, 0, 0);
+  xAxis.normalize().multiplyScalar(sideSign);
+
+  let zAxis = new THREE.Vector3().lerpVectors(worldUp, tangent.clone().negate(), 0.18).normalize();
+  let yAxis = new THREE.Vector3().crossVectors(zAxis, xAxis).normalize();
+  zAxis = new THREE.Vector3().crossVectors(xAxis, yAxis).normalize();
+
+  const m = new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis);
+  return new THREE.Quaternion().setFromRotationMatrix(m);
+}
+
+/* ============================================================
+   5. FEATURE DETECTION
+============================================================ */
+function supportsWebGL() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+  } catch (e) { return false; }
+}
+const reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+let reducedMotion = reduceMotionMQ.matches;
+reduceMotionMQ.addEventListener?.('change', (e) => { reducedMotion = e.matches; });
+
+const stage = document.getElementById('bhStage');
+const tag = document.getElementById('bhTag');
+const perfHud = document.getElementById('perfHud');
+const plant = generatePlant();
+
+if (supportsWebGL()) {
+  initWebGL();
+} else {
+  initFallback2D();
+}
+
+/* ============================================================
+   6. WEBGL PATH
+============================================================ */
+function initWebGL() {
+  const canvas = document.getElementById('bhCanvas');
+  const isMobile = window.matchMedia('(max-width: 640px)').matches;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
+
+  // ---- lights: one soft key + low hemisphere fill, no shadow map
+  // (a real-time shadow map is an extra render target the perf
+  // budget doesn't need — the existing blurred CSS ground ellipse
+  // supplies the contact-shadow read cheaply and reliably instead) ----
+  const hemi = new THREE.HemisphereLight(0xf5f7fc, 0x2c3b5a, 1.25);
+  scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xfff8ec, 3.1);
+  key.position.set(3.2, 5.5, 4.0);
+  scene.add(key);
+  const fillLight = new THREE.DirectionalLight(0xdfe6f5, 0.95);
+  fillLight.position.set(-3.5, 2.0, -2.5);
+  scene.add(fillLight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  // ---- pivot: rotate around a point ~42% up the specimen, not the base ----
+  const pivotY = plant.maxHeight * 0.42;
+  const rotGroup = new THREE.Group();
+  const contentGroup = new THREE.Group();
+  contentGroup.position.y = -pivotY;
+  rotGroup.position.y = pivotY;
+  rotGroup.add(contentGroup);
+  scene.add(rotGroup);
+
+  // ---- stem + branches: merged into one tapered-tube mesh ----
+  const tubeGeoms = [];
+  plant.stems.forEach(s => tubeGeoms.push(makeTaperedTubeGeometry(s.curve, s.radiusBase, s.radiusTip, s.color, 26, 7)));
+  plant.branchCurves.forEach(b => tubeGeoms.push(makeTaperedTubeGeometry(b.curve, b.radiusBase, b.radiusTip, b.color, 10, 5)));
+  const woodGeo = mergeGeometries(tubeGeoms, false);
+  const woodMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0.02 });
+  const woodMesh = new THREE.Mesh(woodGeo, woodMat);
+  contentGroup.add(woodMesh);
+
+  // ---- leaves: instanced, shared shape, per-instance colour + micro-sway ----
+  const leafShape = buildLeafShape();
+  const leafGeo = new THREE.ShapeGeometry(leafShape, 6);
+  leafGeo.computeVertexNormals();
+  const leafMat = new THREE.MeshStandardMaterial({
+    vertexColors: true, roughness: 0.7, metalness: 0, side: THREE.DoubleSide,
+    emissive: new THREE.Color('#3D7835'), emissiveIntensity: 0.16, // lifts the shadow floor so leaf colour reads at small scale, without flattening the light response
+  });
+  const leafCount = plant.leaves.length;
+  const leafMesh = new THREE.InstancedMesh(leafGeo, leafMat, leafCount);
+  leafMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(leafCount * 3), 3);
+
+  const leafBase = new Array(leafCount);
+  const tmpMatrix = new THREE.Matrix4();
+  const tmpScale = new THREE.Vector3();
+  const tmpQuat = new THREE.Quaternion();
+  const swayAxis = new THREE.Vector3(0, 1, 0.2).normalize();
+  const swayQuat = new THREE.Quaternion();
+
+  plant.leaves.forEach((leaf, i) => {
+    const baseLen = lerp(0.30, 0.18, i / leafCount) * leaf.scaleJitter;
+    const quat = computeLeafBasis(leaf.position, leaf.tangent, leaf.sideSign);
+    const jitterEuler = new THREE.Euler(degToRad(leaf.asymJitter * 10), degToRad(leaf.asymJitter * 6), degToRad(leaf.asymJitter * 14));
+    quat.multiply(new THREE.Quaternion().setFromEuler(jitterEuler));
+
+    leafBase[i] = {
+      position: leaf.position.clone().addScaledVector(new THREE.Vector3(0, -1, 0), 0.012),
+      quaternion: quat,
+      scale: new THREE.Vector3(baseLen, baseLen * rand(0.85, 1.08), baseLen),
+      phase: leaf.phase, speed: leaf.speed, amp: leaf.amp,
+    };
+    tmpMatrix.compose(leafBase[i].position, quat, leafBase[i].scale);
+    leafMesh.setMatrixAt(i, tmpMatrix);
+    const tone = LEAF_TONES[leaf.toneIndex];
+    leafMesh.setColorAt(i, tone);
+  });
+  leafMesh.instanceMatrix.needsUpdate = true;
+  if (leafMesh.instanceColor) leafMesh.instanceColor.needsUpdate = true;
+  contentGroup.add(leafMesh);
+
+  // ---- seed capsules: tiny instanced spheres ----
+  const capGeo = new THREE.SphereGeometry(1, 6, 5);
+  const capMat = new THREE.MeshStandardMaterial({ color: CAPSULE_TONE, roughness: 0.75 });
+  const capCount = Math.max(plant.capsules.length, 1);
+  const capMesh = new THREE.InstancedMesh(capGeo, capMat, capCount);
+  plant.capsules.forEach((c, i) => {
+    tmpMatrix.compose(c.position, new THREE.Quaternion(), new THREE.Vector3(0.028, 0.022, 0.028));
+    capMesh.setMatrixAt(i, tmpMatrix);
+  });
+  if (plant.capsules.length === 0) capMesh.setMatrixAt(0, new THREE.Matrix4().makeScale(0, 0, 0));
+  capMesh.instanceMatrix.needsUpdate = true;
+  contentGroup.add(capMesh);
+
+  // ---- typography plane: "BHUI AMLA" as an alpha-cut canvas texture
+  // living INSIDE the 3D scene so it participates in the real z-buffer —
+  // foreground branches occlude it, it occludes geometry behind it,
+  // in both directions, as the specimen is rotated. ----
+  let typePlane = null;
+  function buildTypeTexture() {
+    const tw = 2048, th = 1024;
+    const tc = document.createElement('canvas');
+    tc.width = tw; tc.height = th;
+    const ctx = tc.getContext('2d');
+    ctx.clearRect(0, 0, tw, th);
+    ctx.font = '200 420px "DM Sans", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#C8D0E4';
+    ctx.fillStyle = 'rgba(255,255,255,0.94)';
+    ctx.fillText('BHUI AMLA', tw / 2, th / 2 + 30);
+    ctx.strokeText('BHUI AMLA', tw / 2, th / 2 + 30);
+
+    const tex = new THREE.CanvasTexture(tc);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+
+    const planeH = plant.maxHeight * 0.32;
+    const planeW = planeH * (tw / th);
+    const geo = new THREE.PlaneGeometry(planeW, planeH);
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: false, alphaTest: 0.08, toneMapped: false });
+    typePlane = new THREE.Mesh(geo, mat);
+    typePlane.position.set(0, plant.maxHeight * 0.46, -0.05); // sits mid-depth through the specimen's Z range
+    contentGroup.add(typePlane);
+  }
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.load('200 420px "DM Sans"').catch(() => {}).finally(() => document.fonts.ready.then(buildTypeTexture).catch(buildTypeTexture));
+  } else {
+    buildTypeTexture();
+  }
+
+  // ---- camera framing ----
+  function frameCamera() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    camera.aspect = w / h;
+    const dist = isMobile ? 8.4 : 9.2;
+    camera.position.set(0, pivotY * 1.08, dist);
+    camera.lookAt(0, pivotY * 1.02, 0);
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+  frameCamera();
+
+  // ---- interaction: clamped drag-to-orbit + restrained idle motion ----
+  const BASE_YAW = -10, BASE_PITCH = 5;
+  const YAW_RANGE = 40, PITCH_RANGE = 13;
+  let dragYaw = 0, dragPitch = 0;
+  let dragging = false, lastX = 0, lastY = 0;
+  let idleT0 = null, resumeIdleAt = 0;
+
+  function applyRotation(idleYawDelta) {
+    const yaw = clamp(BASE_YAW + dragYaw + (idleYawDelta || 0), BASE_YAW - YAW_RANGE, BASE_YAW + YAW_RANGE);
+    const pitch = clamp(BASE_PITCH + dragPitch, BASE_PITCH - PITCH_RANGE, BASE_PITCH + PITCH_RANGE);
+    rotGroup.rotation.y = degToRad(yaw);
+    rotGroup.rotation.x = degToRad(pitch);
+  }
+  applyRotation(0);
+
+  function pointerDown(e) {
+    dragging = true;
+    stage.classList.add('is-dragging');
+    lastX = e.touches ? e.touches[0].clientX : e.clientX;
+    lastY = e.touches ? e.touches[0].clientY : e.clientY;
+    tag?.classList.add('is-hidden');
+    e.preventDefault?.();
+  }
+  function pointerMove(e) {
+    if (!dragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const dx = x - lastX, dy = y - lastY;
+    lastX = x; lastY = y;
+    dragYaw = clamp(dragYaw + dx * 0.26, -YAW_RANGE, YAW_RANGE);
+    dragPitch = clamp(dragPitch - dy * 0.16, -PITCH_RANGE, PITCH_RANGE);
+    applyRotation(0);
+    e.preventDefault?.();
+  }
+  function pointerUp() {
+    if (!dragging) return;
+    dragging = false;
+    stage.classList.remove('is-dragging');
+    idleT0 = null;
+    resumeIdleAt = performance.now() + 1800;
+  }
+  stage.addEventListener('pointerdown', pointerDown);
+  window.addEventListener('pointermove', pointerMove, { passive: false });
+  window.addEventListener('pointerup', pointerUp);
+  stage.addEventListener('touchstart', pointerDown, { passive: true });
+  window.addEventListener('touchmove', pointerMove, { passive: false });
+  window.addEventListener('touchend', pointerUp);
+
+  // ---- visibility gating: pause the loop off-screen / tab hidden ----
+  let isVisible = true;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { isVisible = e.isIntersecting; });
+  }, { threshold: 0.05 });
+  io.observe(stage);
+  document.addEventListener('visibilitychange', () => {
+    isVisible = isVisible && document.visibilityState === 'visible';
+  });
+
+  window.addEventListener('resize', frameCamera);
+
+  // ---- animation loop ----
+  let frameSkip = 0;
+  let frameCount = 0, fpsT0 = performance.now(), lastFps = 0;
+  let raf;
+  function animate(now) {
+    raf = requestAnimationFrame(animate);
+    if (!isVisible) return;
+
+    if (!reducedMotion && !dragging && now > resumeIdleAt) {
+      if (idleT0 === null) idleT0 = now;
+      const elapsed = (now - idleT0) / 1000;
+      applyRotation(Math.sin(elapsed * 0.12) * 8);
+    } else if (dragging || reducedMotion) {
+      applyRotation(0);
+    }
+
+    // per-leaf micro sway — independent phase per leaf, throttled on mobile
+    if (!reducedMotion) {
+      frameSkip = (frameSkip + 1) % (isMobile ? 2 : 1);
+      if (frameSkip === 0) {
+        const t = now * 0.001;
+        for (let i = 0; i < leafCount; i++) {
+          const b = leafBase[i];
+          const sway = Math.sin(t * b.speed + b.phase) * b.amp;
+          swayQuat.setFromAxisAngle(swayAxis, sway);
+          tmpQuat.copy(b.quaternion).multiply(swayQuat);
+          tmpMatrix.compose(b.position, tmpQuat, b.scale);
+          leafMesh.setMatrixAt(i, tmpMatrix);
+        }
+        leafMesh.instanceMatrix.needsUpdate = true;
+      }
+    }
+
+    renderer.render(scene, camera);
+
+    frameCount++;
+    if (now - fpsT0 > 1000) {
+      lastFps = Math.round((frameCount * 1000) / (now - fpsT0));
+      frameCount = 0; fpsT0 = now;
+      if (perfHud) perfHud.textContent = lastFps + ' fps · ' + leafCount + ' leaves · ' + (plant.stems.length + plant.branchCurves.length) + ' tubes';
+    }
+  }
+  raf = requestAnimationFrame(animate);
+
+  canvas.classList.add('is-ready');
+}
+
+/* ============================================================
+   7. NO-WEBGL FALLBACK — same generated skeleton data, drawn as
+      a static botanical line study on <canvas 2D>. Not blank,
+      not an error, on-brand colours, no dependency on WebGL.
+============================================================ */
+function initFallback2D() {
+  const canvas = document.getElementById('bhFallback2d');
+  canvas.hidden = false;
+  document.getElementById('bhCanvas').hidden = true;
+  tag?.classList.add('is-hidden');
+
+  const ctx = canvas.getContext('2d');
+  function project(p) {
+    return { x: p.x - p.z * 0.32, y: -p.y - p.z * 0.16 };
+  }
+  function draw() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const scale = h / (plant.maxHeight * 1.28);
+    const originX = w / 2, originY = h - 74;
+    const toScreen = (p) => {
+      const pr = project(p);
+      return { x: originX + pr.x * scale, y: originY + pr.y * scale };
+    };
+
+    // giant outlined wordmark, drawn first so the specimen sits over it —
+    // the same motif as the WebGL version, without true depth interleaving
+    ctx.save();
+    ctx.font = `200 ${Math.round(h * 0.24)}px "DM Sans", system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.strokeStyle = '#C8D0E4';
+    ctx.lineWidth = 1.5;
+    ctx.fillText('BHUI AMLA', w / 2, originY - plant.maxHeight * 0.46 * scale);
+    ctx.strokeText('BHUI AMLA', w / 2, originY - plant.maxHeight * 0.46 * scale);
+    ctx.restore();
+
+    ctx.lineCap = 'round';
+    const drawCurve = (curve, rB, rE, color, segs) => {
+      ctx.strokeStyle = color;
+      for (let i = 0; i < segs; i++) {
+        const t0 = i / segs, t1 = (i + 1) / segs;
+        const p0 = toScreen(curve.getPointAt(t0)), p1 = toScreen(curve.getPointAt(t1));
+        ctx.lineWidth = Math.max(1, lerp(rB, rE, (t0 + t1) / 2) * scale * 2.2);
+        ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
+      }
+    };
+    plant.stems.forEach(s => drawCurve(s.curve, s.radiusBase, s.radiusTip, '#' + s.color.getHexString(), 22));
+    plant.branchCurves.forEach(b => drawCurve(b.curve, b.radiusBase, b.radiusTip, '#' + b.color.getHexString(), 8));
+
+    plant.leaves.forEach(leaf => {
+      const p = toScreen(leaf.position);
+      const tone = LEAF_TONES[leaf.toneIndex];
+      ctx.fillStyle = '#' + tone.getHexString();
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.atan2(-leaf.tangent.y, leaf.tangent.x * leaf.sideSign) * 0.4);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 0.11 * scale, 0.045 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    plant.capsules.forEach(c => {
+      const p = toScreen(c.position);
+      ctx.fillStyle = '#2B5625';
+      ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1, 0.03 * scale), 0, Math.PI * 2); ctx.fill();
+    });
+
+    canvas.classList.add('is-ready');
+  }
+  draw();
+  window.addEventListener('resize', draw);
+}
+</script>
+</body>
+</html>
