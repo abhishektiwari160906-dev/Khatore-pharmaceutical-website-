@@ -1,0 +1,71 @@
+/* Design tokens ported verbatim from the approved v5 art direction
+   (khatore-homepage-v6-1.html) — same brand colors, same type system.
+   Not a new visual language. */
+:root {
+  --blue: #1b3c87;
+  --blue-dark: #12296b;
+  --blue-mid: #2a50a8;
+  --blue-pale: #eef2fa;
+  --green: #3d7835;
+  --green-dk: #2b5625;
+  --green-lt: #4f9543;
+  --green-pale: #ebf3e8;
+  --ink: #0f1724;
+  --ink-mid: #2c3b5a;
+  --paper: #f5f7fc;
+  --off: #eaeef7;
+  --rule: #c8d0e4;
+  --muted: #6874a0;
+  --muted-lt: #9ba5c5;
+  --white: #ffffff;
+
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', monospace;
+  --serif: 'Playfair Display', Georgia, serif;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,116 @@
+.main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 4rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+.imageCol {
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+}
+.detailCol {
+  display: flex;
+  flex-direction: column;
+}
+.num {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  color: var(--muted-lt);
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+.name {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+}
+.format {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin: 0.75rem 0 1.5rem;
+}
+.rule {
+  border: none;
+  height: 1px;
+  background: var(--rule);
+  margin-bottom: 1.5rem;
+}
+.desc {
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--muted);
+  flex: 1;
+  margin-bottom: 1.5rem;
+}
+.descPending {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--muted-lt);
+  margin-bottom: 1.5rem;
+}
+.priceArea {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.price {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--blue);
+}
+.priceNote {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.buy {
+  background: var(--blue);
+  color: white;
+  padding: 0.78rem 2rem;
+  font-size: 0.78rem;
+  transition: background 0.2s;
+}
+.buy:hover {
+  background: var(--blue-mid);
+}
+.whatsapp {
+  border: 1px solid var(--green);
+  color: var(--green-dk);
+  padding: 0.78rem 2rem;
+  font-size: 0.78rem;
+  transition: background 0.2s;
+}
+.whatsapp:hover {
+  background: var(--green-pale);
+}
+.disclaimer {
+  font-size: 0.6rem;
+  color: var(--muted-lt);
+  font-style: italic;
+}
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+}

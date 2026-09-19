@@ -1,0 +1,46 @@
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2.5rem 4rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+}
+.title {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  margin-bottom: 1rem;
+}
+.title strong {
+  font-weight: 400;
+  color: var(--blue);
+}
+.body {
+  font-size: 0.85rem;
+  line-height: 1.85;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+.whatsappRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.waBtn {
+  display: inline-block;
+  padding: 0.65rem 1.2rem;
+  border: 1px solid rgba(61, 120, 53, 0.3);
+  color: var(--green-dk);
+  font-size: 0.76rem;
+  transition: background 0.2s;
+  width: fit-content;
+}
+.waBtn:hover {
+  background: var(--green-pale);
+}
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+}

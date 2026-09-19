@@ -1,0 +1,97 @@
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2.5rem 4rem;
+}
+.header {
+  margin-bottom: 3rem;
+}
+.title {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  margin-bottom: 1rem;
+}
+.title strong {
+  font-weight: 400;
+}
+.body {
+  font-size: 0.85rem;
+  line-height: 1.85;
+  color: var(--muted);
+  max-width: 60ch;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--rule);
+  margin-bottom: 3rem;
+}
+.stat {
+  padding: 1.5rem 2rem;
+  border-right: 1px solid var(--rule);
+}
+.stat:last-child {
+  border-right: none;
+}
+.statN {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--blue);
+}
+.statL {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+}
+.presence {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+.regionHeading {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--green);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.col:not(:first-child) .regionHeading {
+  margin-top: 1.5rem;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--off);
+  font-size: 0.82rem;
+}
+.status {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+}
+.footnote {
+  margin-top: 2.5rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--muted-lt);
+}
+.footnoteLink {
+  color: var(--blue);
+  border-bottom: 1px solid rgba(27, 60, 135, 0.3);
+}
+@media (max-width: 640px) {
+  .stats,
+  .presence {
+    grid-template-columns: 1fr;
+  }
+}

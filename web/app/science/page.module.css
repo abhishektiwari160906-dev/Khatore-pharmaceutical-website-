@@ -1,0 +1,99 @@
+.masthead {
+  background: var(--blue);
+  padding: 3rem 2.5rem;
+}
+.title {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  color: white;
+}
+.title strong {
+  font-weight: 400;
+}
+.meta {
+  margin-top: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.trial {
+  display: grid;
+  grid-template-columns: 48px 1fr 200px;
+  gap: 2rem;
+  padding: 1.75rem 2.5rem;
+  border-bottom: 1px solid var(--rule);
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.trial:nth-child(even) {
+  background: var(--paper);
+}
+.trialN {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--muted-lt);
+  padding-top: 0.25rem;
+}
+.trialLoc {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-bottom: 0.3rem;
+}
+.trialMetaRow {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+.trialSummary {
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.pubCol {
+  text-align: right;
+  padding-top: 0.25rem;
+}
+.pubJournal {
+  display: block;
+  font-family: var(--sans);
+  font-style: italic;
+  font-size: 0.76rem;
+  color: var(--ink-mid);
+  margin-bottom: 0.2rem;
+}
+.pubRef {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  color: var(--muted-lt);
+}
+.compliance {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 1.5rem 2.5rem 3rem;
+  font-size: 0.68rem;
+  line-height: 1.75;
+  font-style: italic;
+  color: var(--muted-lt);
+}
+.compliance a {
+  color: var(--blue);
+  border-bottom: 1px solid rgba(27, 60, 135, 0.3);
+}
+@media (max-width: 768px) {
+  .trial {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .pubCol {
+    text-align: left;
+  }
+}

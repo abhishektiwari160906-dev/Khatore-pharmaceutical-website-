@@ -1,0 +1,110 @@
+.yearBanner {
+  background: var(--paper);
+  padding: 3rem 2.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.yearBig {
+  display: block;
+  font-family: var(--sans);
+  font-size: clamp(6rem, 16vw, 16rem);
+  font-weight: 200;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--white);
+  -webkit-text-stroke: 1px var(--rule);
+  margin-bottom: -0.08em;
+}
+.yearLabel {
+  position: absolute;
+  top: 3rem;
+  right: 2.5rem;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+}
+.pull {
+  padding: 4rem 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-left: 3px solid var(--green);
+}
+.pullQuote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  line-height: 1.7;
+  color: var(--ink-mid);
+  padding-left: 1.5rem;
+}
+.pullQuote strong {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--green-dk);
+}
+.pullAttr {
+  display: block;
+  padding-left: 1.5rem;
+  margin-top: 1rem;
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+}
+.register {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+  border-top: 1px solid var(--rule);
+}
+.entry {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 3rem;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.entryDate {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--blue);
+  letter-spacing: 0.1em;
+}
+.entryTitle {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+.entryText {
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.badges {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.badge {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(27, 60, 135, 0.25);
+  background: var(--blue-pale);
+  color: var(--blue);
+}
+@media (max-width: 640px) {
+  .entry {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}

@@ -1,0 +1,21 @@
+.header {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 3rem 2.5rem 2rem;
+}
+.title {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+.title strong {
+  font-weight: 400;
+}
+.grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 2.5rem 4rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}

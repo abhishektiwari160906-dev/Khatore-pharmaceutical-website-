@@ -1,0 +1,67 @@
+.card {
+  position: relative;
+  border: 1px solid var(--rule);
+  padding: 1.5rem;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.num {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--muted-lt);
+}
+.imageLink {
+  display: block;
+  background: var(--paper);
+  padding: 1rem;
+}
+.name {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+.format {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.desc {
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.descPending {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--muted-lt);
+}
+.price {
+  font-family: var(--sans);
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--blue);
+}
+.priceNote {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+.buy {
+  margin-top: 0.5rem;
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--blue);
+  color: var(--white);
+  font-size: 0.76rem;
+  padding: 0.65rem 1.4rem;
+  transition: background 0.2s;
+}
+.buy:hover {
+  background: var(--blue-mid);
+}
