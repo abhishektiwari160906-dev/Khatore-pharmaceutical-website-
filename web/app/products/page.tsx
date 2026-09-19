@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { ProductCard } from '@/components/ProductCard';
+import { VideoBlock } from '@/components/VideoBlock';
 import { PRODUCTS } from '@/data/products';
 import styles from './page.module.css';
 
@@ -26,6 +27,17 @@ export default function ProductsPage() {
             <ProductCard key={product.productId} product={product} />
           ))}
         </div>
+
+        <section className={styles.processSection} aria-label="Process and promise">
+          <div className={styles.processCol}>
+            <VideoBlock id="reel2" caption="The Kamalahar Process" />
+            <p className={styles.processCaption}>The Kamalahar Process</p>
+          </div>
+          <div className={styles.processCol}>
+            <VideoBlock id="reel3" caption="The Kamalahar Promise" />
+            <p className={styles.processCaption}>The Kamalahar Promise</p>
+          </div>
+        </section>
       </main>
       <Footer />
     </>

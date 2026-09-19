@@ -40,6 +40,24 @@ npm run build && npm start
 - **Redirect map** (`next.config.mjs`) from the live site's real
   31-URL sitemap — only the unambiguous ones; see the comment block
   there for what's deliberately left unmapped and why.
+- **Video** (`data/videos.ts`, `components/{EditorialVideo,CinematicVideo,
+  VideoPlaceholder,VideoBlock}.tsx`) — the 5-video manifest from the
+  client's Drive pack, placed per the approved direction: Reel 1 (BTS) on
+  `/heritage`, Reel 2/3 (Process/Promise) on `/products`, Reel 4 (Herb to
+  Habit) and the Brand Video on `/`. Only Reel 1 has real self-hosted
+  media (`public/assets/video/reel1-bts.mp4` + poster — trimmed to 26s to
+  drop an unrelated tail shot, H.264/AAC, faststart, ~3.8MB); the other 4
+  render as a labeled "final asset in production" placeholder — never a
+  fake frame, never a `drive.google.com` URL — because their bytes are
+  over the Drive connector's 10MB inspection cap and the files aren't
+  link-shared (a tooling limit, not a missing deliverable — see git log
+  for the inspection trail). Swap in real self-hosted files by adding a
+  `src`/`poster` and flipping `status` to `'ready'` in `data/videos.ts`;
+  nothing else needs to change. Fires `video_started`/`video_completed`
+  through the same event layer as everything else. Editorial reels are
+  muted/looped/IntersectionObserver-gated; the Brand Video is deliberate
+  click-to-play, not an autoplay background; both fall back to the poster
+  under `prefers-reduced-motion`.
 
 ## Explicitly NOT done yet (next steps, not oversights)
 

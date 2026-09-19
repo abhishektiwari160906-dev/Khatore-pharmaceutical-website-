@@ -1,0 +1,33 @@
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--aspect, 9 / 16);
+  max-width: var(--maxw, 420px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--blue-pale);
+  border: 1px dashed var(--rule);
+}
+.icon {
+  opacity: 0.5;
+}
+.title {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+.note {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  max-width: 26ch;
+}

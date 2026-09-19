@@ -27,7 +27,9 @@ export type Phase1EventName =
   | 'enquiry_submitted'
   | 'contact_form_submitted'
   | 'whatsapp_click'
-  | 'external_checkout_redirect';
+  | 'external_checkout_redirect'
+  | 'video_started'
+  | 'video_completed';
 
 // ---- Future: schema placeholders only. Do NOT fire these yet — see
 // Section 15, payment is an absolute phase boundary (Phase 5). Declared
@@ -52,4 +54,6 @@ export const ACTIVE_EVENT_NAMES: readonly Phase1EventName[] = [
   'contact_form_submitted',
   'whatsapp_click',
   'external_checkout_redirect',
+  'video_started',
+  'video_completed',
 ];

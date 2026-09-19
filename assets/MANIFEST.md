@@ -39,6 +39,23 @@ files supplied directly by Khatore. Per instruction, I have **not**
 upscaled, AI-regenerated, or otherwise altered these to compensate —
 using them as-is until real higher-resolution sources are available.
 
+## Video
+
+| Local file | Source | Edit |
+|---|---|---|
+| `web/public/assets/video/reel1-bts.mp4` + `reel1-bts-poster.jpg` | Client "Final Content" Drive pack, `Short form video` folder, "BTS" (Drive id `1odRGiLbUBvqBUIIGsdJ2E8Ba64_7dpIU`, 5.3MB, downloaded in full) | Trimmed to the first 26s — the original 30.8s clip's final ~5s (from ~27s) is an unrelated home-interior shot, not the manufacturing-facility content the rest of the clip shows; dropped rather than shipped. Re-encoded H.264/AAC, `+faststart`, 480×854, 3.8MB. Poster is a single frame at t=24s (decoction-vat stirring), no other edit. |
+
+**Not self-hosted yet**: Brand Video, "The Kamalahar Process" (reel2),
+"The Kamalahar Promise" (reel3), "Herb to Habit" (reel4). All four are
+real, final assets per the client — not missing deliverables — but their
+bytes were unobtainable with available tooling: each exceeds the Drive
+connector's 10MB single-file download cap, and none is link-shared
+(owner-only permissions). A direct download and a Descript import both
+independently hit the same authentication wall. `web/data/videos.ts`
+carries these as `status: 'pending-asset'`; the site renders a labeled
+placeholder for each — never a fake frame, never a `drive.google.com`
+URL in shipped code.
+
 ## Not included in this pass
 
 - **Fonts** (DM Sans / DM Mono / Playfair Display) — currently loaded from

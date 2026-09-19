@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
+import { VideoBlock } from '@/components/VideoBlock';
 import { HERITAGE_FOUNDING_YEAR } from '@/lib/config';
 import styles from './page.module.css';
 
@@ -35,6 +36,29 @@ export default function HomePage() {
           <WhatsAppCta phone="918709206320" label="Enquire / Connect" className={styles.ctaGhost} />
         </div>
       </section>
+
+      <section className={styles.brandFilm} aria-label="Brand film">
+        <div className={styles.brandFilmInner}>
+          <VideoBlock id="brand" label="Khatore Pharmaceuticals" maxWidth={960} />
+        </div>
+      </section>
+
+      <section className={styles.herbSection} aria-label="From herb to habit">
+        <div className={styles.herbVideo}>
+          <VideoBlock id="reel4" caption="Herb to Habit" />
+        </div>
+        <div className={styles.herbText}>
+          <h2 className={styles.herbHeading}>From herb to habit</h2>
+          <p className={styles.herbCopy}>
+            Every formulation starts with the plant — Ayurvedic knowledge carried through to a
+            product you can trust.
+          </p>
+          <Link href="/science" className={styles.ctaGhost}>
+            Explore the Science
+          </Link>
+        </div>
+      </section>
+
       <Footer />
     </>
   );

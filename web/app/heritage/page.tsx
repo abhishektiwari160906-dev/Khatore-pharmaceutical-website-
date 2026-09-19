@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
+import { VideoBlock } from '@/components/VideoBlock';
 import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { HERITAGE_FOUNDING_YEAR } from '@/lib/config';
 import styles from './page.module.css';
@@ -31,6 +32,19 @@ export default function HeritagePage() {
             standards."
           </p>
           <span className={styles.pullAttr}>Khatore Pharmaceuticals — Company Mission</span>
+        </section>
+
+        <section className={styles.bts} aria-label="Behind the scenes at the facility">
+          <div className={styles.btsVideo}>
+            <VideoBlock id="reel1" caption="Behind the Scenes" />
+          </div>
+          <div className={styles.btsText}>
+            <h2 className={styles.btsHeading}>Where it's made</h2>
+            <p className={styles.btsCopy}>
+              A look inside the facility — the same decoction and quality-control process behind
+              every batch of Kamalahar.
+            </p>
+          </div>
         </section>
 
         <section className={styles.register} aria-label="Heritage timeline">
