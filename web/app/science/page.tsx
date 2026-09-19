@@ -4,10 +4,13 @@ import { Footer } from '@/components/Footer';
 import { CLEARED_CLINICAL_TRIALS, SCIENCE_COMPLIANCE_NOTE } from '@/data/science';
 import styles from './page.module.css';
 
+const description = "Khatore's published clinical trial record.";
+
 export const metadata: Metadata = {
   title: 'Science & Evidence',
-  description: "Khatore's published clinical trial record.",
+  description,
   alternates: { canonical: '/science' },
+  openGraph: { title: 'Science & Evidence — Khatore Pharmaceuticals', description, url: '/science' },
 };
 
 export default function SciencePage() {

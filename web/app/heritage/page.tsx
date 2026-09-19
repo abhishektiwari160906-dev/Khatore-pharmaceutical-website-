@@ -6,10 +6,13 @@ import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { HERITAGE_FOUNDING_YEAR } from '@/lib/config';
 import styles from './page.module.css';
 
+const description = `The Khatore Pharmaceuticals story — Ayurvedic knowledge since ${HERITAGE_FOUNDING_YEAR}.`;
+
 export const metadata: Metadata = {
   title: 'Heritage',
-  description: `The Khatore Pharmaceuticals story — Ayurvedic knowledge since ${HERITAGE_FOUNDING_YEAR}.`,
+  description,
   alternates: { canonical: '/heritage' },
+  openGraph: { title: 'Heritage — Khatore Pharmaceuticals', description, url: '/heritage' },
 };
 
 export default function HeritagePage() {

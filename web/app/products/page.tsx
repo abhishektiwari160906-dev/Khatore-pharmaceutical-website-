@@ -6,10 +6,13 @@ import { VideoBlock } from '@/components/VideoBlock';
 import { PRODUCTS } from '@/data/products';
 import styles from './page.module.css';
 
+const description = "Khatore Pharmaceuticals' Ayurvedic product catalogue.";
+
 export const metadata: Metadata = {
   title: 'Products',
-  description: "Khatore Pharmaceuticals' Ayurvedic product catalogue.",
+  description,
   alternates: { canonical: '/products' },
+  openGraph: { title: 'Product Archive — Khatore Pharmaceuticals', description, url: '/products' },
 };
 
 export default function ProductsPage() {

@@ -37,9 +37,15 @@
   color: var(--muted);
 }
 .descPending {
-  font-size: 0.72rem;
-  font-style: italic;
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--muted-lt);
+  border: 1px dashed var(--rule);
+  padding: 0.35rem 0.6rem;
 }
 .price {
   font-family: var(--sans);

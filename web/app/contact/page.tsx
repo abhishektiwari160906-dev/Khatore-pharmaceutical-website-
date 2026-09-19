@@ -5,10 +5,13 @@ import { ContactForm } from '@/components/ContactForm';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import styles from './page.module.css';
 
+const description = 'Enquire with Khatore Pharmaceuticals.';
+
 export const metadata: Metadata = {
   title: 'Contact',
-  description: 'Enquire with Khatore Pharmaceuticals.',
+  description,
   alternates: { canonical: '/contact' },
+  openGraph: { title: 'Contact — Khatore Pharmaceuticals', description, url: '/contact' },
 };
 
 export default function ContactPage() {

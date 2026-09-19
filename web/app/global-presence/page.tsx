@@ -5,10 +5,13 @@ import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { GLOBAL_STATS, GLOBAL_PRESENCE, GLOBAL_DATA_CAVEAT } from '@/data/global';
 import styles from './page.module.css';
 
+const description = "Khatore Pharmaceuticals' international reach.";
+
 export const metadata: Metadata = {
   title: 'Global Presence',
-  description: "Khatore Pharmaceuticals' international reach.",
+  description,
   alternates: { canonical: '/global-presence' },
+  openGraph: { title: 'Global Presence — Khatore Pharmaceuticals', description, url: '/global-presence' },
 };
 
 export default function GlobalPresencePage() {
@@ -17,6 +20,10 @@ export default function GlobalPresencePage() {
       <Nav />
       <main className={styles.main}>
         <header className={styles.header}>
+          <span className={styles.ghostNum} aria-hidden="true">
+            {String(GLOBAL_PRESENCE.length).padStart(2, '0')}
+          </span>
+          <span className={styles.eyebrow}>Regions Served</span>
           <h1 className={styles.title}>
             30+ countries. <strong>One mission.</strong>
           </h1>
@@ -36,13 +43,13 @@ export default function GlobalPresencePage() {
         </div>
 
         <div className={styles.presence}>
-          {GLOBAL_PRESENCE.map((group) => (
-            <div key={group.region} className={styles.col}>
+          {GLOBAL_PRESENCE.map((group, i) => (
+            <div key={group.region} className={styles.col} data-accent={i % 2 === 0 ? 'blue' : 'green'}>
               <span className={styles.regionHeading}>{group.region}</span>
               {group.countries.map((c) => (
                 <div key={c} className={styles.row}>
+                  <span className={styles.dot} aria-hidden="true" />
                   <span>{c}</span>
-                  <span className={styles.status}>Active</span>
                 </div>
               ))}
             </div>

@@ -47,9 +47,7 @@ export function ProductCard({ product }: { product: Product }) {
       {product.status === 'approved' && product.description ? (
         <p className={styles.desc}>{product.description}</p>
       ) : (
-        <p className={styles.descPending} aria-hidden="true">
-          Description pending Khatore approval.
-        </p>
+        <span className={styles.descPending}>Description pending Khatore approval</span>
       )}
       {product.price ? (
         <div className={styles.price}>
