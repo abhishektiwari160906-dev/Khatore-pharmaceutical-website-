@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
+import { Reveal } from '@/components/Reveal';
 import { CLEARED_CLINICAL_TRIALS, SCIENCE_COMPLIANCE_NOTE } from '@/data/science';
 import styles from './page.module.css';
 
@@ -19,30 +20,37 @@ export default function SciencePage() {
       <Nav />
       <main>
         <section className={styles.masthead}>
+          <span className={styles.eyebrow}>{CLEARED_CLINICAL_TRIALS.length} Published Clinical Trials · 1987–1993</span>
           <h1 className={styles.title}>
-            Evidence, <strong>not assertion.</strong>
+            Evidence, <em>not assertion.</em>
           </h1>
-          <p className={styles.meta}>{CLEARED_CLINICAL_TRIALS.length} Published Clinical Trials · 1987–1993</p>
         </section>
 
-        <section aria-label="Clinical trial index">
-          {CLEARED_CLINICAL_TRIALS.map((trial) => (
-            <article key={trial.id} className={styles.trial}>
-              <span className={styles.trialN}>{String(trial.order).padStart(2, '0')}</span>
+        <section className={styles.dashboard} aria-label="Clinical trial evidence">
+          {CLEARED_CLINICAL_TRIALS.map((trial, i) => (
+            <Reveal key={trial.id} as="details" className={styles.trialCard} delay={((i % 3) + 1) as 1 | 2 | 3}>
+              <summary className={styles.trialSummaryRow}>
+                <span className={styles.trialN}>{String(trial.order).padStart(2, '0')}</span>
+                <span className={styles.trialStat}>{trial.patientCount}</span>
+                <span className={styles.trialStatLabel}>Patients</span>
+                <span className={styles.trialLoc}>{trial.location.split(',')[0]}</span>
+                <span className={styles.trialExpand} aria-hidden="true">
+                  + Details
+                </span>
+              </summary>
               <div className={styles.trialBody}>
-                <h2 className={styles.trialLoc}>{trial.location}</h2>
+                <h2 className={styles.trialFullLoc}>{trial.location}</h2>
                 <div className={styles.trialMetaRow}>
                   <span>{trial.dateRange}</span>
-                  <span>{trial.patientCount} Patients</span>
                   <span>{trial.conditions.join(' · ')}</span>
                 </div>
-                <p className={styles.trialSummary}>{trial.summary}</p>
+                <p className={styles.trialSummaryText}>{trial.summary}</p>
+                <div className={styles.pubCol}>
+                  <span className={styles.pubJournal}>{trial.publication.journal}</span>
+                  <span className={styles.pubRef}>{trial.publication.reference}</span>
+                </div>
               </div>
-              <div className={styles.pubCol}>
-                <span className={styles.pubJournal}>{trial.publication.journal}</span>
-                <span className={styles.pubRef}>{trial.publication.reference}</span>
-              </div>
-            </article>
+            </Reveal>
           ))}
         </section>
 

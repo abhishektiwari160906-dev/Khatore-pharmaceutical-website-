@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { VideoBlock } from '@/components/VideoBlock';
+import { Reveal } from '@/components/Reveal';
 import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { HERITAGE_FOUNDING_YEAR } from '@/lib/config';
 import styles from './page.module.css';
@@ -27,38 +29,38 @@ export default function HeritagePage() {
           <span className={styles.yearLabel}>Year of founding · Barbil, Orissa</span>
         </section>
 
-        <section className={styles.pull}>
+        <Reveal as="section" className={styles.pull}>
           <p className={styles.pullQuote}>
-            "The mission of Late Shri Sitaram Khatore was to relieve the suffering patients from serious
+            &quot;The mission of Late Shri Sitaram Khatore was to relieve the suffering patients from serious
             liver ailments and jaundice. Our mission is to continue to help patients globally to manage and
             recover from liver ailments by providing unique <strong>Kamalahar</strong> as per top quality
-            standards."
+            standards.&quot;
           </p>
           <span className={styles.pullAttr}>Khatore Pharmaceuticals — Company Mission</span>
-        </section>
+        </Reveal>
 
-        <section className={styles.bts} aria-label="Behind the scenes at the facility">
+        <Reveal as="section" className={styles.bts} aria-label="Behind the scenes at the facility">
           <div className={styles.btsVideo}>
             <VideoBlock id="reel1" caption="Behind the Scenes" />
           </div>
           <div className={styles.btsText}>
-            <h2 className={styles.btsHeading}>Where it's made</h2>
+            <h2 className={styles.btsHeading}>Where it&apos;s made</h2>
             <p className={styles.btsCopy}>
               A look inside the facility — the same decoction and quality-control process behind
               every batch of Kamalahar.
             </p>
           </div>
-        </section>
+        </Reveal>
 
         <section className={styles.register} aria-label="Heritage timeline">
-          {HERITAGE_ENTRIES.map((entry) => (
-            <div key={entry.title} className={styles.entry}>
+          {HERITAGE_ENTRIES.map((entry, i) => (
+            <Reveal key={entry.title} as="div" className={styles.entry} delay={((i % 3) + 1) as 1 | 2 | 3}>
               <div className={styles.entryDate}>{entry.date}</div>
               <div>
                 <h2 className={styles.entryTitle}>{entry.title}</h2>
                 <p className={styles.entryText}>{entry.text}</p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </section>
 
@@ -67,6 +69,17 @@ export default function HeritagePage() {
           <span className={styles.badge}>Best Entrepreneur — Ayurvedic Medicine in Asia, 2000</span>
           <span className={styles.badge}>Designed by Ayurvedacharya</span>
           <span className={styles.badge}>No Heavy Metals</span>
+        </section>
+
+        <section className={styles.nextChapter}>
+          <Link href="/science" className={styles.nextLink}>
+            <span className={styles.nextLabel}>Next</span>
+            <span className={styles.nextTitle}>The Science →</span>
+          </Link>
+          <Link href="/products" className={styles.nextLink}>
+            <span className={styles.nextLabel}>Also</span>
+            <span className={styles.nextTitle}>The Products →</span>
+          </Link>
         </section>
       </main>
       <Footer />

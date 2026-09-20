@@ -3,6 +3,7 @@ import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { ProductCard } from '@/components/ProductCard';
 import { VideoBlock } from '@/components/VideoBlock';
+import { Reveal } from '@/components/Reveal';
 import { PRODUCTS } from '@/data/products';
 import styles from './page.module.css';
 
@@ -21,24 +22,25 @@ export default function ProductsPage() {
       <Nav />
       <main>
         <header className={styles.header}>
+          <span className={styles.eyebrow}>{PRODUCTS.length} Formulations</span>
           <h1 className={styles.title}>
             Product <strong>Archive</strong>
           </h1>
         </header>
         <div className={styles.grid}>
-          {PRODUCTS.map((product) => (
-            <ProductCard key={product.productId} product={product} />
+          {PRODUCTS.map((product, i) => (
+            <Reveal key={product.productId} delay={((i % 3) + 1) as 1 | 2 | 3}>
+              <ProductCard product={product} />
+            </Reveal>
           ))}
         </div>
 
         <section className={styles.processSection} aria-label="Process and promise">
-          <div className={styles.processCol}>
-            <VideoBlock id="reel2" caption="The Kamalahar Process" />
-            <p className={styles.processCaption}>The Kamalahar Process</p>
+          <div className={styles.processStage}>
+            <VideoBlock id="reel2" eyebrow="The Process" heading="The Kamalahar Process" dark />
           </div>
-          <div className={styles.processCol}>
-            <VideoBlock id="reel3" caption="The Kamalahar Promise" />
-            <p className={styles.processCaption}>The Kamalahar Promise</p>
+          <div className={styles.processStage}>
+            <VideoBlock id="reel3" eyebrow="The Promise" heading="The Kamalahar Promise" dark />
           </div>
         </section>
       </main>

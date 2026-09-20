@@ -12,76 +12,60 @@
 }
 
 .lead {
-  max-width: 640px;
+  max-width: 760px;
   margin: 0 auto;
   text-align: center;
-}
-.textcol {
-  padding-top: 0.5rem;
-}
-
-.pull {
-  display: grid;
-  grid-template-columns: 3px 1fr;
-  gap: 1.5rem;
-  text-align: left;
   padding-bottom: 2.5rem;
-  margin-bottom: 2.5rem;
-  border-bottom: 1px solid var(--rule);
 }
-.pullBar {
-  background: var(--green);
-}
-.pullQ {
-  font-family: var(--serif);
-  font-size: clamp(0.95rem, 1.5vw, 1.18rem);
-  font-style: italic;
-  line-height: 1.7;
-  color: var(--ink-mid);
-}
-.pullQ strong {
-  font-style: normal;
-  font-weight: 500;
-  color: var(--green-dk);
-}
-.pullAttr {
-  font-family: var(--mono);
-  font-size: 0.52rem;
-  letter-spacing: 0.16em;
-  color: var(--muted-lt);
-  text-transform: uppercase;
-  margin-top: 1rem;
-  display: block;
-}
-
 .eyebrow {
   font-family: var(--mono);
   font-size: 0.62rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--blue);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   display: block;
 }
-.copy h2 {
+.leadHeading {
   font-family: var(--sans);
   font-weight: 200;
-  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
-  line-height: 1.2;
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--ink);
-  margin-bottom: 1.3rem;
+  margin-bottom: 1.5rem;
 }
-.copy p {
-  font-size: 0.84rem;
-  line-height: 1.8;
+.leadHeading em {
+  font-style: normal;
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--green-dk);
+}
+.pullQ {
+  font-family: var(--serif);
+  font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+  font-style: italic;
+  line-height: 1.7;
   color: var(--muted);
-  max-width: 44ch;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 52ch;
+  margin: 0 auto 2rem;
 }
-.copy p + p {
-  margin-top: 1rem;
+.chapterLabels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+}
+.chapterSep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--rule);
 }
 
 .srOnly {

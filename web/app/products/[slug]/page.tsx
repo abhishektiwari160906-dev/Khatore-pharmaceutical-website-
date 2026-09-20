@@ -59,7 +59,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       />
       <main className={styles.main}>
         <div className={styles.imageCol}>
-          <Image src={product.image} alt={product.name} width={295} height={295} priority />
+          <Image src={product.image} alt={product.name} width={380} height={380} priority />
         </div>
         <div className={styles.detailCol}>
           <span className={styles.num}>

@@ -565,32 +565,20 @@ export function BhuiAmlaExperience() {
     <section className={styles.botanical} aria-label="The Bhui Amla botanical study">
       <div className={styles.scene}>
         <div className={styles.lead}>
-          <div className={styles.textcol}>
-            <div className={styles.pull}>
-              <div className={styles.pullBar} />
-              <div>
-                <p className={styles.pullQ}>
-                  In classical Ayurvedic texts, <strong>Bhui Amla</strong> — literally &quot;ground amla&quot; — is
-                  described as a liver-supportive herb that carries its seed capsules on the underside of each
-                  leaf, close to the ground it grows from. It is one of the botanicals in Khatore&apos;s traditional
-                  formulation lineage.
-                </p>
-                <span className={styles.pullAttr}>Traditional Ayurvedic Materia Medica</span>
-              </div>
-            </div>
-
-            <div className={styles.copy}>
-              <span className={styles.eyebrow}>The Ingredient Study</span>
-              <h2>Sourced faithfully. Prepared the traditional way.</h2>
-              <p>
-                Khatore&apos;s formulation philosophy begins with the plant — sourcing Bhui Amla according to its
-                traditional use, and carrying that botanical lineage forward into the finished formulation.
-              </p>
-              <p>
-                The study below is a working botanical model, not a photograph. Scroll to trace its growth from
-                root to full canopy — or drag at any point to examine its branching structure directly.
-              </p>
-            </div>
+          <span className={styles.eyebrow}>The Ingredient Study</span>
+          <h2 className={styles.leadHeading}>
+            Ground amla. <em>Carried into every formulation.</em>
+          </h2>
+          <p className={styles.pullQ}>
+            &quot;Bhui Amla&quot; — literally ground amla — carries its seed capsules beneath each leaf, close to
+            the earth it grows from. One of the botanicals in Khatore&apos;s traditional formulation lineage.
+          </p>
+          <div className={styles.chapterLabels}>
+            <span>The Plant</span>
+            <span className={styles.chapterSep} aria-hidden="true" />
+            <span>The Process</span>
+            <span className={styles.chapterSep} aria-hidden="true" />
+            <span>The Product</span>
           </div>
         </div>
       </div>

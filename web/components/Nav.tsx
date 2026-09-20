@@ -17,6 +17,7 @@ const LINKS = [
 
 export function Nav() {
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -31,8 +32,30 @@ export function Nav() {
     };
   }, [open]);
 
+  // Recede on scroll-down past the first viewport, return on scroll-up —
+  // keeps the chapter-scale hero/sections unobstructed without losing
+  // navigation. Never hides while the mobile menu is open.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (!open) {
+          setHidden(y > lastY && y > 220);
+        }
+        lastY = y;
+        ticking = false;
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [open]);
+
   return (
-    <nav className={styles.nav}>
+    <nav className={`${styles.nav} ${hidden ? styles.navHidden : ''}`}>
       <div className={styles.bar}>
         <Link href="/" aria-label="Khatore Pharmaceuticals home" className={styles.logoLink}>
           <Image src="/assets/brand/khatore-logo.png" alt="Khatore Pharmaceuticals" width={130} height={44} priority />

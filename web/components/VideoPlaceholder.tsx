@@ -4,9 +4,35 @@ import styles from './VideoPlaceholder.module.css';
 /**
  * Honest stand-in for a placement whose real media isn't self-hosted yet.
  * Never a fake frame, never a Drive URL — just the reserved slot, labeled,
- * so the section reads as "coming" rather than broken.
+ * so the section reads as "coming" rather than broken. `variant="dark"`
+ * matches the cinematic full-bleed treatment for chapter-scale placements
+ * (e.g. the Brand Video); the default is the light editorial chip.
  */
-export function VideoPlaceholder({ video, maxWidth }: { video: VideoAsset; maxWidth?: number }) {
+export function VideoPlaceholder({
+  video,
+  maxWidth,
+  variant = 'light',
+  eyebrow,
+  heading,
+}: {
+  video: VideoAsset;
+  maxWidth?: number;
+  variant?: 'light' | 'dark';
+  eyebrow?: string;
+  heading?: string;
+}) {
+  if (variant === 'dark') {
+    return (
+      <div className={styles.cinematicFrame} style={{ ['--aspect' as string]: video.aspect ?? '16 / 9' }}>
+        <div className={styles.cinematicText}>
+          {eyebrow && <span className={styles.cinematicEyebrow}>{eyebrow}</span>}
+          {heading && <h2 className={styles.cinematicHeading}>{heading}</h2>}
+          <span className={styles.cinematicNote}>{video.title} — final asset in production</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={styles.frame}

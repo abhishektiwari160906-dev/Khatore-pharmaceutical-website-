@@ -19,6 +19,16 @@
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--rule);
+  transform: translateY(0);
+  transition: transform 0.4s var(--ease);
+}
+.navHidden .bar {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
+  }
 }
 .logoLink {
   display: flex;

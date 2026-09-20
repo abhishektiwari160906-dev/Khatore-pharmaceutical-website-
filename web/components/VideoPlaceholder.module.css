@@ -31,3 +31,57 @@
   color: var(--muted);
   max-width: 26ch;
 }
+
+/* Cinematic (dark, full-bleed) variant — matches CinematicVideo.module.css
+   so a pending chapter-scale placement still reads as monumental, not as
+   a broken box, until its real asset lands. */
+.cinematicFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--aspect, 16 / 9);
+  background: linear-gradient(160deg, var(--ink) 0%, #1a2438 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.cinematicFrame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.cinematicText {
+  position: relative;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+.cinematicEyebrow {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 1rem;
+}
+.cinematicHeading {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  color: white;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.25rem;
+}
+.cinematicNote {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  padding: 0.5rem 0.9rem;
+}

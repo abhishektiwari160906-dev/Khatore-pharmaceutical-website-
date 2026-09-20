@@ -11,7 +11,17 @@ import styles from './CinematicVideo.module.css';
  * the visitor chooses to watch; only then does playback (unmuted, with
  * native controls) start.
  */
-export function CinematicVideo({ video, label }: { video: VideoAsset; label?: string }) {
+export function CinematicVideo({
+  video,
+  label,
+  eyebrow,
+  heading,
+}: {
+  video: VideoAsset;
+  label?: string;
+  eyebrow?: string;
+  heading?: string;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -42,6 +52,13 @@ export function CinematicVideo({ video, label }: { video: VideoAsset; label?: st
       ) : (
         <>
           {video.poster && <img src={video.poster} alt={video.title} className={styles.poster} />}
+          <div className={styles.scrim} aria-hidden="true" />
+          {(eyebrow || heading) && (
+            <div className={styles.textBlock}>
+              {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
+              {heading && <h2 className={styles.heading}>{heading}</h2>}
+            </div>
+          )}
           <button
             type="button"
             className={styles.playButton}
@@ -49,7 +66,7 @@ export function CinematicVideo({ video, label }: { video: VideoAsset; label?: st
             aria-label={`Play ${video.title}`}
           >
             <span className={styles.disc}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
                 <path d="M6 4L16 10L6 16V4Z" fill="#1b3c87" />
               </svg>
             </span>
