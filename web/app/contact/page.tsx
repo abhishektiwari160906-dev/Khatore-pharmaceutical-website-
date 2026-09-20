@@ -26,6 +26,7 @@ export default function ContactPage() {
           <p className={styles.body}>
             Reach Khatore directly — by form, WhatsApp, or email. For urgent queries, WhatsApp is fastest.
           </p>
+          <span className={styles.waLabel}>Chat with Khatore</span>
           <div className={styles.whatsappRow}>
             <WhatsAppCta phone="919665110525" label="WhatsApp — US/UK/EU" className={styles.waBtn} />
             <WhatsAppCta phone="918709206320" label="WhatsApp — India/World" className={styles.waBtn} />

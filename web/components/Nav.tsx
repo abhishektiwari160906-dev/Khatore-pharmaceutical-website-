@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { WhatsAppCta } from './WhatsAppCta';
+import { CartButton } from './Cart/CartButton';
+import { SearchOverlay } from './Search/SearchOverlay';
 import styles from './Nav.module.css';
 
 const LINKS = [
@@ -18,10 +20,12 @@ const LINKS = [
 export function Nav() {
   const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     setOpen(false);
+    setSearchOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -69,7 +73,14 @@ export function Nav() {
             </li>
           ))}
         </ul>
+        <button type="button" className={styles.searchBtn} onClick={() => setSearchOpen(true)} aria-label="Search products">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.4" />
+            <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        </button>
         <WhatsAppCta phone="918709206320" label="Talk to Khatore" className={styles.cta} />
+        <CartButton className={styles.cartBtn} />
 
         <button
           type="button"
@@ -104,7 +115,23 @@ export function Nav() {
           label="Talk to Khatore"
           className={styles.mobileCta}
         />
+        <div className={styles.mobileUtilityRow} onClick={() => setOpen(false)}>
+          <button
+            type="button"
+            className={styles.mobileSearchBtn}
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search products"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.4" />
+              <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
+          </button>
+          <CartButton className={styles.mobileCartBtn} />
+        </div>
       </div>
+
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </nav>
   );
 }

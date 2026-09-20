@@ -1,0 +1,12 @@
+.btn {
+  border: 1px solid var(--ink-mid);
+  color: var(--ink-mid);
+  padding: 0.78rem 2rem;
+  font-size: 0.78rem;
+  transition: background 0.2s, color 0.2s;
+  min-width: 9.5rem;
+}
+.btn:hover {
+  background: var(--ink);
+  color: white;
+}

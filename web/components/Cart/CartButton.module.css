@@ -1,0 +1,30 @@
+.btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-mid);
+  flex-shrink: 0;
+}
+.btn:hover {
+  color: var(--ink);
+}
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: white;
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}

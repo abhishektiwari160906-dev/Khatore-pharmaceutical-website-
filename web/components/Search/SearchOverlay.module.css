@@ -1,0 +1,135 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  pointer-events: none;
+}
+.overlayOpen {
+  pointer-events: auto;
+}
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 36, 0.35);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+}
+.overlayOpen .backdrop {
+  opacity: 1;
+}
+.panel {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 20px 60px rgba(15, 23, 36, 0.18);
+  transform: translateY(-16px);
+  opacity: 0;
+  transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.overlayOpen .panel {
+  transform: translateY(0);
+  opacity: 1;
+  margin-top: 12svh;
+}
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .panel {
+    transition: none;
+  }
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.input {
+  flex: 1;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--ink);
+  background: none;
+  border: none;
+  outline: none;
+}
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.closeBtn:hover {
+  color: var(--ink);
+}
+
+.results {
+  list-style: none;
+  overflow-y: auto;
+}
+.resultLink {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  transition: background 0.15s;
+}
+.resultLink:hover {
+  background: var(--paper);
+}
+.resultImg {
+  width: 48px;
+  height: 48px;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.resultName {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+.resultFormat {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  margin-top: 0.2rem;
+}
+.noResults,
+.hint {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted-lt);
+}
+
+@media (max-width: 640px) {
+  .overlayOpen .panel {
+    margin-top: 0;
+    max-height: 100vh;
+    height: 100vh;
+  }
+  .panel {
+    max-width: none;
+  }
+}

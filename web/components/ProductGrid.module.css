@@ -1,0 +1,35 @@
+.filters {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 2.5rem 2rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.filterBtn {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--rule);
+  transition: all 0.2s;
+}
+.filterBtn:hover {
+  color: var(--ink);
+  border-color: var(--ink-mid);
+}
+.filterBtnActive {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+
+.grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 2.5rem 5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}

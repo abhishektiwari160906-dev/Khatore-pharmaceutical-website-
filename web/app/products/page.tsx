@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductGrid } from '@/components/ProductGrid';
 import { VideoBlock } from '@/components/VideoBlock';
-import { Reveal } from '@/components/Reveal';
 import { PRODUCTS } from '@/data/products';
 import styles from './page.module.css';
 
@@ -27,13 +26,7 @@ export default function ProductsPage() {
             Product <strong>Archive</strong>
           </h1>
         </header>
-        <div className={styles.grid}>
-          {PRODUCTS.map((product, i) => (
-            <Reveal key={product.productId} delay={((i % 3) + 1) as 1 | 2 | 3}>
-              <ProductCard product={product} />
-            </Reveal>
-          ))}
-        </div>
+        <ProductGrid products={PRODUCTS} />
 
         <section className={styles.processSection} aria-label="Process and promise">
           <div className={styles.processStage}>

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { BuyButton } from '@/components/BuyButton';
+import { AddToCartButton } from '@/components/Cart/AddToCartButton';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { TrackProductView } from '@/components/TrackProductView';
 import { PRODUCTS, getProductBySlug } from '@/data/products';
@@ -85,9 +86,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           ) : null}
           <div className={styles.actions}>
             <BuyButton product={product} className={styles.buy} />
+            <AddToCartButton product={product} />
             <WhatsAppCta
               phone="918709206320"
-              label="Ask on WhatsApp"
+              label="Ask about this product"
               productId={product.productId}
               productName={product.name}
               className={styles.whatsapp}
@@ -98,6 +100,57 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           </p>
         </div>
       </main>
+
+      {/* Progressive sections — each renders only when the approved
+          source data for it actually exists. No section here is a
+          placeholder; a product with none of these fields populated
+          (all 8, today, apart from Kamalahar's evidence link) simply
+          skips straight from the hero to Related Products below. */}
+      {(product.ingredients?.length || product.usage || product.packSizes?.length || product.evidenceLinked) ? (
+        <section className={styles.infoSections} aria-label="Product information">
+          {product.ingredients && product.ingredients.length > 0 ? (
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>Formulation</h2>
+              <ul className={styles.infoList}>
+                {product.ingredients.map((ing) => (
+                  <li key={ing}>{ing}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {product.usage ? (
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>How to Use</h2>
+              <p className={styles.infoText}>{product.usage}</p>
+            </div>
+          ) : null}
+
+          {product.packSizes && product.packSizes.length > 0 ? (
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>Pack &amp; Size</h2>
+              <ul className={styles.infoList}>
+                {product.packSizes.map((size) => (
+                  <li key={size}>{size}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {product.evidenceLinked ? (
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>Science &amp; Evidence</h2>
+              <p className={styles.infoText}>
+                Per Khatore&apos;s heritage record, {product.name} is the formulation named in the
+                company&apos;s published clinical trial program.
+              </p>
+              <Link href="/science" className={styles.infoLink}>
+                View the clinical record →
+              </Link>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {related.length > 0 ? (
         <section className={styles.related} aria-label="Related products">

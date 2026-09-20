@@ -61,6 +61,21 @@
 .cta:hover {
   background: var(--blue-mid);
 }
+.cartBtn {
+  margin-left: -0.5rem;
+}
+.searchBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-mid);
+  flex-shrink: 0;
+}
+.searchBtn:hover {
+  color: var(--ink);
+}
 
 .burger {
   display: none;
@@ -94,7 +109,9 @@
 
 @media (max-width: 860px) {
   .links,
-  .cta {
+  .cta,
+  .cartBtn,
+  .searchBtn {
     display: none;
   }
   .burger {
@@ -141,5 +158,20 @@
     padding: 0.9rem 1.6rem;
     font-size: 0.85rem;
     min-height: 44px;
+  }
+  .mobileUtilityRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+  .mobileCartBtn,
+  .mobileSearchBtn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-mid);
   }
 }

@@ -1,10 +1,23 @@
 /**
- * Product data model (Master Build Directive, Section 13).
+ * Product data model (Master Build Directive, Section 13; extended for
+ * the Commerce Foundation pass).
  * Modular objects, not hardcoded per-page markup — future fields
  * (ingredients, benefits, pack sizes, checkout_url, ...) are typed as
  * optional so they can be populated later without a schema change,
  * and are only filled in here where approved source data exists.
  */
+
+/** Content-approval axis — has Khatore signed off the copy shown for this product. */
+export type ContentStatus = 'approved' | 'pending-description';
+
+/**
+ * Commerce-availability axis — deliberately SEPARATE from ContentStatus.
+ * A product's description can be pending Khatore's approval while the
+ * product is still genuinely purchasable through the live Magento
+ * store (that's the real, current state of all 8 products here) — the
+ * two facts don't imply each other, so they aren't the same field.
+ */
+export type PurchaseState = 'BUY_NOW' | 'ENQUIRE' | 'UNAVAILABLE';
 
 export interface Product {
   productId: string;
@@ -15,18 +28,49 @@ export interface Product {
   image: string;
   /** Undefined, not invented, where no approved description exists yet — see status. */
   description?: string;
-  status: 'approved' | 'pending-description';
+  status: ContentStatus;
   price?: { amount: number; currency: 'USD' };
   priceNote?: string;
   /** External Magento product page — the only purchase path today (Section 14). */
   checkoutUrl: string;
+  /**
+   * Explicit override for PurchaseState, only when Khatore has actually
+   * said so (e.g. a real discontinuation or an enquire-only line). Leave
+   * undefined for every product here — none of the 8 have such an
+   * instruction on file, so all resolve via getPurchaseState()'s default
+   * (real checkoutUrl present -> BUY_NOW) instead of a guess.
+   */
+  purchaseStateOverride?: PurchaseState;
   // Reserved for later, populated only when approved data exists:
   sku?: string;
   ingredients?: string[];
   benefits?: string[];
+  usage?: string;
   packSizes?: string[];
   availability?: 'in-stock' | 'out-of-stock';
+  /**
+   * Set only where an already-approved source (e.g. the Heritage page's
+   * own mission statement, which explicitly names Kamalahar as the
+   * subject of the clinical trial program) ties this product to
+   * Khatore's published clinical evidence. Never inferred from a study's
+   * subject matter alone — that would be an efficacy claim by visual
+   * association, which is exactly what this field must not create.
+   */
+  evidenceLinked?: boolean;
   metadata?: Record<string, unknown>;
+}
+
+/**
+ * Purchase state, derived only from fields that already exist on the
+ * product — never a separate guess. `purchaseStateOverride` wins when
+ * Khatore has actually said so; otherwise a real `checkoutUrl` means
+ * BUY_NOW (today's real, live purchase path for all 8 products), and
+ * its absence means ENQUIRE — there is no UNAVAILABLE case in the
+ * current catalogue, only in the type, for whenever one is needed.
+ */
+export function getPurchaseState(product: Product): PurchaseState {
+  if (product.purchaseStateOverride) return product.purchaseStateOverride;
+  return product.checkoutUrl ? 'BUY_NOW' : 'ENQUIRE';
 }
 
 export const PRODUCTS: Product[] = [
@@ -43,6 +87,10 @@ export const PRODUCTS: Product[] = [
     price: { amount: 399, currency: 'USD' },
     priceNote: 'Full 6-month course',
     checkoutUrl: 'https://www.khatorepharma.com/products/kamalahar.html',
+    // The Heritage page's own approved mission statement explicitly
+    // names Kamalahar as the subject of the clinical trial program —
+    // an already-published association, not an inference from this pass.
+    evidenceLinked: true,
   },
   {
     productId: 'k-mens',
