@@ -243,16 +243,19 @@
 
 /* ============================================================
    THE ARCHIVE (visual teaser, homepage only)
-   Sits in the same continuous dark passage between Origin's ink-ending
-   gradient tail and Brand Film's ink-starting top — solid ink, no
-   gradient of its own needed. Background lives on the outer section
-   (full-bleed); the grid/heading carry their own max-width so wide
-   viewports don't get a boxed sidebar (see .worldChapter/.productsChapter
-   for the same split pattern).
+   Starts where Origin's gradient left off (ink); now that Brand Film
+   sits before Hero->Origin instead of after Archive (narrative
+   sequence: Hero -> Brand Film -> Origin/Archive -> Bhui Amla), this
+   chapter carries its own ink->paper tail to hand off seamlessly to
+   the Bhui Amla chapter's paper start — the same tail-fade pattern
+   used by .origin/.scienceChapter. Background lives on the outer
+   section (full-bleed); the grid/heading carry their own max-width so
+   wide viewports don't get a boxed sidebar (see .worldChapter/
+   .productsChapter for the same split pattern).
 ============================================================ */
 .archiveChapter {
-  background: var(--ink);
-  padding: 5rem 2.5rem 6rem;
+  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 78%, var(--paper) 100%);
+  padding: 5rem 2.5rem 9rem;
   text-align: center;
 }
 .archiveHead {
@@ -273,15 +276,23 @@
 }
 
 /* ============================================================
-   03 — BRAND FILM (full-bleed cinematic)
-   Starts where Origin's gradient left off (ink); a short gradient
-   tail below the frame fades it back to paper before the plant
-   chapter begins, so the video reads as "the story continuing"
-   rather than a boxed media card.
+   02 — OUR STORY (Brand Film, full-bleed cinematic)
+   Sits directly after the Hero (approved narrative order: Hero ->
+   Brand Video -> Heritage/Origin -> Bhui Amla -> ...), so both its
+   neighbors are paper-toned at the seam — a paper->ink->paper "dip"
+   instead of the old one-directional ink->paper tail, so the cinematic
+   moment reads as a deliberate dark beat inside the otherwise light
+   opening rather than a hard-cut video block.
 ============================================================ */
 .brandFilm {
-  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 78%, var(--paper) 100%);
-  padding-bottom: 7rem;
+  background: linear-gradient(
+    180deg,
+    var(--paper) 0%,
+    var(--ink) 10%,
+    var(--ink) 88%,
+    var(--paper) 100%
+  );
+  padding: 4rem 0 7rem;
 }
 
 /* ============================================================

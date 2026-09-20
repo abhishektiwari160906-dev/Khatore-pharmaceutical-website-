@@ -67,7 +67,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 02 — ORIGIN */}
+      {/* 02 — OUR STORY (Brand Film) — placed immediately after the hero
+          per the approved narrative sequence (hero stays a quiet editorial
+          opening; this is the first deliberate cinematic beat, "now let
+          Khatore tell its own story," before the visitor is taken back
+          into 1984/heritage). */}
+      <section className={styles.brandFilm} aria-label="Our story — brand film">
+        <VideoBlock
+          id="brand"
+          eyebrow="Our Story"
+          heading="Khatore Pharmaceuticals"
+          label="Brand Film"
+          dark
+        />
+      </section>
+
+      {/* 03 — ORIGIN */}
       <section className={styles.origin} aria-label="Origin">
         <Reveal as="span" className={styles.originGhost} delay={1}>
           {HERITAGE_FOUNDING_YEAR}
@@ -95,17 +110,6 @@ export default function HomePage() {
         <Link href="/heritage" className={styles.textLinkLight}>
           Explore the story →
         </Link>
-      </section>
-
-      {/* 03 — OUR STORY (Brand Film) */}
-      <section className={styles.brandFilm} aria-label="Our story — brand film">
-        <VideoBlock
-          id="brand"
-          eyebrow="Our Story"
-          heading="Khatore Pharmaceuticals"
-          label="Brand Film"
-          dark
-        />
       </section>
 
       {/* 04 — FROM PLANT TO PRODUCT */}
