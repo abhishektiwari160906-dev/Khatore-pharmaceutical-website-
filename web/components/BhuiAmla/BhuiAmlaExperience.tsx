@@ -573,13 +573,11 @@ export function BhuiAmlaExperience() {
             &quot;Bhui Amla&quot; — literally ground amla — carries its seed capsules beneath each leaf, close to
             the earth it grows from. One of the botanicals in Khatore&apos;s traditional formulation lineage.
           </p>
-          <div className={styles.chapterLabels}>
-            <span>The Plant</span>
-            <span className={styles.chapterSep} aria-hidden="true" />
-            <span>The Process</span>
-            <span className={styles.chapterSep} aria-hidden="true" />
-            <span>The Product</span>
-          </div>
+          <ol className={styles.stepNav}>
+            <li className={styles.stepNavItem}>The Plant</li>
+            <li className={styles.stepNavItem}>The Process</li>
+            <li className={styles.stepNavItem}>The Product</li>
+          </ol>
         </div>
       </div>
 

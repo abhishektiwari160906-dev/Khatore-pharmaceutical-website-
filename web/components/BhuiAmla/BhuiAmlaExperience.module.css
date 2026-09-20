@@ -1,7 +1,6 @@
 .botanical {
   position: relative;
   background: var(--paper);
-  border-top: 1px solid var(--rule);
 }
 
 .scene {
@@ -50,22 +49,63 @@
   max-width: 52ch;
   margin: 0 auto 2rem;
 }
-.chapterLabels {
+/* Visual step-nav: PLANT -> PROCESS -> PRODUCT as a connected line of
+   dots rather than a plain text row, so the sequence reads at a
+   glance. Purely presentational (the growth engine below is untouched
+   and isn't wired to these steps' scroll position). */
+.stepNav {
+  list-style: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.9rem;
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted-lt);
+  counter-reset: step;
 }
-.chapterSep {
-  width: 3px;
-  height: 3px;
+.stepNavItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  padding: 0 1.6rem;
+}
+.stepNavItem::before {
+  counter-increment: step;
+  content: counter(step);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
+  border: 1px solid var(--green);
+  color: var(--green-dk);
+  font-size: 0.56rem;
+}
+.stepNavItem:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -0.1rem;
+  top: 50%;
+  width: 1.4rem;
+  height: 1px;
   background: var(--rule);
+}
+@media (max-width: 560px) {
+  .stepNav {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .stepNavItem {
+    padding: 0;
+  }
+  .stepNavItem:not(:last-child)::after {
+    display: none;
+  }
 }
 
 .srOnly {

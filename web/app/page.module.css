@@ -55,6 +55,8 @@
   padding-bottom: 2px;
 }
 .textLinkLight {
+  position: relative;
+  z-index: 1;
   display: inline-block;
   font-family: var(--mono);
   font-size: 0.68rem;
@@ -186,17 +188,20 @@
 
 /* ============================================================
    02 — ORIGIN
+   Fades paper -> ink across its own height so it flows straight
+   into the Brand Film chapter with no hard seam.
 ============================================================ */
 .origin {
   position: relative;
-  min-height: 70svh;
+  min-height: 78svh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 4rem 2.5rem;
+  padding: 4rem 2.5rem 9rem;
   overflow: hidden;
+  background: linear-gradient(180deg, var(--paper) 0%, var(--paper) 68%, var(--ink) 100%);
 }
 .originGhost {
   display: block;
@@ -208,6 +213,20 @@
   -webkit-text-stroke: 1px var(--rule);
   letter-spacing: -0.04em;
   user-select: none;
+  /* Monumental emergence: a deliberate exception to the shared .rv
+     fade (opacity/translateY only) — this is the site's origin point,
+     so it also scales in from slightly smaller, reinforcing "this is
+     where the world begins" rather than just another reveal. */
+  transform: translateY(20px) scale(0.92) !important;
+  transition: opacity 1.2s var(--ease), transform 1.2s var(--ease) !important;
+}
+.originGhost:global(.on) {
+  transform: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .originGhost {
+    transform: none !important;
+  }
 }
 .originText {
   margin-top: -3rem;
@@ -224,21 +243,27 @@
 
 /* ============================================================
    03 — BRAND FILM (full-bleed cinematic)
+   Starts where Origin's gradient left off (ink); a short gradient
+   tail below the frame fades it back to paper before the plant
+   chapter begins, so the video reads as "the story continuing"
+   rather than a boxed media card.
 ============================================================ */
 .brandFilm {
-  background: var(--ink);
+  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 78%, var(--paper) 100%);
+  padding-bottom: 7rem;
 }
 
 /* ============================================================
    04 — FROM PLANT TO PRODUCT
 ============================================================ */
 .plantToProduct {
-  background: var(--paper);
+  background: linear-gradient(180deg, var(--paper) 0%, var(--paper) 88%, var(--ink) 100%);
+  padding-bottom: 7rem;
 }
 .herbSection {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 5rem 2.5rem;
+  padding: 5rem 2.5rem 0;
   display: grid;
   grid-template-columns: minmax(200px, 320px) 1fr;
   gap: 3.5rem;
@@ -252,17 +277,38 @@
 
 /* ============================================================
    05 — SCIENCE
+   A deliberate tonal shift from the plant chapter's warmth into a
+   precise, measured environment — fine grid instead of botanical
+   softness — while staying on the same dark→light rhythm as every
+   other chapter boundary.
 ============================================================ */
 .scienceChapter {
-  background: var(--ink);
-  padding: 5rem 2.5rem;
+  position: relative;
+  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 82%, var(--paper) 100%);
+  padding: 6rem 2.5rem 9rem;
   text-align: center;
+  overflow: hidden;
+}
+.scienceChapter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(180deg, black 0%, black 70%, transparent 100%);
+  pointer-events: none;
 }
 .scienceHead {
+  position: relative;
+  z-index: 1;
   max-width: 700px;
   margin: 0 auto;
 }
 .evidenceGrid {
+  position: relative;
+  z-index: 1;
   max-width: 1100px;
   margin: 0 auto 2.5rem;
   display: grid;
@@ -312,11 +358,17 @@
 
 /* ============================================================
    06 — PRODUCTS
+   Full-bleed wrapper carries the gradient (paper, matching Science's
+   tail, settling to white); .productsInner holds the max-width
+   layout so the background isn't boxed on wide viewports.
 ============================================================ */
 .productsChapter {
+  background: linear-gradient(180deg, var(--paper) 0%, white 22%);
+}
+.productsInner {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 5rem 2.5rem;
+  padding: 6rem 2.5rem 5rem;
 }
 .productsHead {
   margin-bottom: 2.5rem;
@@ -364,27 +416,66 @@
   }
 }
 
+/* Exhibition, not e-commerce: a quiet asymmetric rhythm across a
+   6-column grid instead of 7 identical cells. Spans are set per item
+   (not a generic nth-child modulo) specifically so every row sums to
+   exactly 6 — an auto-fill/modulo pattern left a visible empty cell
+   here previously. Still editorial, not implying any of the 7 is more
+   "approved" than the others; the varied scale is decorative only. */
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 1px;
   background: var(--rule);
   border: 1px solid var(--rule);
   margin-bottom: 2rem;
 }
+.productTileWrap:nth-child(1) {
+  grid-column: span 4;
+}
+.productTileWrap:nth-child(2) {
+  grid-column: span 2;
+}
+.productTileWrap:nth-child(3) {
+  grid-column: span 2;
+}
+.productTileWrap:nth-child(4) {
+  grid-column: span 4;
+}
+.productTileWrap:nth-child(5) {
+  grid-column: span 4;
+}
+.productTileWrap:nth-child(6) {
+  grid-column: span 2;
+}
+.productTileWrap:nth-child(7) {
+  grid-column: span 6;
+}
 .productTile {
   background: white;
-  padding: 2rem 1.25rem;
+  padding: 2.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  gap: 1rem;
   text-align: center;
-  transition: background 0.2s;
+  transition: background 0.25s, transform 0.25s var(--ease);
   height: 100%;
 }
 .productTile:hover {
   background: var(--paper);
+  transform: translateY(-2px);
+}
+.productTileWrap:nth-child(1) .productTile,
+.productTileWrap:nth-child(4) .productTile,
+.productTileWrap:nth-child(5) .productTile {
+  padding: 3rem 1.5rem;
+}
+.productTileWrap:nth-child(7) .productTile {
+  flex-direction: row;
+  gap: 2rem;
+  padding: 2rem 2.5rem;
 }
 .productTileImg {
   width: 100px;
@@ -393,6 +484,12 @@
   align-items: center;
   justify-content: center;
 }
+.productTileWrap:nth-child(1) .productTileImg,
+.productTileWrap:nth-child(4) .productTileImg,
+.productTileWrap:nth-child(5) .productTileImg {
+  width: 130px;
+  height: 130px;
+}
 .productTileName {
   font-family: var(--sans);
   font-size: 0.85rem;
@@ -400,21 +497,59 @@
 }
 @media (max-width: 860px) {
   .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .productTileWrap:nth-child(1),
+  .productTileWrap:nth-child(4),
+  .productTileWrap:nth-child(5) {
+    grid-column: span 2;
+  }
+  .productTileWrap:nth-child(2),
+  .productTileWrap:nth-child(3),
+  .productTileWrap:nth-child(6) {
+    grid-column: span 2;
+  }
+  .productTileWrap:nth-child(7) {
+    grid-column: span 4;
   }
 }
 @media (max-width: 480px) {
   .productsGrid {
     grid-template-columns: 1fr;
   }
+  .productTileWrap {
+    grid-column: span 1 !important;
+  }
+  .productTileWrap:nth-child(7) .productTile {
+    flex-direction: column;
+  }
 }
 
 /* ============================================================
    07 — THE WORLD
+   Full-bleed wrapper (fades in from Products' white, fades out to
+   Connect's white); .worldInner holds the constrained grid layout.
+   Data hierarchy stays: the approved region text renders first in
+   markup, the decorative globe second — never the other way round.
 ============================================================ */
 .worldChapter {
-  background: var(--ink);
-  padding: 5rem 2.5rem;
+  position: relative;
+  background: linear-gradient(180deg, white 0%, var(--ink) 14%, var(--ink) 86%, white 100%);
+  overflow: hidden;
+}
+.worldChapter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 40%, transparent 100%);
+}
+.worldInner {
+  position: relative;
+  z-index: 1;
+  padding: 7rem 2.5rem;
   max-width: 1300px;
   margin: 0 auto;
   display: grid;
@@ -505,7 +640,7 @@
   color: rgba(255, 255, 255, 0.35);
 }
 @media (max-width: 860px) {
-  .worldChapter {
+  .worldInner {
     grid-template-columns: 1fr;
     text-align: center;
   }
@@ -521,22 +656,24 @@
 
 /* ============================================================
    08 — CONNECT
+   The closing bookend: same monumental register as the Hero's
+   "Khatore" wordmark, deliberately restrained everywhere else.
 ============================================================ */
 .connect {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 6rem 2.5rem;
+  padding: 7rem 2.5rem 8rem;
   text-align: center;
+}
+.connectInner {
+  max-width: 700px;
+  margin: 0 auto;
 }
 .connectHeading {
   font-family: var(--sans);
   font-weight: 200;
-  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
-  margin-bottom: 2rem;
-}
-.connectHeading strong {
-  font-weight: 400;
-  color: var(--blue);
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 2.5rem;
 }
 .connectActions {
   display: flex;
