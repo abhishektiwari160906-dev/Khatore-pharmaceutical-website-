@@ -142,7 +142,18 @@
 .heroSince strong {
   font-style: normal;
   font-weight: 500;
-  color: var(--blue);
+  background: linear-gradient(100deg, #a9782f 15%, #f4d06f 40%, #fff6da 50%, #f4d06f 60%, #a9782f 85%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 6px rgba(244, 208, 111, 0.35));
+  animation: originGoldShimmer 7s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroSince strong {
+    animation: none;
+  }
 }
 .heroCtas {
   display: flex;
@@ -209,10 +220,19 @@
   font-weight: 200;
   font-size: clamp(8rem, 26vw, 22rem);
   line-height: 1;
-  color: var(--off);
-  -webkit-text-stroke: 1px var(--rule);
   letter-spacing: -0.04em;
   user-select: none;
+  /* Gold-sparkle treatment on the founding year — a slow shimmer across
+     a gold gradient fill, restrained (no confetti/particle effects),
+     matching the site's premium/editorial register. */
+  background: linear-gradient(100deg, #a9782f 15%, #f4d06f 35%, #fff6da 50%, #f4d06f 65%, #a9782f 85%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(169, 120, 47, 0.4);
+  filter: drop-shadow(0 0 22px rgba(244, 208, 111, 0.22));
+  animation: originGoldShimmer 7s ease-in-out infinite;
   /* Monumental emergence: a deliberate exception to the shared .rv
      fade (opacity/translateY only) — this is the site's origin point,
      so it also scales in from slightly smaller, reinforcing "this is
@@ -223,9 +243,19 @@
 .originGhost:global(.on) {
   transform: none !important;
 }
+@keyframes originGoldShimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .originGhost {
     transform: none !important;
+    animation: none;
   }
 }
 .originText {
@@ -618,6 +648,80 @@
   .productTileWrap:nth-child(7) .productTile {
     flex-direction: column;
   }
+}
+
+/* ============================================================
+   TESTIMONIALS
+   Sits on white, continuing straight off Products' white background.
+   Same eyebrow/heading/card-grid vocabulary as Shop by Concern —
+   deliberately quiet, since every card is an honest content
+   placeholder (see data/testimonials.ts), not a finished claim.
+============================================================ */
+.testimonialsChapter {
+  background: white;
+  padding: 5rem 2.5rem 6rem;
+  text-align: center;
+}
+.testimonialsHead {
+  max-width: 620px;
+  margin: 0 auto 3rem;
+}
+.testimonialGrid {
+  max-width: 1100px;
+  margin: 0 auto 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  text-align: left;
+}
+.testimonialCard {
+  background: var(--paper);
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.testimonialMark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 2.4rem;
+  line-height: 0.6;
+  color: var(--green-lt);
+}
+.testimonialText {
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: var(--muted);
+  font-style: italic;
+}
+.testimonialFoot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+.testimonialName {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.testimonialTag {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
+}
+.testimonialPending {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+  margin-top: 0.15rem;
 }
 
 /* ============================================================

@@ -14,6 +14,7 @@ import { CLEARED_CLINICAL_TRIALS } from '@/data/science';
 import { PRODUCTS } from '@/data/products';
 import { CONCERNS } from '@/data/concerns';
 import { GLOBAL_STATS, GLOBAL_PRESENCE } from '@/data/global';
+import { TESTIMONIAL_PLACEHOLDERS, TESTIMONIALS_ARCHIVE_URL } from '@/data/testimonials';
 import styles from './page.module.css';
 
 const BhuiAmlaExperience = dynamic(
@@ -222,7 +223,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 10 — GLOBAL PRESENCE */}
+      {/* 10 — TESTIMONIALS — the approved v5/v6 reference design's own
+          Testimonials section is itself an honest placeholder (bracketed
+          "to be populated" copy, "Awaiting Khatore content approval" on
+          every card); that pattern is carried forward verbatim here —
+          no patient content is invented. See data/testimonials.ts. */}
+      <section className={styles.testimonialsChapter} aria-label="Patient testimonials">
+        <Reveal as="div" className={styles.testimonialsHead}>
+          <span className={styles.eyebrow}>Patient Archive</span>
+          <h2 className={styles.chapterHeading}>Real experiences, honestly shared.</h2>
+          <p className={styles.chapterSub}>
+            Many people navigating liver health look for perspectives beyond routine care. These are patient
+            accounts — published only as Khatore confirms and approves each one.
+          </p>
+        </Reveal>
+        <Reveal as="div" className={styles.testimonialGrid}>
+          {TESTIMONIAL_PLACEHOLDERS.map((t) => (
+            <div key={t.id} className={styles.testimonialCard}>
+              <span className={styles.testimonialMark} aria-hidden="true">&ldquo;</span>
+              <p className={styles.testimonialText}>{t.text}</p>
+              <div className={styles.testimonialFoot}>
+                <span className={styles.testimonialName}>{t.name}</span>
+                <span className={styles.testimonialTag}>{t.tag}</span>
+                <span className={styles.testimonialPending}>Awaiting Khatore content approval</span>
+              </div>
+            </div>
+          ))}
+        </Reveal>
+        <a href={TESTIMONIALS_ARCHIVE_URL} target="_blank" rel="noopener" className={styles.textLink}>
+          Full testimonial archive at khatorepharma.com →
+        </a>
+      </section>
+
+      {/* 11 — GLOBAL PRESENCE */}
       <section className={styles.worldChapter} aria-label="Global presence">
         <div className={styles.worldInner}>
           <Reveal as="div" className={styles.worldText}>
@@ -265,7 +298,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 11 — ENQUIRY / CONNECT */}
+      {/* 12 — ENQUIRY / CONNECT */}
       <section className={styles.connect} aria-label="Begin your enquiry">
         <Reveal as="div" className={styles.connectInner}>
           <span className={styles.eyebrow}>The Journey Continues</span>

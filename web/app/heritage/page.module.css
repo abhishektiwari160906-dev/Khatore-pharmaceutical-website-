@@ -14,9 +14,31 @@
   font-weight: 200;
   line-height: 0.85;
   letter-spacing: -0.04em;
-  color: var(--white);
-  -webkit-text-stroke: 1px var(--rule);
   margin-bottom: -0.08em;
+  /* Gold-sparkle treatment on the founding year — matches the
+     homepage's origin numeral (app/page.module.css .originGhost). */
+  background: linear-gradient(100deg, #a9782f 15%, #f4d06f 35%, #fff6da 50%, #f4d06f 65%, #a9782f 85%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(169, 120, 47, 0.4);
+  filter: drop-shadow(0 0 22px rgba(244, 208, 111, 0.22));
+  animation: yearGoldShimmer 7s ease-in-out infinite;
+}
+@keyframes yearGoldShimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .yearBig {
+    animation: none;
+  }
 }
 .yearLabel {
   position: absolute;

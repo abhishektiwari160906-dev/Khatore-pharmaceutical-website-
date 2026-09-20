@@ -18,6 +18,23 @@ export function Footer() {
             Dedicated in service of mankind. Efficacious, safe and economic Ayurvedic products. Est. 1984,
             Barbil, Orissa. GMP Certified.
           </p>
+          <ul className={styles.social}>
+            <li>
+              <a href="https://www.facebook.com/liverhealthy/" target="_blank" rel="noopener">
+                Facebook
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/khatorepharma" target="_blank" rel="noopener">
+                Twitter
+              </a>
+            </li>
+            <li>
+              <a href="https://www.linkedin.com/company/khatore-pharmaceuticals-p-ltd/about/" target="_blank" rel="noopener">
+                LinkedIn
+              </a>
+            </li>
+          </ul>
         </div>
         <div>
           <span className={styles.colTitle}>Products</span>
@@ -45,6 +62,21 @@ export function Footer() {
               </a>
             </li>
             <li>
+              <a href="https://www.khatorepharma.com/testimonials" target="_blank" rel="noopener">
+                Testimonials
+              </a>
+            </li>
+            <li>
+              <a href="https://www.khatorepharma.com/wellness/kamalahar" target="_blank" rel="noopener">
+                Wellness
+              </a>
+            </li>
+            <li>
+              <a href="https://www.khatorepharma.com/blog" target="_blank" rel="noopener">
+                Blog &amp; Insights
+              </a>
+            </li>
+            <li>
               <a href="https://www.khatorepharma.com/faq" target="_blank" rel="noopener">
                 FAQ
               </a>
@@ -56,6 +88,25 @@ export function Footer() {
           <ul className={styles.links}>
             <li>
               <a href="mailto:support@khatorepharma.com">Email Khatore</a>
+            </li>
+            <li>
+              <a href="https://api.whatsapp.com/send?phone=919665110525&text=Hi" target="_blank" rel="noopener">
+                WhatsApp US/UK/EU
+              </a>
+            </li>
+            <li>
+              <a href="https://api.whatsapp.com/send?phone=918709206320&text=Hi" target="_blank" rel="noopener">
+                WhatsApp India/World
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.amazon.in/stores/Khatore+Pharmaceutical/page/2067E8F4-5E4D-49A3-B405-20BCA2B42D0C"
+                target="_blank"
+                rel="noopener"
+              >
+                Amazon India
+              </a>
             </li>
             <li>
               <a href="https://www.khatorepharma.com/contactus" target="_blank" rel="noopener">

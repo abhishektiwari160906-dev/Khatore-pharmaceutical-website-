@@ -22,6 +22,21 @@
   color: rgba(255, 255, 255, 0.28);
   max-width: 28ch;
 }
+.social {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.social a {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.22);
+  transition: color 0.2s;
+}
+.social a:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
 .colTitle {
   font-family: var(--mono);
   font-size: 0.52rem;
