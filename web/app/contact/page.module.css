@@ -39,7 +39,7 @@
 .waBtn {
   display: inline-block;
   padding: 0.65rem 1.2rem;
-  border: 1px solid rgba(61, 120, 53, 0.3);
+  border: 1px solid rgba(21, 149, 82, 0.3);
   color: var(--green-dk);
   font-size: 0.76rem;
   transition: background 0.2s;

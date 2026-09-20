@@ -51,7 +51,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   color: var(--blue);
-  border-bottom: 1px solid rgba(27, 60, 135, 0.3);
+  border-bottom: 1px solid rgba(6, 26, 112, 0.3);
   padding-bottom: 2px;
 }
 .textLinkLight {
@@ -62,7 +62,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   color: var(--green-lt);
-  border-bottom: 1px solid rgba(79, 149, 67, 0.4);
+  border-bottom: 1px solid rgba(27, 186, 99, 0.4);
   padding-bottom: 2px;
 }
 .ctaPrimary,
@@ -481,7 +481,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--blue);
-  border: 1px solid rgba(27, 60, 135, 0.25);
+  border: 1px solid rgba(6, 26, 112, 0.25);
   background: var(--blue-pale);
   padding: 0.3rem 0.7rem;
   margin-bottom: 1rem;

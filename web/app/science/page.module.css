@@ -152,7 +152,7 @@
 }
 .compliance a {
   color: var(--blue);
-  border-bottom: 1px solid rgba(27, 60, 135, 0.3);
+  border-bottom: 1px solid rgba(6, 26, 112, 0.3);
 }
 
 @media (max-width: 768px) {

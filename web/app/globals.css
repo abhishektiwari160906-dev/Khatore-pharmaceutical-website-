@@ -1,15 +1,19 @@
-/* Design tokens ported verbatim from the approved v5 art direction
-   (khatore-homepage-v6-1.html) — same brand colors, same type system.
-   Not a new visual language. */
+/* Design tokens: same type system and structure as the approved v5 art
+   direction (khatore-homepage-v6-1.html). Brand blue/green corrected to
+   the approved palette (Navy #061A70 / Green #159552); the derived
+   dark/mid/pale shades below are recalculated from that new base via
+   the same relative HSL relationships the old derived shades had to
+   the old base — not a blind hex swap — so hover/emphasis/tint states
+   stay visually coherent with each other. Not a new visual language. */
 :root {
-  --blue: #1b3c87;
-  --blue-dark: #12296b;
-  --blue-mid: #2a50a8;
-  --blue-pale: #eef2fa;
-  --green: #3d7835;
-  --green-dk: #2b5625;
-  --green-lt: #4f9543;
-  --green-pale: #ebf3e8;
+  --blue: #061a70;
+  --blue-dark: #020d4f;
+  --blue-mid: #0e2798;
+  --blue-pale: #eef0fa;
+  --green: #159552;
+  --green-dk: #0e6a3a;
+  --green-lt: #1bba63;
+  --green-pale: #e8f3ed;
   --ink: #0f1724;
   --ink-mid: #2c3b5a;
   --paper: #f5f7fc;

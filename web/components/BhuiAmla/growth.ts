@@ -34,12 +34,17 @@ export const smooth01 = (a: number, b: number, x: number) => {
 };
 export const degToRad = THREE.MathUtils.degToRad;
 
-export const GREEN_DK = new THREE.Color('#2B5625');
-export const GREEN = new THREE.Color('#3D7835');
-export const GREEN_LT = new THREE.Color('#4F9543');
-export const LEAF_TONES = [new THREE.Color('#2B5625'), new THREE.Color('#3D7835'), new THREE.Color('#4F9543')];
-export const CAPSULE_TONE = new THREE.Color('#2B5625');
-const ROOT_TONE = new THREE.Color('#2B5625');
+// Brand green corrected to #159552 (was #3D7835) — these three tones
+// are the same --green-dk/--green/--green-lt relationship as the CSS
+// tokens in globals.css, recalculated from the new base the same way,
+// so the plant's own material colors stay coherent with the rest of
+// the UI. Botanical generation logic (below) is untouched.
+export const GREEN_DK = new THREE.Color('#0E6A3A');
+export const GREEN = new THREE.Color('#159552');
+export const GREEN_LT = new THREE.Color('#1BBA63');
+export const LEAF_TONES = [new THREE.Color('#0E6A3A'), new THREE.Color('#159552'), new THREE.Color('#1BBA63')];
+export const CAPSULE_TONE = new THREE.Color('#0E6A3A');
+const ROOT_TONE = new THREE.Color('#0E6A3A');
 
 export interface GrowthUnit {
   curve: THREE.CatmullRomCurve3;

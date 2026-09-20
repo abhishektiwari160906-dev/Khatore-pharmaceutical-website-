@@ -67,7 +67,7 @@ export function CinematicVideo({
           >
             <span className={styles.disc}>
               <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-                <path d="M6 4L16 10L6 16V4Z" fill="#1b3c87" />
+                <path d="M6 4L16 10L6 16V4Z" fill="#061a70" />
               </svg>
             </span>
           </button>

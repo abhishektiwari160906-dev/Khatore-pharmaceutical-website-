@@ -150,7 +150,7 @@ export function BhuiAmlaExperience() {
         roughness: 0.7,
         metalness: 0,
         side: THREE.DoubleSide,
-        emissive: new THREE.Color('#3D7835'),
+        emissive: new THREE.Color('#159552'),
         emissiveIntensity: 0.16,
       });
       const leafCount = plant.leaves.length;
@@ -541,7 +541,7 @@ export function BhuiAmlaExperience() {
         });
         plant.capsules.forEach((c) => {
           const p = toScreen(c.position);
-          ctx.fillStyle = '#2B5625';
+          ctx.fillStyle = '#0E6A3A';
           ctx.beginPath();
           ctx.arc(p.x, p.y, Math.max(1, 0.03 * scale), 0, Math.PI * 2);
           ctx.fill();
