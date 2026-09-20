@@ -4,6 +4,7 @@ import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { VideoBlock } from '@/components/VideoBlock';
 import { Reveal } from '@/components/Reveal';
+import { ArchivePhotoSlot } from '@/components/ArchivePhotoSlot';
 import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { HERITAGE_FOUNDING_YEAR } from '@/lib/config';
 import styles from './page.module.css';
@@ -51,6 +52,21 @@ export default function HeritagePage() {
             </p>
           </div>
         </Reveal>
+
+        <section className={styles.archiveSection} aria-label="Photographic archive">
+          <Reveal as="div" className={styles.archiveHead}>
+            <span className={styles.archiveEyebrow}>The Archive</span>
+            <p className={styles.archiveNote}>
+              Genuine Khatore photography from each period below will be added here as it is
+              located and cleared for use — never a recreated or stock image in its place.
+            </p>
+          </Reveal>
+          <Reveal as="div" className={styles.archiveGrid}>
+            {HERITAGE_ENTRIES.map((entry) => (
+              <ArchivePhotoSlot key={entry.title} number={entry.date} caption={entry.title} />
+            ))}
+          </Reveal>
+        </section>
 
         <section className={styles.register} aria-label="Heritage timeline">
           {HERITAGE_ENTRIES.map((entry, i) => (

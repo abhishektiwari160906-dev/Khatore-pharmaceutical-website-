@@ -7,10 +7,12 @@ import { Footer } from '@/components/Footer';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { VideoBlock } from '@/components/VideoBlock';
 import { Reveal } from '@/components/Reveal';
+import { ArchivePhotoSlot } from '@/components/ArchivePhotoSlot';
 import { HERITAGE_FOUNDING_YEAR } from '@/lib/config';
 import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { CLEARED_CLINICAL_TRIALS } from '@/data/science';
 import { PRODUCTS } from '@/data/products';
+import { CONCERNS } from '@/data/concerns';
 import { GLOBAL_STATS, GLOBAL_PRESENCE } from '@/data/global';
 import styles from './page.module.css';
 
@@ -79,6 +81,22 @@ export default function HomePage() {
         </Reveal>
       </section>
 
+      {/* THE ARCHIVE — visual teaser only; the real story lives on /heritage */}
+      <section className={styles.archiveChapter} aria-label="The Archive">
+        <Reveal as="div" className={styles.archiveHead}>
+          <span className={styles.eyebrowLight}>The Archive</span>
+          <h2 className={styles.chapterHeadingLight}>Our story, in frames.</h2>
+        </Reveal>
+        <Reveal as="div" className={styles.archiveGrid}>
+          <ArchivePhotoSlot number="01" caption="Open Heritage" href="/heritage" large />
+          <ArchivePhotoSlot number="02" caption="1984 · Origin" href="/heritage" />
+          <ArchivePhotoSlot number="03" caption="Archive · Detail" href="/heritage" />
+        </Reveal>
+        <Link href="/heritage" className={styles.textLinkLight}>
+          Explore the story →
+        </Link>
+      </section>
+
       {/* 03 — OUR STORY (Brand Film) */}
       <section className={styles.brandFilm} aria-label="Our story — brand film">
         <VideoBlock
@@ -101,9 +119,7 @@ export default function HomePage() {
           <Reveal className={styles.herbText} delay={1}>
             <span className={styles.eyebrow}>The Product</span>
             <h2 className={styles.chapterHeading}>From herb to habit.</h2>
-            <p className={styles.chapterSub}>
-              The same process, every batch — GMP-certified, no heavy metals.
-            </p>
+            <p className={styles.chapterSub}>GMP-certified. No heavy metals. Every batch.</p>
             <Link href="/heritage" className={styles.textLink}>
               See how it&apos;s made →
             </Link>
@@ -130,6 +146,37 @@ export default function HomePage() {
         <Link href="/science" className={styles.textLinkLight}>
           View the full clinical record →
         </Link>
+      </section>
+
+      {/* SHOP BY CONCERN — only categories backed by approved data;
+          see data/concerns.ts. Not a full taxonomy, and not filled out
+          to look complete — one real door plus the honest "see everything"
+          door. */}
+      <section className={styles.concernsChapter} aria-label="Shop by concern">
+        <Reveal as="div" className={styles.concernsHead}>
+          <span className={styles.eyebrow}>Shop by Concern</span>
+          <h2 className={styles.chapterHeading}>Find what you need.</h2>
+        </Reveal>
+        <Reveal as="div" className={styles.concernGrid}>
+          {CONCERNS.map((c) => (
+            <Link key={c.slug} href={`/concerns/${c.slug}`} className={styles.concernCard}>
+              <span className={styles.concernName}>
+                {c.cardLabel[0]}
+                <br />
+                {c.cardLabel[1]}
+              </span>
+              <span className={styles.concernArrow} aria-hidden="true">↗</span>
+            </Link>
+          ))}
+          <Link href="/products" className={styles.concernCard}>
+            <span className={styles.concernName}>
+              Explore
+              <br />
+              All
+            </span>
+            <span className={styles.concernArrow} aria-hidden="true">↗</span>
+          </Link>
+        </Reveal>
       </section>
 
       {/* 06 — PRODUCTS */}

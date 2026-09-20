@@ -1,0 +1,110 @@
+.masthead {
+  background: var(--green-dk);
+  padding: 6rem 2.5rem 5rem;
+  text-align: center;
+}
+.eyebrow {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 1.25rem;
+}
+.title {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  color: white;
+  line-height: 1.05;
+}
+
+.body {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 3.5rem 2.5rem 1rem;
+}
+.description {
+  font-size: 0.92rem;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+.products {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 2.5rem 1rem;
+}
+.productsHeading {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+.productCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  padding: 2rem 1rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  transition: background 0.2s;
+}
+.productCard:hover {
+  background: var(--green-pale);
+}
+.productImg {
+  display: flex;
+}
+.productName {
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--ink);
+}
+.productLink {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--green-dk);
+}
+
+.closing {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2.5rem 2.5rem 5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.textLink {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+  border-bottom: 1px solid rgba(27, 60, 135, 0.3);
+  padding-bottom: 2px;
+}
+.whatsapp {
+  border: 1px solid var(--green);
+  color: var(--green-dk);
+  padding: 0.7rem 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  transition: background 0.2s;
+}
+.whatsapp:hover {
+  background: var(--green-pale);
+}

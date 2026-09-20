@@ -83,6 +83,48 @@
     grid-template-columns: 1fr;
   }
 }
+.archiveSection {
+  background: var(--ink);
+  padding: 4rem 2.5rem 5rem;
+}
+.archiveHead {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+}
+.archiveEyebrow {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--green-lt);
+  margin-bottom: 0.75rem;
+}
+.archiveNote {
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 52ch;
+  font-style: italic;
+}
+.archiveGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+}
+@media (max-width: 900px) {
+  .archiveGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .archiveGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .register {
   max-width: 1200px;
   margin: 0 auto;

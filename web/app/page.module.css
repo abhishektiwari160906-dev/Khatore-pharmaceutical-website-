@@ -242,6 +242,37 @@
 }
 
 /* ============================================================
+   THE ARCHIVE (visual teaser, homepage only)
+   Sits in the same continuous dark passage between Origin's ink-ending
+   gradient tail and Brand Film's ink-starting top — solid ink, no
+   gradient of its own needed. Background lives on the outer section
+   (full-bleed); the grid/heading carry their own max-width so wide
+   viewports don't get a boxed sidebar (see .worldChapter/.productsChapter
+   for the same split pattern).
+============================================================ */
+.archiveChapter {
+  background: var(--ink);
+  padding: 5rem 2.5rem 6rem;
+  text-align: center;
+}
+.archiveHead {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.archiveGrid {
+  max-width: 1100px;
+  margin: 0 auto 2rem;
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr;
+  gap: 2px;
+}
+@media (max-width: 720px) {
+  .archiveGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
    03 — BRAND FILM (full-bleed cinematic)
    Starts where Origin's gradient left off (ink); a short gradient
    tail below the frame fades it back to paper before the plant
@@ -354,6 +385,59 @@
   .evidenceGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ============================================================
+   SHOP BY CONCERN
+   Sits in solid paper, continuing straight off Science's paper-ending
+   gradient tail. Only as many cards as CONCERNS has real entries for,
+   plus one static "Explore All" — never padded out with invented
+   categories to fill a grid.
+============================================================ */
+.concernsChapter {
+  background: var(--paper);
+  padding: 5rem 2.5rem 6rem;
+  text-align: center;
+}
+.concernsHead {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.concernGrid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.concernCard {
+  background: white;
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 160px;
+  transition: background 0.2s, transform 0.2s;
+}
+.concernCard:hover {
+  background: var(--green-pale);
+  transform: translateY(-2px);
+}
+.concernName {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.concernArrow {
+  font-family: var(--sans);
+  font-size: 1.2rem;
+  color: var(--green-dk);
 }
 
 /* ============================================================
