@@ -67,7 +67,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 02 — OUR STORY (Brand Film) — placed immediately after the hero
+      {/* 02 — BRAND FILM / OUR STORY — placed immediately after the hero
           per the approved narrative sequence (hero stays a quiet editorial
           opening; this is the first deliberate cinematic beat, "now let
           Khatore tell its own story," before the visitor is taken back
@@ -82,7 +82,7 @@ export default function HomePage() {
         />
       </section>
 
-      {/* 03 — ORIGIN */}
+      {/* 03 — HERITAGE / ORIGIN */}
       <section className={styles.origin} aria-label="Origin">
         <Reveal as="span" className={styles.originGhost} delay={1}>
           {HERITAGE_FOUNDING_YEAR}
@@ -96,7 +96,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* THE ARCHIVE — visual teaser only; the real story lives on /heritage */}
+      {/* 04 — ARCHIVE — visual teaser only; the real story lives on /heritage */}
       <section className={styles.archiveChapter} aria-label="The Archive">
         <Reveal as="div" className={styles.archiveHead}>
           <span className={styles.eyebrowLight}>The Archive</span>
@@ -112,10 +112,11 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* 04 — FROM PLANT TO PRODUCT */}
+      {/* 05 — BHUI AMLA */}
       <div className={styles.plantToProduct}>
         <BhuiAmlaExperience />
 
+        {/* 06 — HERB TO HABIT / PLANT-TO-PRODUCT */}
         <section className={styles.herbSection} aria-label="Herb to habit">
           <Reveal as="div" className={styles.herbVideo}>
             <VideoBlock id="reel4" caption="Herb to Habit" />
@@ -131,7 +132,7 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* 05 — SCIENCE */}
+      {/* 07 — SCIENCE */}
       <section className={styles.scienceChapter} aria-label="Science">
         <Reveal as="div" className={styles.scienceHead}>
           <span className={styles.eyebrowLight}>The Science</span>
@@ -152,7 +153,7 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* SHOP BY CONCERN — only categories backed by approved data;
+      {/* 08 — SHOP BY CONCERN — only categories backed by approved data;
           see data/concerns.ts. Not a full taxonomy, and not filled out
           to look complete — one real door plus the honest "see everything"
           door. */}
@@ -183,7 +184,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 06 — PRODUCTS */}
+      {/* 09 — PRODUCTS */}
       <section className={styles.productsChapter} aria-label="Products">
         <div className={styles.productsInner}>
           <Reveal as="div" className={styles.productsHead}>
@@ -221,7 +222,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 07 — THE WORLD */}
+      {/* 10 — GLOBAL PRESENCE */}
       <section className={styles.worldChapter} aria-label="Global presence">
         <div className={styles.worldInner}>
           <Reveal as="div" className={styles.worldText}>
@@ -264,7 +265,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 08 — CONNECT */}
+      {/* 11 — ENQUIRY / CONNECT */}
       <section className={styles.connect} aria-label="Begin your enquiry">
         <Reveal as="div" className={styles.connectInner}>
           <span className={styles.eyebrow}>The Journey Continues</span>
