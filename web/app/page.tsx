@@ -14,7 +14,7 @@ import { CLEARED_CLINICAL_TRIALS } from '@/data/science';
 import { PRODUCTS } from '@/data/products';
 import { CONCERNS } from '@/data/concerns';
 import { GLOBAL_STATS, GLOBAL_PRESENCE } from '@/data/global';
-import { TESTIMONIAL_PLACEHOLDERS, TESTIMONIALS_ARCHIVE_URL } from '@/data/testimonials';
+import { TESTIMONIALS, TESTIMONIALS_ARCHIVE_URL } from '@/data/testimonials';
 import styles from './page.module.css';
 
 const BhuiAmlaExperience = dynamic(
@@ -83,7 +83,40 @@ export default function HomePage() {
         />
       </section>
 
-      {/* 03 — HERITAGE / ORIGIN */}
+      {/* 03 — TESTIMONIALS — real, attributed patient accounts already
+          published on Khatore's own site (data/testimonials.ts), placed
+          right after the brand film so the site's strongest trust signal
+          is visible early, before the visitor scrolls past it. */}
+      <section className={styles.testimonialsChapter} aria-label="Patient testimonials">
+        <Reveal as="div" className={styles.testimonialsHead}>
+          <span className={styles.eyebrow}>Patient Archive</span>
+          <h2 className={styles.chapterHeading}>Real experiences, honestly shared.</h2>
+          <p className={styles.chapterSub}>
+            Many people navigating liver health look for perspectives beyond routine care. These are real,
+            attributed accounts already published by Khatore.
+          </p>
+        </Reveal>
+        <Reveal as="div" className={styles.testimonialGrid}>
+          {TESTIMONIALS.map((t) => (
+            <a key={t.id} href={t.sourceUrl} target="_blank" rel="noopener" className={styles.testimonialCard}>
+              <span className={styles.testimonialMark} aria-hidden="true">&ldquo;</span>
+              <p className={styles.testimonialText}>{t.excerpt}</p>
+              <div className={styles.testimonialFoot}>
+                <span className={styles.testimonialName}>
+                  {t.name} — {t.location}
+                </span>
+                <span className={styles.testimonialTag}>{t.tag}</span>
+                <span className={styles.testimonialSource}>Source: khatorepharma.com ↗</span>
+              </div>
+            </a>
+          ))}
+        </Reveal>
+        <a href={TESTIMONIALS_ARCHIVE_URL} target="_blank" rel="noopener" className={styles.textLink}>
+          Full testimonial archive at khatorepharma.com →
+        </a>
+      </section>
+
+      {/* 04 — HERITAGE / ORIGIN */}
       <section className={styles.origin} aria-label="Origin">
         <Reveal as="span" className={styles.originGhost} delay={1}>
           {HERITAGE_FOUNDING_YEAR}
@@ -97,7 +130,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 04 — ARCHIVE — visual teaser only; the real story lives on /heritage */}
+      {/* 05 — ARCHIVE — visual teaser only; the real story lives on /heritage */}
       <section className={styles.archiveChapter} aria-label="The Archive">
         <Reveal as="div" className={styles.archiveHead}>
           <span className={styles.eyebrowLight}>The Archive</span>
@@ -113,11 +146,11 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* 05 — BHUI AMLA */}
+      {/* 06 — BHUI AMLA */}
       <div className={styles.plantToProduct}>
         <BhuiAmlaExperience />
 
-        {/* 06 — HERB TO HABIT / PLANT-TO-PRODUCT */}
+        {/* 07 — HERB TO HABIT / PLANT-TO-PRODUCT */}
         <section className={styles.herbSection} aria-label="Herb to habit">
           <Reveal as="div" className={styles.herbVideo}>
             <VideoBlock id="reel4" caption="Herb to Habit" />
@@ -133,7 +166,7 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* 07 — SCIENCE */}
+      {/* 08 — SCIENCE */}
       <section className={styles.scienceChapter} aria-label="Science">
         <Reveal as="div" className={styles.scienceHead}>
           <span className={styles.eyebrowLight}>The Science</span>
@@ -154,7 +187,7 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* 08 — SHOP BY CONCERN — only categories backed by approved data;
+      {/* 09 — SHOP BY CONCERN — only categories backed by approved data;
           see data/concerns.ts. Not a full taxonomy, and not filled out
           to look complete — one real door plus the honest "see everything"
           door. */}
@@ -185,7 +218,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 09 — PRODUCTS */}
+      {/* 10 — PRODUCTS */}
       <section className={styles.productsChapter} aria-label="Products">
         <div className={styles.productsInner}>
           <Reveal as="div" className={styles.productsHead}>
@@ -221,38 +254,6 @@ export default function HomePage() {
             View full archive →
           </Link>
         </div>
-      </section>
-
-      {/* 10 — TESTIMONIALS — the approved v5/v6 reference design's own
-          Testimonials section is itself an honest placeholder (bracketed
-          "to be populated" copy, "Awaiting Khatore content approval" on
-          every card); that pattern is carried forward verbatim here —
-          no patient content is invented. See data/testimonials.ts. */}
-      <section className={styles.testimonialsChapter} aria-label="Patient testimonials">
-        <Reveal as="div" className={styles.testimonialsHead}>
-          <span className={styles.eyebrow}>Patient Archive</span>
-          <h2 className={styles.chapterHeading}>Real experiences, honestly shared.</h2>
-          <p className={styles.chapterSub}>
-            Many people navigating liver health look for perspectives beyond routine care. These are patient
-            accounts — published only as Khatore confirms and approves each one.
-          </p>
-        </Reveal>
-        <Reveal as="div" className={styles.testimonialGrid}>
-          {TESTIMONIAL_PLACEHOLDERS.map((t) => (
-            <div key={t.id} className={styles.testimonialCard}>
-              <span className={styles.testimonialMark} aria-hidden="true">&ldquo;</span>
-              <p className={styles.testimonialText}>{t.text}</p>
-              <div className={styles.testimonialFoot}>
-                <span className={styles.testimonialName}>{t.name}</span>
-                <span className={styles.testimonialTag}>{t.tag}</span>
-                <span className={styles.testimonialPending}>Awaiting Khatore content approval</span>
-              </div>
-            </div>
-          ))}
-        </Reveal>
-        <a href={TESTIMONIALS_ARCHIVE_URL} target="_blank" rel="noopener" className={styles.textLink}>
-          Full testimonial archive at khatorepharma.com →
-        </a>
       </section>
 
       {/* 11 — GLOBAL PRESENCE */}

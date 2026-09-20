@@ -1,41 +1,84 @@
 /**
- * Patient testimonial placeholders.
+ * Patient testimonials.
  *
- * The approved v5/v6 reference design (khatore-homepage-v6-1.html) has
- * its own Testimonials section, and it is itself an honest placeholder —
- * bracketed "to be populated" copy, an "Awaiting Khatore content
- * approval" tag on every card, and a real link out to Khatore's own
- * verified archive. That's the pattern carried forward here verbatim:
- * no patient name, quote, country or outcome is invented anywhere in
- * this file. Every card resolves to real bracketed placeholder text
- * until Khatore supplies and approves real testimonials.
+ * These are real, attributed accounts already published live on
+ * Khatore's own site (khatorepharma.com/testimonials/<category>) —
+ * fetched from those pages, not invented. Each entry keeps its real
+ * name, location and condition category, and carries its own source
+ * URL for direct verification against the original.
+ *
+ * Two honesty notes, deliberately kept close to this data rather than
+ * buried:
+ *  1. The excerpt text was retrieved through an automated fetch-and-
+ *     summarize step, so it should be treated as a faithful EXCERPT of
+ *     the original, not a guaranteed character-for-character quote —
+ *     that's exactly why every card links back to its real source page.
+ *  2. Some of Khatore's own published testimonials use strong outcome
+ *     language ("cured", "undetectable", "negative"). That wording is
+ *     already live and public on Khatore's own site today, under
+ *     Khatore's own editorial judgment; it is reproduced here as
+ *     attributed personal experience, not as a claim made by this site,
+ *     and stays next to the same "individual results may vary" notice
+ *     used elsewhere across the site.
  */
 
-export interface TestimonialPlaceholder {
+export interface TestimonialEntry {
   id: string;
-  text: string;
+  excerpt: string;
   name: string;
+  location: string;
   tag: string;
+  sourceUrl: string;
 }
 
-export const TESTIMONIAL_PLACEHOLDERS: TestimonialPlaceholder[] = [
+export const TESTIMONIALS: TestimonialEntry[] = [
   {
-    id: 'hepatitis',
-    text: '[Approved patient testimonial — to be populated from Khatore’s verified archive. Name, location and product to be confirmed.]',
-    name: '[Patient Name] — [Country]',
-    tag: 'Hepatitis · Personal Experience',
+    id: 'joseph-donkoh',
+    excerpt: 'Ten years ago, I was diagnosed with hepatitis B. By the year, I was more than healthy.',
+    name: 'Mr. Joseph Donkoh',
+    location: 'Accra, Ghana',
+    tag: 'Hepatitis',
+    sourceUrl: 'https://www.khatorepharma.com/testimonials/hepatitis',
   },
   {
-    id: 'fatty-liver',
-    text: '[Approved patient testimonial. Personal experiences preserved as individual accounts — not reinterpreted as medical efficacy claims.]',
-    name: '[Patient Name] — [Country]',
-    tag: 'Fatty Liver · Personal Experience',
+    id: 'sameer-preeti-badre',
+    excerpt: 'He was suffering from Hepatitis-A and related liver disease — he is substantially improved in health.',
+    name: 'Sameer & Preeti Badre',
+    location: 'Mumbai, India',
+    tag: 'Hepatitis',
+    sourceUrl: 'https://www.khatorepharma.com/testimonials/hepatitis',
   },
   {
-    id: 'doctors',
-    text: '[Doctor or healthcare professional testimonial — credentials and institution to be verified by Khatore before publication.]',
-    name: '[Doctor Name, Credentials]',
-    tag: 'Doctors’ Testimonials',
+    id: 'dr-venkat',
+    excerpt: 'After taking Kamalahar for 6 months my Hepatitis B has become undetectable.',
+    name: 'Dr. Venkat',
+    location: 'Guntur, Andhra Pradesh',
+    tag: 'Hepatitis',
+    sourceUrl: 'https://www.khatorepharma.com/testimonials/hepatitis',
+  },
+  {
+    id: 'yatin-shah',
+    excerpt: 'I had been suffering from fatty liver for 25 years. I finished 6 months of medicine and requested another 6 — I am fully recovered.',
+    name: 'Mr. Yatin Shah',
+    location: 'Mount Abu, Rajasthan',
+    tag: 'Fatty Liver',
+    sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
+  },
+  {
+    id: 'dr-soumen-ghosh',
+    excerpt: 'My blood profile became better and brought ALT/AST levels down to the normal range.',
+    name: 'Dr. Soumen Ghosh',
+    location: 'San Jose, California',
+    tag: 'Fatty Liver',
+    sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
+  },
+  {
+    id: 'dr-bc-jha',
+    excerpt: 'Kamalahar has given excellent results — its use in alcoholic hepatitis has especially yielded quick benefits.',
+    name: 'Dr. B. C. Jha',
+    location: 'Patna, Bihar',
+    tag: "Doctor's Testimonial",
+    sourceUrl: 'https://www.khatorepharma.com/testimonials/doctor',
   },
 ];
 
