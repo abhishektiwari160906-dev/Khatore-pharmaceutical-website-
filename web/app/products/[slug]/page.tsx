@@ -9,6 +9,7 @@ import { AddToCartButton } from '@/components/Cart/AddToCartButton';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { TrackProductView } from '@/components/TrackProductView';
 import { PRODUCTS, getProductBySlug } from '@/data/products';
+import { CONTACT } from '@/lib/config';
 import styles from './page.module.css';
 
 const SITE_URL = 'https://www.khatorepharma.com';
@@ -88,7 +89,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <BuyButton product={product} className={styles.buy} />
             <AddToCartButton product={product} />
             <WhatsAppCta
-              phone="918709206320"
+              phone={CONTACT.whatsappIndiaWorld}
               label="Ask about this product"
               productId={product.productId}
               productName={product.name}

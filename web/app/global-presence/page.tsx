@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { Reveal } from '@/components/Reveal';
 import { GLOBAL_STATS, GLOBAL_PRESENCE, GLOBAL_DATA_CAVEAT } from '@/data/global';
+import { CONTACT } from '@/lib/config';
 import styles from './page.module.css';
 
 const description = "Khatore Pharmaceuticals' international reach.";
@@ -88,8 +89,8 @@ export default function GlobalPresencePage() {
 
         <p className={styles.footnote}>
           {GLOBAL_DATA_CAVEAT} ·{' '}
-          <WhatsAppCta phone="919665110525" label="+91 9665110525 (US/UK/EU)" className={styles.footnoteLink} /> ·{' '}
-          <WhatsAppCta phone="918709206320" label="+91 8709206320 (India/World)" className={styles.footnoteLink} />
+          <WhatsAppCta phone={CONTACT.whatsappUsUkEu} label="+91 9665110525 (US/UK/EU)" className={styles.footnoteLink} /> ·{' '}
+          <WhatsAppCta phone={CONTACT.whatsappIndiaWorld} label="+91 8709206320 (India/World)" className={styles.footnoteLink} />
         </p>
       </main>
       <Footer />

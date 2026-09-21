@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { PRODUCTS } from '@/data/products';
+import { CONTACT } from '@/lib/config';
 import styles from './Footer.module.css';
 
 export function Footer() {
@@ -87,15 +88,15 @@ export function Footer() {
           <span className={styles.colTitle}>Contact</span>
           <ul className={styles.links}>
             <li>
-              <a href="mailto:support@khatorepharma.com">Email Khatore</a>
+              <a href={`mailto:${CONTACT.email}`}>Email Khatore</a>
             </li>
             <li>
-              <a href="https://api.whatsapp.com/send?phone=919665110525&text=Hi" target="_blank" rel="noopener">
+              <a href={`https://api.whatsapp.com/send?phone=${CONTACT.whatsappUsUkEu}&text=Hi`} target="_blank" rel="noopener">
                 WhatsApp US/UK/EU
               </a>
             </li>
             <li>
-              <a href="https://api.whatsapp.com/send?phone=918709206320&text=Hi" target="_blank" rel="noopener">
+              <a href={`https://api.whatsapp.com/send?phone=${CONTACT.whatsappIndiaWorld}&text=Hi`} target="_blank" rel="noopener">
                 WhatsApp India/World
               </a>
             </li>

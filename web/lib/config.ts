@@ -13,3 +13,16 @@ export const BRAND = {
   flagshipProduct: 'Kamalahar',
   foundingCity: 'Barbil, Orissa',
 } as const;
+
+/**
+ * Client-confirmed contact details. Two WhatsApp lines are both real and
+ * both genuinely published by Khatore (already live on khatorepharma.com)
+ * — one for India/World, one for US/UK/Europe. They are not duplicates
+ * or a conflict; every call site should import the relevant one from
+ * here rather than re-typing the digits.
+ */
+export const CONTACT = {
+  email: 'support@khatorepharma.com',
+  whatsappIndiaWorld: '918709206320',
+  whatsappUsUkEu: '919665110525',
+} as const;

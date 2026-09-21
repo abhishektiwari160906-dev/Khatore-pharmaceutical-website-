@@ -2,8 +2,9 @@
 
 import { trackEvent } from '@/lib/events/client';
 import { getPurchaseState, type Product } from '@/data/products';
+import { CONTACT } from '@/lib/config';
 
-const WHATSAPP_PHONE = '918709206320';
+const WHATSAPP_PHONE = CONTACT.whatsappIndiaWorld;
 
 /**
  * Purchase-state aware (Commerce Foundation pass): BUY_NOW redirects to

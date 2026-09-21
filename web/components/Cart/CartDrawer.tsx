@@ -5,9 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from './CartContext';
 import { trackEvent } from '@/lib/events/client';
+import { CONTACT } from '@/lib/config';
 import styles from './CartDrawer.module.css';
 
-const WHATSAPP_PHONE = '918709206320';
+const WHATSAPP_PHONE = CONTACT.whatsappIndiaWorld;
 
 /**
  * Premium slide-over, not a generic cart template. Client-only state —

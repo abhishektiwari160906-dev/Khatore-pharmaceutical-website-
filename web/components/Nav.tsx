@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { WhatsAppCta } from './WhatsAppCta';
 import { CartButton } from './Cart/CartButton';
 import { SearchOverlay } from './Search/SearchOverlay';
+import { CONTACT } from '@/lib/config';
 import styles from './Nav.module.css';
 
 const LINKS = [
@@ -34,6 +35,16 @@ export function Nav() {
     return () => {
       document.body.style.overflow = '';
     };
+  }, [open]);
+
+  // Same Escape-to-close pattern already used by SearchOverlay/CartDrawer.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, [open]);
 
   // Recede on scroll-down past the first viewport, return on scroll-up —
@@ -79,7 +90,7 @@ export function Nav() {
             <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
         </button>
-        <WhatsAppCta phone="918709206320" label="Talk to Khatore" className={styles.cta} />
+        <WhatsAppCta phone={CONTACT.whatsappIndiaWorld} label="Talk to Khatore" className={styles.cta} />
         <CartButton className={styles.cartBtn} />
 
         <button
@@ -111,7 +122,7 @@ export function Nav() {
           ))}
         </ul>
         <WhatsAppCta
-          phone="918709206320"
+          phone={CONTACT.whatsappIndiaWorld}
           label="Talk to Khatore"
           className={styles.mobileCta}
         />

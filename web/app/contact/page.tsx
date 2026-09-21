@@ -3,6 +3,7 @@ import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { ContactForm } from '@/components/ContactForm';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
+import { CONTACT } from '@/lib/config';
 import styles from './page.module.css';
 
 const description = 'Enquire with Khatore Pharmaceuticals.';
@@ -28,8 +29,8 @@ export default function ContactPage() {
           </p>
           <span className={styles.waLabel}>Chat with Khatore</span>
           <div className={styles.whatsappRow}>
-            <WhatsAppCta phone="919665110525" label="WhatsApp — US/UK/EU" className={styles.waBtn} />
-            <WhatsAppCta phone="918709206320" label="WhatsApp — India/World" className={styles.waBtn} />
+            <WhatsAppCta phone={CONTACT.whatsappUsUkEu} label="WhatsApp — US/UK/EU" className={styles.waBtn} />
+            <WhatsAppCta phone={CONTACT.whatsappIndiaWorld} label="WhatsApp — India/World" className={styles.waBtn} />
           </div>
         </div>
         <ContactForm />

@@ -6,6 +6,7 @@ import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { CONCERNS, getConcernBySlug, getConcernProducts } from '@/data/concerns';
+import { CONTACT } from '@/lib/config';
 import styles from './page.module.css';
 
 export function generateStaticParams() {
@@ -66,7 +67,7 @@ export default function ConcernPage({ params }: { params: { slug: string } }) {
           <Link href="/products" className={styles.textLink}>
             Explore the full collection →
           </Link>
-          <WhatsAppCta phone="918709206320" label="Ask about this" className={styles.whatsapp} />
+          <WhatsAppCta phone={CONTACT.whatsappIndiaWorld} label="Ask about this" className={styles.whatsapp} />
         </section>
       </main>
       <Footer />

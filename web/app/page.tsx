@@ -8,7 +8,7 @@ import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { VideoBlock } from '@/components/VideoBlock';
 import { Reveal } from '@/components/Reveal';
 import { ArchivePhotoSlot } from '@/components/ArchivePhotoSlot';
-import { HERITAGE_FOUNDING_YEAR } from '@/lib/config';
+import { HERITAGE_FOUNDING_YEAR, CONTACT } from '@/lib/config';
 import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { CLEARED_CLINICAL_TRIALS } from '@/data/science';
 import { PRODUCTS } from '@/data/products';
@@ -60,7 +60,7 @@ export default function HomePage() {
             <Link href="/products" className={styles.ctaPrimary}>
               Explore Products
             </Link>
-            <WhatsAppCta phone="918709206320" label="Enquire" className={styles.ctaGhostLight} />
+            <WhatsAppCta phone={CONTACT.whatsappIndiaWorld} label="Enquire" className={styles.ctaGhostLight} />
           </div>
         </div>
         <div className={styles.scrollCue} aria-hidden="true">
@@ -308,7 +308,7 @@ export default function HomePage() {
             <Link href="/contact" className={styles.ctaPrimary}>
               Send an Enquiry
             </Link>
-            <WhatsAppCta phone="918709206320" label="WhatsApp Khatore" className={styles.ctaGhost} />
+            <WhatsAppCta phone={CONTACT.whatsappIndiaWorld} label="WhatsApp Khatore" className={styles.ctaGhost} />
           </div>
         </Reveal>
       </section>
