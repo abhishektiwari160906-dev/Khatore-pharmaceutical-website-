@@ -6,7 +6,9 @@
  *
  * Do not add a fifth entry, and do not add fields (extra outcomes,
  * extra citations, percentages) beyond what's here without an
- * explicit new clearance.
+ * explicit new clearance. `institutionImageKey`/`evidenceHighlight`
+ * were added under an explicit 2026-09-24 clearance (Science/Evidence
+ * image refinement) — see INSTITUTION_IMAGES below.
  */
 
 export interface ClinicalTrial {
@@ -31,6 +33,15 @@ export interface ClinicalTrial {
    * set it on a specific trial once Khatore confirms which one(s).
    */
   studyDesign?: 'double-blind' | 'blind';
+  /**
+   * The large, primary visual tag for this trial's card — replaces
+   * the patient count as the dominant element. Only a value directly
+   * supported by this trial's own `summary`/`location`/`publication`
+   * fields, never inferred from the program-level Heritage statement.
+   */
+  evidenceHighlight: 'MULTI-CENTRE STUDY' | 'PUBLISHED STUDY';
+  /** One or more keys into INSTITUTION_IMAGES — more than one only for the multi-site trial. */
+  institutionImageKeys: string[];
 }
 
 /**
@@ -42,6 +53,55 @@ export interface ClinicalTrial {
  * here rather than silently added to a trial's `location`.
  */
 export const CUTTACK_HOSPITAL_PENDING_CONFIRMATION = true;
+
+export interface InstitutionImage {
+  src: string;
+  alt: string;
+  /** Where the photo was sourced from — kept for the internal record (Section 17), not shown on the page. */
+  source: string;
+  /** License/usage basis as actually stated by the source, recorded honestly rather than assumed. */
+  license: string;
+}
+
+/**
+ * Real, verified building photographs — each one confirmed to depict
+ * the named institution (either by visible signage in the photo, or
+ * as the institution's own official-site homepage image). Every
+ * source and license basis is recorded here rather than asserted:
+ *
+ *  - Guntur: Wikimedia Commons, explicitly CC BY-SA / GFDL licensed.
+ *  - Jhansi, Patna, Ahmedabad: each institution's own official
+ *    website. These sites do not state an explicit reuse license —
+ *    used here only for factual institutional identification, not
+ *    presented as freely licensed stock. If this ever needs a public
+ *    licensing audit, this table is the record to check.
+ */
+export const INSTITUTION_IMAGES: Record<string, InstitutionImage> = {
+  guntur: {
+    src: '/assets/science/guntur-medical-college.webp',
+    alt: 'Front gate of Guntur Medical College',
+    source: 'Wikimedia Commons — "Guntur Medical College (2).jpg" (Gpics, 2007), commons.wikimedia.org/wiki/Category:Guntur_Medical_College',
+    license: 'CC BY-SA 3.0 / GFDL 1.2+ (dual-licensed by uploader)',
+  },
+  jhansi: {
+    src: '/assets/science/mlb-medical-college-jhansi.webp',
+    alt: 'Main building of Maharani Laxmi Bai Medical College, Jhansi',
+    source: 'Official site — mlbmcj.edu.in (homepage banner image)',
+    license: 'Not explicitly stated by source; used for factual institutional identification only',
+  },
+  patna: {
+    src: '/assets/science/igims-patna.webp',
+    alt: 'Main building of Indira Gandhi Institute of Medical Sciences, Patna',
+    source: 'Official site — igims.org (homepage banner image)',
+    license: 'Not explicitly stated by source; used for factual institutional identification only',
+  },
+  ahmedabad: {
+    src: '/assets/science/bj-medical-college-ahmedabad.webp',
+    alt: 'Main building of B.J. Medical College, Ahmedabad, with building signage visible',
+    source: 'Official site — bjmcabd.edu.in (homepage banner image)',
+    license: 'Not explicitly stated by source; used for factual institutional identification only',
+  },
+};
 
 export const CLEARED_CLINICAL_TRIALS: ClinicalTrial[] = [
   {
@@ -58,6 +118,8 @@ export const CLEARED_CLINICAL_TRIALS: ClinicalTrial[] = [
       journal: 'Indian Journal of Gastroenterology, 1993; JAPI, 1992',
       reference: 'NIH/PubMed listed',
     },
+    evidenceHighlight: 'MULTI-CENTRE STUDY',
+    institutionImageKeys: ['jhansi', 'guntur', 'patna', 'ahmedabad'],
   },
   {
     id: 'trial-02-jhansi',
@@ -72,6 +134,8 @@ export const CLEARED_CLINICAL_TRIALS: ClinicalTrial[] = [
       journal: 'Indian Medical Practitioner (Bombay)',
       reference: 'Vol. XLII No 4, pp. 303–308',
     },
+    evidenceHighlight: 'PUBLISHED STUDY',
+    institutionImageKeys: ['jhansi'],
   },
   {
     id: 'trial-03-patna',
@@ -86,6 +150,8 @@ export const CLEARED_CLINICAL_TRIALS: ClinicalTrial[] = [
       journal: 'Journal of Physicians of India',
       reference: 'JAPI Vol 37, Abstract p. 64',
     },
+    evidenceHighlight: 'PUBLISHED STUDY',
+    institutionImageKeys: ['patna'],
   },
   {
     id: 'trial-04-ahmedabad',
@@ -100,6 +166,8 @@ export const CLEARED_CLINICAL_TRIALS: ClinicalTrial[] = [
       journal: 'Journal of Association of Physicians India',
       reference: 'JAPI Vol 39, ISSN 004/5772, p. 82',
     },
+    evidenceHighlight: 'PUBLISHED STUDY',
+    institutionImageKeys: ['ahmedabad'],
   },
 ];
 

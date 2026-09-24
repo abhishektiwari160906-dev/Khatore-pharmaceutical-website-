@@ -26,6 +26,31 @@
   color: rgba(255, 255, 255, 0.65);
 }
 
+/* Program-level methodology statement — the Heritage record's own
+   "blind and double-blind randomised protocols" line, shown once
+   here rather than attributed to any single trial card below. */
+.programBanner {
+  max-width: 640px;
+  margin: 2.5rem auto 0;
+  padding-top: 1.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+.programBannerLabel {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--green-lt);
+  margin-bottom: 0.6rem;
+}
+.programBannerText {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .dashboard {
   max-width: 1100px;
   margin: 0 auto;
@@ -54,14 +79,51 @@
 .trialSummaryRow::-webkit-details-marker {
   display: none;
 }
-.trialN {
+
+/* Institution photo — bleeds to the card's own edges (negative-margins
+   the summary's padding) so it reads as a header image, not an inset
+   thumbnail. Fixed aspect-ratio box: no layout shift while it loads. */
+.institutionImageWrap {
+  grid-column: 1 / -1;
   grid-row: 1;
+  display: block;
+  margin: -2rem -1.75rem 1.5rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--paper);
+}
+.institutionImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  display: block;
+}
+.institutionImageGrid {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  margin: -2rem -1.75rem 1.5rem;
+  background: var(--rule);
+}
+.institutionImageSmall {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center 35%;
+  display: block;
+}
+
+.trialN {
+  grid-row: 2;
   font-family: var(--mono);
   font-size: 0.58rem;
   color: var(--muted-lt);
 }
 .trialExpand {
-  grid-row: 1;
+  grid-row: 2;
   justify-self: end;
   font-family: var(--mono);
   font-size: 0.54rem;
@@ -72,29 +134,49 @@
 .trialCard[open] .trialExpand {
   visibility: hidden;
 }
-.trialStat {
+
+/* Primary visual tag — the study's verified characteristic, replacing
+   patient count as the dominant element (Section 6/9 of the brief). */
+.trialHighlight {
   grid-column: 1 / -1;
   font-family: var(--sans);
-  font-weight: 200;
-  font-size: clamp(2.6rem, 5vw, 3.6rem);
-  color: var(--blue);
-  line-height: 1;
-}
-.trialStatLabel {
-  grid-column: 1 / -1;
-  font-family: var(--mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted-lt);
-  margin-top: 0.3rem;
+  font-weight: 600;
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  letter-spacing: 0.01em;
+  color: var(--green-dk);
+  margin-top: 0.6rem;
 }
 .trialLoc {
   grid-column: 1 / -1;
   font-family: var(--sans);
-  font-size: 0.85rem;
-  color: var(--ink-mid);
-  margin-top: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-top: 0.4rem;
+}
+
+/* Patient count — now secondary/supporting information, inline and
+   small rather than the card's largest element. */
+.trialStatRow {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
+.trialStat {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1;
+}
+.trialStatLabel {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-lt);
 }
 
 .trialBody {
