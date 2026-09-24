@@ -17,8 +17,25 @@ import { GLOBAL_STATS, GLOBAL_PRESENCE } from '@/data/global';
 import { TESTIMONIALS, TESTIMONIALS_ARCHIVE_URL } from '@/data/testimonials';
 import styles from './page.module.css';
 
+// Diagnosed 2026-09-24: next/dynamic's underlying webpack chunk fetch
+// has no built-in retry, so a single transient network failure while
+// loading this ssr:false component's chunk silently leaves the section
+// permanently unmounted for that page load — no error shown, nothing
+// in the DOM. The component itself is not the problem (verified working,
+// correct geometry/interaction, once it mounts); this just gives that
+// mount a couple of real chances against a flaky connection before
+// giving up, instead of one.
+function importWithRetry<T>(load: () => Promise<T>, retries = 2, delayMs = 700): Promise<T> {
+  return load().catch((err) => {
+    if (retries <= 0) throw err;
+    return new Promise((resolve) => setTimeout(resolve, delayMs)).then(() =>
+      importWithRetry(load, retries - 1, delayMs),
+    );
+  });
+}
+
 const BhuiAmlaExperience = dynamic(
-  () => import('@/components/BhuiAmla/BhuiAmlaExperience').then((m) => m.BhuiAmlaExperience),
+  () => importWithRetry(() => import('@/components/BhuiAmla/BhuiAmlaExperience')).then((m) => m.BhuiAmlaExperience),
   {
     ssr: false,
     loading: () => <div className={styles.bhuiAmlaLoading} aria-hidden="true" />,
