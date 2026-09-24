@@ -505,10 +505,14 @@ export interface Stage {
   rail: string;
 }
 
+// Every date/fact below is the same approved record already used on
+// /heritage (data/heritage.ts, HERITAGE_ENTRIES) — restated here in a
+// shorter, editorial register for the growth caption, not invented or
+// re-dated. Stage order mirrors that same chronological record.
 export const STAGES: Stage[] = [
-  { p: 0.0, num: 'Stage 01 / 05', eyebrow: '1984 — Foundation', body: 'The roots run deep. Khatore began with a commitment to Ayurvedic knowledge that has continued across generations.', rail: 'Roots' },
-  { p: 0.17, num: 'Stage 02 / 05', eyebrow: 'Knowledge — Khatore', body: 'A single stem carries that knowledge forward — <strong>discipline</strong>, continuity, decades of formulation practice.', rail: 'Stem' },
-  { p: 0.38, num: 'Stage 03 / 05', eyebrow: 'Formulations + Research', body: 'Branches extend outward — each one a <strong>formulation</strong>, an Ayurvedic principle, a line of research.', rail: 'Branches' },
-  { p: 0.62, num: 'Stage 04 / 05', eyebrow: 'Knowledge + Products', body: "Foliage fills in — the breadth of Khatore's <strong>products</strong> and the botanical evidence behind them.", rail: 'Leaves' },
-  { p: 0.85, num: 'Stage 05 / 05', eyebrow: 'Trust + Global Reach', body: 'The full specimen — the same botanical study behind <strong>Kamalahar</strong>, trusted in 30+ countries.', rail: 'Full Canopy' },
+  { p: 0.0, num: 'Stage 01 / 05', eyebrow: '1984 — Foundation', body: 'Khatore Pharmaceuticals launched in Barbil, Orissa — Ayurvedic formulations for patients with liver ailments and jaundice, built on <strong>efficacy, safety and accessibility</strong>.', rail: 'Roots' },
+  { p: 0.17, num: 'Stage 02 / 05', eyebrow: '1987–1988 — Clinical Trials', body: 'Four clinical trials across Jhansi, Guntur, Patna and Ahmedabad — <strong>144 patients</strong> enrolled across blind and double-blind randomised protocols.', rail: 'Stem' },
+  { p: 0.38, num: 'Stage 03 / 05', eyebrow: '1992–1993 — Peer-Reviewed Publication', body: 'Findings published in JAPI and the Indian Journal of Gastroenterology, listed on <strong>NIH/PubMed</strong> — Ayurvedic knowledge held to scientific record.', rail: 'Branches' },
+  { p: 0.62, num: 'Stage 04 / 05', eyebrow: '2000 — Industry Recognition', body: 'Best Entrepreneur Award for Ayurvedic Medicine in Asia. <strong>GMP certification</strong> maintained — traditional practice, rigorously assured.', rail: 'Leaves' },
+  { p: 0.85, num: 'Stage 05 / 05', eyebrow: 'Today — Global Presence', body: 'Eight Ayurvedic formulations, patients in <strong>30+ countries</strong> — the same botanical study behind Kamalahar.', rail: 'Full Canopy' },
 ];

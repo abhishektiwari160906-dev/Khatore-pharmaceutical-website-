@@ -65,8 +65,23 @@ export default function HomePage() {
     <>
       <Nav />
 
-      {/* 01 — HERO */}
+      {/* 01 — HERO
+          Composition: Kamalahar (flagship, evidence-linked product) on
+          the left, the brand mark + founding year centered, the raw
+          Ayurvedic botanicals used across Khatore's formulations on the
+          right — real product/ingredient photography (see
+          public/assets/MANIFEST.md), not stock imagery. */}
       <section className={styles.hero} aria-label="Khatore Pharmaceuticals">
+        <div className={styles.heroVisualLeft} aria-hidden="true">
+          <Image
+            src="/assets/products/01-kamalahar-cutout.png"
+            alt=""
+            width={295}
+            height={295}
+            className={styles.heroVisualImg}
+            priority
+          />
+        </div>
         <div className={styles.heroInner}>
           <span className={styles.heroKicker}>Ayurvedic Knowledge</span>
           <h1 className={styles.heroWordmark}>Khatore</h1>
@@ -79,6 +94,15 @@ export default function HomePage() {
             </Link>
             <WhatsAppCta phone={CONTACT.whatsappIndiaWorld} label="Enquire" className={styles.ctaGhostLight} />
           </div>
+        </div>
+        <div className={styles.heroVisualRight} aria-hidden="true">
+          <Image
+            src="/assets/products/raw-botanical-ingredients-cutout.png"
+            alt=""
+            width={410}
+            height={1080}
+            className={styles.heroVisualImg}
+          />
         </div>
         <div className={styles.scrollCue} aria-hidden="true">
           <span />

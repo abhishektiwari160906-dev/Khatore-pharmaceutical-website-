@@ -103,16 +103,66 @@
 .hero {
   position: relative;
   min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    'center center'
+    'left right';
   align-items: center;
-  justify-content: center;
+  justify-items: center;
+  gap: 2rem 1rem;
   text-align: center;
-  padding: 2rem 2.5rem 5rem;
+  padding: 6rem 2rem 5rem;
   background: linear-gradient(180deg, var(--white) 0%, var(--paper) 100%);
 }
 .heroInner {
+  grid-area: center;
   max-width: 720px;
+}
+/* Flanking product/ingredient imagery — real photography (Kamalahar
+   bottle, raw botanicals), not decoration for its own sake. On mobile
+   they sit as a small paired strip below the brand mark rather than
+   being crushed into the 3-column desktop layout at a tiny scale. */
+.heroVisualLeft,
+.heroVisualRight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 130px;
+  width: 100%;
+}
+.heroVisualLeft {
+  grid-area: left;
+  justify-self: end;
+}
+.heroVisualRight {
+  grid-area: right;
+  justify-self: start;
+}
+.heroVisualImg {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 20px rgba(15, 23, 36, 0.12));
+}
+.heroVisualRight img {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+@media (min-width: 980px) {
+  .hero {
+    grid-template-columns: minmax(140px, 240px) minmax(auto, 720px) minmax(140px, 240px);
+    grid-template-areas: 'left center right';
+    padding: 2rem 2.5rem 5rem;
+  }
+  .heroVisualLeft,
+  .heroVisualRight {
+    max-width: 220px;
+  }
+  .heroVisualImg {
+    max-height: 340px;
+  }
 }
 .heroKicker {
   display: block;

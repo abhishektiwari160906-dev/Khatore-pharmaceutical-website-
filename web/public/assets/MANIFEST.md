@@ -27,6 +27,13 @@ Downloaded: 2026-09-19
 (Full source paths share the prefix
 `https://www.khatorepharma.com/media/catalog/product/cache/1/small_image/295x295/9df78eab33525d08d6e5fb8d27136e95/`)
 
+## Hero composition assets (added 2026-09-24)
+
+| Local file | Source | Notes |
+|---|---|---|
+| `products/01-kamalahar-cutout.png` | Derived from `products/01-kamalahar.png` above | Background-knocked-out (white-point alpha threshold, no content added/altered) for the homepage hero's flanking product visual. |
+| `products/raw-botanical-ingredients-cutout.png` | Client-supplied product photograph (K-Cuff Cough Syrup with Tulsi, flat-lay with tulsi leaf, black pepper, cardamom and bay leaf) | Cropped to the raw-ingredient portion only (bottle excluded) and background-knocked-out. Real Khatore ingredient photography, not stock imagery — used here for the "raw botanicals" side of the hero rather than a specific "Gota Masala" claim, which is not attested anywhere in the repo's verified product data. |
+
 ## Known limitation — flagging, not hiding
 
 These are Magento's **295×295 cache-generated thumbnails** — the only

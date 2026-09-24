@@ -14,6 +14,12 @@
   --green-dk: #0e6a3a;
   --green-lt: #1bba63;
   --green-pale: #e8f3ed;
+  /* Gold — already used for the "1984" heritage-marker treatment
+     (app/page.module.css .originGhost, app/heritage/page.module.css
+     .yearBig); tokenized here so other green/gold sections reuse the
+     same value instead of a fresh literal. */
+  --gold: #c9a227;
+  --gold-lt: #f4d06f;
   --ink: #0f1724;
   --ink-mid: #2c3b5a;
   --paper: #f5f7fc;

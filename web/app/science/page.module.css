@@ -1,5 +1,5 @@
 .masthead {
-  background: var(--blue);
+  background: var(--green-dk);
   padding: 6rem 2.5rem 5rem;
   text-align: center;
 }
@@ -9,21 +9,21 @@
   font-size: 0.62rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--gold-lt);
   margin-bottom: 1.25rem;
 }
 .title {
   font-family: var(--sans);
   font-weight: 200;
   font-size: clamp(2.4rem, 5vw, 4.2rem);
-  color: white;
+  color: var(--gold-lt);
   line-height: 1.05;
 }
 .title em {
   font-style: normal;
   font-family: var(--serif);
   font-style: italic;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--gold);
 }
 
 /* Program-level methodology statement — the Heritage record's own
@@ -33,7 +33,7 @@
   max-width: 640px;
   margin: 2.5rem auto 0;
   padding-top: 1.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(201, 162, 39, 0.35);
 }
 .programBannerLabel {
   display: block;
@@ -41,14 +41,14 @@
   font-size: 0.58rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--green-lt);
+  color: var(--gold);
   margin-bottom: 0.6rem;
 }
 .programBannerText {
   font-family: var(--sans);
   font-size: 0.85rem;
   line-height: 1.75;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(244, 208, 111, 0.85);
 }
 
 .dashboard {

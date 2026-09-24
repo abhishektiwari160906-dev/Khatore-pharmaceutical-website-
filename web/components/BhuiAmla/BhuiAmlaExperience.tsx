@@ -307,9 +307,23 @@ export function BhuiAmlaExperience() {
       stage!.addEventListener('pointerdown', pointerDown as EventListener);
       window.addEventListener('pointermove', pointerMove as EventListener, { passive: false });
       window.addEventListener('pointerup', pointerUp);
+      // Diagnosed 2026-09-24: without these, an interrupted gesture (the
+      // browser taking the touch over for its own scroll/zoom handling,
+      // an OS-level gesture, app switch, etc. — all things that fire
+      // touchcancel/pointercancel instead of touchend/pointerup) left
+      // `dragging` stuck true forever. Since pointerMove calls
+      // preventDefault() on every window-level touchmove while dragging
+      // is true, a stuck-true `dragging` silently blocked scrolling
+      // anywhere on the page from then on — the actual root cause of the
+      // reported scroll lock, not a global wheel/scroll hijack (there
+      // never was one). These two listeners guarantee the same cleanup
+      // pointerUp() already does on a normal release also runs when the
+      // gesture is cancelled instead.
+      window.addEventListener('pointercancel', pointerUp);
       stage!.addEventListener('touchstart', pointerDown as EventListener, { passive: true });
       window.addEventListener('touchmove', pointerMove as EventListener, { passive: false });
       window.addEventListener('touchend', pointerUp);
+      window.addEventListener('touchcancel', pointerUp);
 
       let isVisible = true;
       const io = new IntersectionObserver(
@@ -454,9 +468,11 @@ export function BhuiAmlaExperience() {
         stage!.removeEventListener('pointerdown', pointerDown as EventListener);
         window.removeEventListener('pointermove', pointerMove as EventListener);
         window.removeEventListener('pointerup', pointerUp);
+        window.removeEventListener('pointercancel', pointerUp);
         stage!.removeEventListener('touchstart', pointerDown as EventListener);
         window.removeEventListener('touchmove', pointerMove as EventListener);
         window.removeEventListener('touchend', pointerUp);
+        window.removeEventListener('touchcancel', pointerUp);
         window.removeEventListener('resize', onResize);
         document.removeEventListener('visibilitychange', onVisibilityChange);
         io.disconnect();
