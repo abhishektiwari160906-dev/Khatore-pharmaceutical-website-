@@ -30,6 +30,6 @@ export const HERITAGE_ENTRIES: HeritageEntry[] = [
   {
     date: 'Today',
     title: 'Global Presence',
-    text: 'Eight Ayurvedic formulations. Patients in 30+ countries across South Asia, Africa, Europe and the Americas. Over one million patients benefited. Available through direct ordering, WhatsApp, and Amazon India.',
+    text: 'Eight Ayurvedic formulations. Patients in 100+ countries across South Asia, Africa, Europe and the Americas. Over five million patients benefited. Available through direct ordering, WhatsApp, and Amazon India.',
   },
 ];

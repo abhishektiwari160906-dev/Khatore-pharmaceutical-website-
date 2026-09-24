@@ -21,7 +21,27 @@ export interface ClinicalTrial {
     journal: string;
     reference: string;
   };
+  /**
+   * Post-review rebuild scaffold. The Heritage record (data/heritage.ts,
+   * "Clinical Trials" entry) already states "144 patients enrolled
+   * across blind and double-blind randomised protocols" — real,
+   * approved evidence for the PROGRAM as a whole. It does not say
+   * which of these 4 trials used a double-blind design, so this field
+   * stays undefined on every entry below rather than guessing. Only
+   * set it on a specific trial once Khatore confirms which one(s).
+   */
+  studyDesign?: 'double-blind' | 'blind';
 }
+
+/**
+ * None of the 4 cleared trials above list "Cuttack Hospital" as a
+ * location (the approved locations are Jhansi, Guntur, Patna and
+ * Ahmedabad only). A client brief asked to "call out Cuttack
+ * Hospital" in the evidence section — that cannot be done from
+ * current approved data without inventing an affiliation. Flagged
+ * here rather than silently added to a trial's `location`.
+ */
+export const CUTTACK_HOSPITAL_PENDING_CONFIRMATION = true;
 
 export const CLEARED_CLINICAL_TRIALS: ClinicalTrial[] = [
   {

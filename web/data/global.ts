@@ -1,11 +1,12 @@
 /**
- * Carried forward verbatim from the previously-approved source content —
- * not a newly invented list (Section 23). The "to be confirmed" caveat
- * that ships with it there ships with it here too.
+ * Confirmed by the client (Mr. Vijay), 2026-09-24 — 1M+/30+ updated to
+ * 5M/100+ per that confirmation. Prep-branch change only; not deployed
+ * to the locked review build. See also data/heritage.ts's "Today" entry,
+ * which states the same figures in prose and was updated to match.
  */
 export const GLOBAL_STATS = [
-  { n: '1M+', l: 'Patients benefited' },
-  { n: '30+', l: 'Countries served' },
+  { n: '5M', l: 'Patients benefited' },
+  { n: '100+', l: 'Countries served' },
   { n: '40+', l: 'Years of practice' },
 ];
 
