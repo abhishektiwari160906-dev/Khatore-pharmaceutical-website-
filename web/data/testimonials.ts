@@ -29,6 +29,18 @@ export interface TestimonialEntry {
   location: string;
   tag: string;
   sourceUrl: string;
+  /**
+   * Real testimonial video/photo, once Khatore supplies one for this
+   * person -- currently undefined for every entry (see 2026-09-24
+   * FINAL CLIENT-REVIEW SPRINT: no real video/photo assets of these
+   * specific patients exist in the repo, and the brief explicitly
+   * prohibits fabricating or AI-generating people to fill this gap).
+   * The card component renders the real media when this is set, and
+   * an honestly-labeled pending placeholder otherwise -- so dropping
+   * in real assets later needs no component changes, only this field.
+   */
+  videoUrl?: string;
+  posterUrl?: string;
 }
 
 export const TESTIMONIALS: TestimonialEntry[] = [

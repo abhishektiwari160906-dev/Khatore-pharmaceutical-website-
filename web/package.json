@@ -10,13 +10,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@react-three/drei": "9.114.0",
+    "@react-three/fiber": "8.17.10",
+    "gsap": "3.12.5",
     "next": "14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "three": "0.180.0",
-    "@react-three/fiber": "8.17.10",
-    "@react-three/drei": "9.114.0",
-    "gsap": "3.12.5"
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "20.14.9",

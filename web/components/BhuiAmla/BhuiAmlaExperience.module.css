@@ -144,7 +144,19 @@
   width: 100%;
   height: 100%;
   cursor: grab;
-  touch-action: none;
+  /* `.gstage` is the full 100vh sticky stage for the entire 460vh
+     scroll-driven section (see .growthWrap below) -- on touch devices
+     that means almost every touch during this section starts here.
+     `touch-action: none` (the previous value) disabled ALL native
+     touch panning inside it at the browser level, independent of any
+     JS state, which is what still made scrolling "feel stuck" through
+     this section even after the pointercancel/touchcancel fix: it
+     wasn't a stale-state bug, native vertical scroll was flatly
+     disabled the moment a finger landed anywhere on screen here.
+     `pan-y` lets the browser handle vertical panning (page scroll)
+     natively and only reserves horizontal/other gestures for the JS
+     drag-to-rotate handling below. */
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
 }

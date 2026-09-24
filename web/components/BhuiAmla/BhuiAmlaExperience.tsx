@@ -277,25 +277,41 @@ export function BhuiAmlaExperience() {
       }
       applyRotation(0);
 
-      function pointerDown(e: PointerEvent | TouchEvent) {
+      // Pointer Events only -- covers mouse, touch and pen in one model.
+      // A previous version also listened for raw touchstart/touchmove/
+      // touchend/touchcancel in parallel, which double-handles the same
+      // physical touch gesture (browsers dispatch both event families
+      // for touch input) and forced preventDefault() on every move to
+      // stop the duplicate/native handling from fighting the rotation.
+      // That preventDefault() is what silently blocked page scrolling:
+      // called unconditionally on pointerdown/pointermove, it suppressed
+      // the browser's default scroll action for ANY touch landing on
+      // `.gstage` -- and `.gstage` is the full 100vh stage for this
+      // entire 460vh scroll-driven section, so that was effectively the
+      // whole screen. Combined with `touch-action: pan-y` (see the CSS),
+      // vertical drags are now left to the browser's native scroll
+      // entirely; only non-mouse-default gestures (drag-to-rotate) are
+      // handled here, so no preventDefault is needed at all.
+      // One handler for every pointer type (mouse, touch, pen). For
+      // touch, `touch-action: pan-y` on `.gstage` (see the CSS) is what
+      // lets a vertical swipe fall through to native page scroll -- the
+      // browser fires `pointercancel` here when it claims a gesture as
+      // a scroll, which resets `dragging` the same as a normal release.
+      function pointerDown(e: PointerEvent) {
         dragging = true;
         stage!.classList.add(draggingClass);
-        lastX = 'touches' in e ? e.touches[0]!.clientX : (e as PointerEvent).clientX;
-        lastY = 'touches' in e ? e.touches[0]!.clientY : (e as PointerEvent).clientY;
-        e.preventDefault?.();
+        lastX = e.clientX;
+        lastY = e.clientY;
       }
-      function pointerMove(e: PointerEvent | TouchEvent) {
+      function pointerMove(e: PointerEvent) {
         if (!dragging) return;
-        const x = 'touches' in e ? e.touches[0]!.clientX : (e as PointerEvent).clientX;
-        const y = 'touches' in e ? e.touches[0]!.clientY : (e as PointerEvent).clientY;
-        const dx = x - lastX;
-        const dy = y - lastY;
-        lastX = x;
-        lastY = y;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
         dragYaw = THREE.MathUtils.clamp(dragYaw + dx * 0.26, -YAW_RANGE, YAW_RANGE);
         dragPitch = THREE.MathUtils.clamp(dragPitch - dy * 0.16, -PITCH_RANGE, PITCH_RANGE);
         applyRotation(0);
-        e.preventDefault?.();
       }
       function pointerUp() {
         if (!dragging) return;
@@ -305,25 +321,10 @@ export function BhuiAmlaExperience() {
         resumeIdleAt = performance.now() + 1800;
       }
       stage!.addEventListener('pointerdown', pointerDown as EventListener);
-      window.addEventListener('pointermove', pointerMove as EventListener, { passive: false });
+      window.addEventListener('pointermove', pointerMove as EventListener, { passive: true });
       window.addEventListener('pointerup', pointerUp);
-      // Diagnosed 2026-09-24: without these, an interrupted gesture (the
-      // browser taking the touch over for its own scroll/zoom handling,
-      // an OS-level gesture, app switch, etc. — all things that fire
-      // touchcancel/pointercancel instead of touchend/pointerup) left
-      // `dragging` stuck true forever. Since pointerMove calls
-      // preventDefault() on every window-level touchmove while dragging
-      // is true, a stuck-true `dragging` silently blocked scrolling
-      // anywhere on the page from then on — the actual root cause of the
-      // reported scroll lock, not a global wheel/scroll hijack (there
-      // never was one). These two listeners guarantee the same cleanup
-      // pointerUp() already does on a normal release also runs when the
-      // gesture is cancelled instead.
       window.addEventListener('pointercancel', pointerUp);
-      stage!.addEventListener('touchstart', pointerDown as EventListener, { passive: true });
-      window.addEventListener('touchmove', pointerMove as EventListener, { passive: false });
-      window.addEventListener('touchend', pointerUp);
-      window.addEventListener('touchcancel', pointerUp);
+      window.addEventListener('pointerleave', pointerUp);
 
       let isVisible = true;
       const io = new IntersectionObserver(
@@ -469,10 +470,7 @@ export function BhuiAmlaExperience() {
         window.removeEventListener('pointermove', pointerMove as EventListener);
         window.removeEventListener('pointerup', pointerUp);
         window.removeEventListener('pointercancel', pointerUp);
-        stage!.removeEventListener('touchstart', pointerDown as EventListener);
-        window.removeEventListener('touchmove', pointerMove as EventListener);
-        window.removeEventListener('touchend', pointerUp);
-        window.removeEventListener('touchcancel', pointerUp);
+        window.removeEventListener('pointerleave', pointerUp);
         window.removeEventListener('resize', onResize);
         document.removeEventListener('visibilitychange', onVisibilityChange);
         io.disconnect();

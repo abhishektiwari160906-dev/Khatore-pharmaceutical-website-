@@ -8,6 +8,7 @@ import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { VideoBlock } from '@/components/VideoBlock';
 import { Reveal } from '@/components/Reveal';
 import { ArchivePhotoSlot } from '@/components/ArchivePhotoSlot';
+import { GlobeSection } from '@/components/Globe3D/GlobeSection';
 import { HERITAGE_FOUNDING_YEAR, CONTACT } from '@/lib/config';
 import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { CLEARED_CLINICAL_TRIALS } from '@/data/science';
@@ -49,16 +50,6 @@ export const metadata: Metadata = {
 const founding = HERITAGE_ENTRIES[0]!;
 const flagship = PRODUCTS.find((p) => p.productId === 'kamalahar')!;
 const restProducts = PRODUCTS.filter((p) => p.productId !== 'kamalahar');
-
-// Purely decorative placement for the abstract globe motif — not a claim
-// of precise geography. The factual list stays the approved region/
-// country data from data/global.ts, rendered verbatim below it.
-const GLOBE_MARKERS = [
-  { region: 'South Asia & Middle East', x: 63, y: 46 },
-  { region: 'Africa', x: 50, y: 58 },
-  { region: 'Europe & Americas', x: 30, y: 38 },
-  { region: 'Asia-Pacific', x: 78, y: 62 },
-];
 
 export default function HomePage() {
   return (
@@ -138,19 +129,49 @@ export default function HomePage() {
           </p>
         </Reveal>
         <Reveal as="div" className={styles.testimonialGrid}>
-          {TESTIMONIALS.map((t) => (
-            <a key={t.id} href={t.sourceUrl} target="_blank" rel="noopener" className={styles.testimonialCard}>
-              <span className={styles.testimonialMark} aria-hidden="true">&ldquo;</span>
-              <p className={styles.testimonialText}>{t.excerpt}</p>
-              <div className={styles.testimonialFoot}>
-                <span className={styles.testimonialName}>
-                  {t.name} — {t.location}
-                </span>
-                <span className={styles.testimonialTag}>{t.tag}</span>
-                <span className={styles.testimonialSource}>Source: khatorepharma.com ↗</span>
-              </div>
-            </a>
-          ))}
+          {TESTIMONIALS.map((t) => {
+            const nameWords = t.name
+              .replace(/^(Mr\.|Mrs\.|Ms\.|Dr\.)\s*/, '')
+              .split(/\s+/)
+              .filter((w) => /^[A-Za-z]/.test(w));
+            const initials = [nameWords[0], nameWords[nameWords.length - 1]]
+              .filter(Boolean)
+              .map((w) => w![0])
+              .join('')
+              .toUpperCase();
+            return (
+              <a key={t.id} href={t.sourceUrl} target="_blank" rel="noopener" className={styles.testimonialCard}>
+                <div className={styles.testimonialMedia}>
+                  {t.videoUrl ? (
+                    <video
+                      className={styles.testimonialVideo}
+                      src={t.videoUrl}
+                      poster={t.posterUrl}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <>
+                      <span className={styles.testimonialInitials} aria-hidden="true">
+                        {initials}
+                      </span>
+                      <span className={styles.testimonialPending}>Testimonial video pending</span>
+                    </>
+                  )}
+                  <span className={styles.testimonialTag}>{t.tag}</span>
+                </div>
+                <p className={styles.testimonialText}>&ldquo;{t.excerpt}&rdquo;</p>
+                <div className={styles.testimonialFoot}>
+                  <span className={styles.testimonialName}>
+                    {t.name} — {t.location}
+                  </span>
+                  <span className={styles.testimonialSource}>Source: khatorepharma.com ↗</span>
+                </div>
+              </a>
+            );
+          })}
         </Reveal>
         <a href={TESTIMONIALS_ARCHIVE_URL} target="_blank" rel="noopener" className={styles.textLink}>
           Full testimonial archive at khatorepharma.com →
@@ -303,7 +324,7 @@ export default function HomePage() {
           <Reveal as="div" className={styles.worldText}>
             <span className={styles.eyebrowLight}>The World</span>
             <h2 className={styles.chapterHeadingLight}>
-              30+ countries. <em>One mission.</em>
+              100+ countries. <em>One mission.</em>
             </h2>
             <div className={styles.worldStats}>
               {GLOBAL_STATS.map((s) => (
@@ -319,18 +340,7 @@ export default function HomePage() {
           </Reveal>
 
           <Reveal as="div" className={styles.globe} delay={1}>
-            <svg viewBox="0 0 100 100" className={styles.globeSvg} aria-hidden="true">
-              <circle cx="50" cy="50" r="38" className={styles.globeRing} />
-              <ellipse cx="50" cy="50" rx="38" ry="14" className={styles.globeRing} />
-              <ellipse cx="50" cy="50" rx="38" ry="26" className={styles.globeRing} />
-              <line x1="12" y1="50" x2="88" y2="50" className={styles.globeRing} />
-              <line x1="50" y1="12" x2="50" y2="88" className={styles.globeRing} />
-            </svg>
-            {GLOBE_MARKERS.map((m) => (
-              <span key={m.region} className={styles.globeDot} style={{ left: `${m.x}%`, top: `${m.y}%` }}>
-                <span className={styles.globeDotPing} />
-              </span>
-            ))}
+            <GlobeSection compact />
             <ul className={styles.globeLegend}>
               {GLOBAL_PRESENCE.map((g) => (
                 <li key={g.region}>{g.region}</li>

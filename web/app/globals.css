@@ -20,6 +20,11 @@
      same value instead of a fresh literal. */
   --gold: #c9a227;
   --gold-lt: #f4d06f;
+  /* Warm ivory -- distinct from the site's existing cool off-whites
+     (--paper/--off), for readable body copy on dark green/heritage
+     backgrounds (footer) where pure white or the cool paper tones
+     would clash with the gold accents. */
+  --ivory: #f3ead2;
   --ink: #0f1724;
   --ink-mid: #2c3b5a;
   --paper: #f5f7fc;

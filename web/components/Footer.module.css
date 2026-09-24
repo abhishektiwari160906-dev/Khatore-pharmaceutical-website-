@@ -1,6 +1,6 @@
 .footer {
-  background: var(--ink);
-  color: white;
+  background: var(--green-dk);
+  color: var(--ivory);
   padding: 4rem 2.5rem 2rem;
 }
 .top {
@@ -10,7 +10,7 @@
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 3rem;
   padding-bottom: 3rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(201, 162, 39, 0.22);
 }
 .logo {
   filter: brightness(0) invert(1);
@@ -19,7 +19,7 @@
 .brandText {
   font-size: 0.72rem;
   line-height: 1.75;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(243, 234, 210, 0.6);
   max-width: 28ch;
 }
 .social {
@@ -31,17 +31,17 @@
 }
 .social a {
   font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.22);
+  color: rgba(243, 234, 210, 0.55);
   transition: color 0.2s;
 }
 .social a:hover {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--gold-lt);
 }
 .colTitle {
   font-family: var(--mono);
   font-size: 0.52rem;
   letter-spacing: 0.2em;
-  color: var(--green-lt);
+  color: var(--gold);
   text-transform: uppercase;
   margin-bottom: 0.75rem;
   display: block;
@@ -54,11 +54,11 @@
 }
 .links a {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(243, 234, 210, 0.65);
   transition: color 0.2s;
 }
 .links a:hover {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--gold-lt);
 }
 .bottom {
   max-width: 1200px;
@@ -66,16 +66,16 @@
 }
 .copy {
   font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.18);
+  color: rgba(243, 234, 210, 0.4);
 }
 .disclaimer {
   max-width: 1200px;
   margin: 1.5rem auto 0;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(243, 234, 210, 0.12);
   font-size: 0.56rem;
   line-height: 1.72;
-  color: rgba(255, 255, 255, 0.13);
+  color: rgba(243, 234, 210, 0.35);
   font-style: italic;
 }
 @media (max-width: 900px) {
