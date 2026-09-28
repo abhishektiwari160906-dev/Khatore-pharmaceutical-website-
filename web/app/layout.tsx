@@ -38,14 +38,14 @@ export const metadata: Metadata = {
     template: '%s — Khatore Pharmaceuticals',
   },
   description:
-    'Khatore Pharmaceuticals (GMP Certified): Ayurvedic formulations with published clinical research. 1M+ patients, 30+ countries. Est. 1984, Barbil, India.',
+    'Khatore Pharmaceuticals (GMP Certified): Ayurvedic formulations with published clinical research. 3M+ estimated patients, 100+ countries. Est. 1984, Barbil, India.',
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     siteName: 'Khatore Pharmaceuticals',
     title: 'Khatore Pharmaceuticals — Ayurvedic Knowledge Since 1984',
     description:
-      'Khatore Pharmaceuticals (GMP Certified): Ayurvedic formulations with published clinical research. 1M+ patients, 30+ countries. Est. 1984, Barbil, India.',
+      'Khatore Pharmaceuticals (GMP Certified): Ayurvedic formulations with published clinical research. 3M+ estimated patients, 100+ countries. Est. 1984, Barbil, India.',
     url: SITE_URL,
   },
   twitter: {

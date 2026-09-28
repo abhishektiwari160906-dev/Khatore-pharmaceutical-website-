@@ -514,5 +514,5 @@ export const STAGES: Stage[] = [
   { p: 0.17, num: 'Stage 02 / 05', eyebrow: '1987–1988 — Clinical Trials', body: 'Four clinical trials across Jhansi, Guntur, Patna and Ahmedabad — <strong>144 patients</strong> enrolled across blind and double-blind randomised protocols.', rail: 'Stem' },
   { p: 0.38, num: 'Stage 03 / 05', eyebrow: '1992–1993 — Peer-Reviewed Publication', body: 'Findings published in JAPI and the Indian Journal of Gastroenterology, listed on <strong>NIH/PubMed</strong> — Ayurvedic knowledge held to scientific record.', rail: 'Branches' },
   { p: 0.62, num: 'Stage 04 / 05', eyebrow: '2000 — Industry Recognition', body: 'Best Entrepreneur Award for Ayurvedic Medicine in Asia. <strong>GMP certification</strong> maintained — traditional practice, rigorously assured.', rail: 'Leaves' },
-  { p: 0.85, num: 'Stage 05 / 05', eyebrow: 'Today — Global Presence', body: 'Eight Ayurvedic formulations, patients in <strong>30+ countries</strong> — the same botanical study behind Kamalahar.', rail: 'Full Canopy' },
+  { p: 0.85, num: 'Stage 05 / 05', eyebrow: 'Today — Global Presence', body: 'Eight Ayurvedic formulations, patients in <strong>100+ countries</strong> — the same botanical study behind Kamalahar.', rail: 'Full Canopy' },
 ];

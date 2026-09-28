@@ -1,12 +1,12 @@
 /**
- * Patient/country figures updated 2026-09-24 per Khatore/Mr. Vijay's
- * explicit confirmed direction (1M+ -> 5M+, 30+ -> 100+ countries),
- * carried over from the isolated prep-branch scaffolding where this
- * was first verified. The "40+ years" heritage figure is unchanged --
- * still supported by the founding year in data/heritage.ts (1984).
+ * Patient/country figures updated 2026-09-28 per Khatore's confirmed
+ * revision: patient figure corrected from 5M+ to 3M+ (estimated), the
+ * 100+ countries figure (set 2026-09-24) is unchanged. The "40+ years"
+ * heritage figure is unchanged -- still supported by the founding year
+ * in data/heritage.ts (1984).
  */
 export const GLOBAL_STATS = [
-  { n: '5M+', l: 'Patients benefited' },
+  { n: '3M+', l: 'Estimated patients benefitted' },
   { n: '100+', l: 'Countries served' },
   { n: '40+', l: 'Years of practice' },
 ];
