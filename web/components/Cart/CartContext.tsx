@@ -18,6 +18,8 @@ interface CartContextValue {
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   setQuantity: (productId: string, quantity: number) => void;
+  /** Called after a successful order is created at checkout -- the order itself is the new record, the cart's job is done. */
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -124,6 +126,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [removeItem],
   );
 
+  const clearCart = useCallback(() => {
+    itemsRef.current = [];
+    setItems([]);
+  }, []);
+
   const open = useCallback(() => {
     setIsOpen(true);
     trackEvent('cart_viewed', {
@@ -149,6 +156,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     addItem,
     removeItem,
     setQuantity,
+    clearCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

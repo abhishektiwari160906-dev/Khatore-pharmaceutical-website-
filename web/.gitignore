@@ -5,7 +5,9 @@
 # dependencies
 /node_modules
 
-# env
+# env -- .env.example (no secrets) stays tracked; any real .env file never should be.
+.env
+.env.local
 .env*.local
 
 # misc

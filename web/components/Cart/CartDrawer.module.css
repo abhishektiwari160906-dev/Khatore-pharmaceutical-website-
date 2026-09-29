@@ -122,7 +122,7 @@
 }
 .itemPrice {
   font-size: 0.85rem;
-  color: var(--blue);
+  color: var(--green-dk);
   margin-bottom: 0.5rem;
 }
 .itemPriceNote {
@@ -184,19 +184,34 @@
   font-size: 1.1rem;
   color: var(--ink);
 }
+.checkoutBtn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: var(--green-dk);
+  color: var(--ivory);
+  padding: 0.85rem;
+  font-size: 0.78rem;
+  transition: background 0.2s;
+  margin-bottom: 0.6rem;
+}
+.checkoutBtn:hover {
+  background: var(--green);
+}
 .enquireBtn {
   display: block;
   width: 100%;
   text-align: center;
-  background: var(--blue);
-  color: white;
-  padding: 0.85rem;
-  font-size: 0.78rem;
-  transition: background 0.2s;
+  border: 1px solid var(--rule);
+  color: var(--ink-mid);
+  padding: 0.8rem;
+  font-size: 0.74rem;
+  transition: border-color 0.2s, color 0.2s;
   margin-bottom: 0.75rem;
 }
 .enquireBtn:hover {
-  background: var(--blue-mid);
+  border-color: var(--green-dk);
+  color: var(--green-dk);
 }
 .footnote {
   font-size: 0.62rem;

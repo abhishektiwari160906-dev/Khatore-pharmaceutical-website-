@@ -1,0 +1,192 @@
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 2.5rem 6rem;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.sectionTitle {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--green-dk);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.input {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 300;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--rule);
+  background: white;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input:focus {
+  border-color: var(--green-dk);
+}
+.paymentNote {
+  font-size: 0.72rem;
+  line-height: 1.7;
+  color: var(--muted);
+  font-style: italic;
+  background: var(--green-pale);
+  border-left: 2px solid var(--gold);
+  padding: 0.9rem 1.1rem;
+}
+.submit {
+  align-self: flex-start;
+  background: var(--green-dk);
+  color: var(--ivory);
+  padding: 0.85rem 2.25rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  transition: background 0.2s;
+}
+.submit:hover {
+  background: var(--green);
+}
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.error {
+  font-size: 0.75rem;
+  color: #b3261e;
+}
+
+.summary {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 1.75rem;
+  position: sticky;
+  top: 6rem;
+}
+.summaryTitle {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+}
+.summaryItems {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 1rem;
+}
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.summaryImg {
+  flex-shrink: 0;
+  background: white;
+  border: 1px solid var(--rule);
+}
+.summaryInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+.summaryName {
+  font-size: 0.8rem;
+  color: var(--ink);
+}
+.summaryQty {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  color: var(--muted-lt);
+}
+.summaryPrice {
+  font-size: 0.78rem;
+  color: var(--ink-mid);
+  white-space: nowrap;
+}
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0.35rem 0;
+}
+.summaryMuted {
+  font-style: italic;
+  color: var(--muted-lt);
+}
+.summaryTotal {
+  font-size: 0.95rem;
+  color: var(--ink);
+  font-weight: 500;
+  border-top: 1px solid var(--rule);
+  margin-top: 0.5rem;
+  padding-top: 0.9rem;
+}
+
+.empty {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 6rem 2.5rem;
+  text-align: center;
+  color: var(--muted);
+}
+.emptyLink {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--green-dk);
+  border-bottom: 1px solid var(--green-dk);
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .summary {
+    position: static;
+  }
+}
+@media (max-width: 560px) {
+  .row2 {
+    grid-template-columns: 1fr;
+  }
+}

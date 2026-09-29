@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { COUNTRY_GEO, HUB_COUNTRY, type CountryGeo } from '@/data/geo';
 import { getCountryLineGeometry } from './countryGeometry';
+import { getLandGeometry } from './landGeometry';
 import { buildArcPoints, latLonToVector3 } from './sphereMath';
 import styles from './Globe3D.module.css';
 
@@ -123,11 +124,28 @@ function NetworkArcs({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 function CountryBorders() {
-  const geometry = useMemo(() => getCountryLineGeometry(RADIUS * 1.001), []);
+  const geometry = useMemo(() => getCountryLineGeometry(RADIUS * 1.003), []);
   return (
     <lineSegments geometry={geometry}>
-      <lineBasicMaterial color="#f4d06f" transparent opacity={0.28} toneMapped={false} />
+      <lineBasicMaterial color="#f4d06f" transparent opacity={0.35} toneMapped={false} />
     </lineSegments>
+  );
+}
+
+/**
+ * Real landmass fill (see landGeometry.ts) -- sits just above the ocean
+ * sphere's surface so it reads as continents rather than a texture
+ * seam. Uses the site's own brand green (matching --green-dk elsewhere)
+ * rather than an arbitrary new colour, so the globe stays part of the
+ * same Ayurvedic/pharmaceutical visual system instead of introducing a
+ * generic "map green".
+ */
+function Land() {
+  const geometry = useMemo(() => getLandGeometry(RADIUS * 1.0015), []);
+  return (
+    <mesh geometry={geometry}>
+      <meshStandardMaterial color="#1c6b45" roughness={0.9} metalness={0} />
+    </mesh>
   );
 }
 
@@ -222,13 +240,17 @@ function GlobeScene({
     <>
       <ambientLight intensity={0.55} />
       <directionalLight position={[3, 2, 4]} intensity={1.15} color="#fff6da" />
-      <directionalLight position={[-3, -1, -2]} intensity={0.35} color="#1bba63" />
+      <directionalLight position={[-3, -1, -2]} intensity={0.3} color="#6fb7e0" />
 
       <group ref={rotGroup}>
+        {/* Ocean base -- realistic deep Earth-blue, not neon/sci-fi.
+            Slight metalness gives the subtle water-like sheen the
+            directional lights catch as the globe rotates. */}
         <mesh>
           <sphereGeometry args={[RADIUS, 64, 64]} />
-          <meshStandardMaterial color="#0a3323" roughness={0.85} metalness={0.08} />
+          <meshStandardMaterial color="#0b3d63" roughness={0.75} metalness={0.15} />
         </mesh>
+        <Land />
         <CountryBorders />
         <NetworkArcs reducedMotion={reducedMotion} />
         {COUNTRY_GEO.map((c) => (
@@ -238,10 +260,11 @@ function GlobeScene({
 
       {/* Soft atmosphere glow -- a slightly larger back-facing sphere
           with additive blending, the standard cheap-but-effective
-          technique, restrained rather than a bright halo. */}
+          technique, restrained rather than a bright halo. Blue, to
+          match the realistic-Earth direction (was brand-green). */}
       <mesh scale={1.06}>
         <sphereGeometry args={[RADIUS, 48, 48]} />
-        <meshBasicMaterial color="#1bba63" transparent opacity={0.1} side={THREE.BackSide} depthWrite={false} />
+        <meshBasicMaterial color="#5ba8d9" transparent opacity={0.12} side={THREE.BackSide} depthWrite={false} />
       </mesh>
     </>
   );

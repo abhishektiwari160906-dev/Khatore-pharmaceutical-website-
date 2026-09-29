@@ -1,0 +1,85 @@
+/**
+ * Checkout order model (Master Website Upgrade, Section 14).
+ *
+ * This is the real, buildable part of the payment architecture: an
+ * order can genuinely be created today (a customer fills in real
+ * shipping/contact details and gets a real order record), while
+ * PAYMENT stays an explicit later step — see lib/payment/types.ts and
+ * PaymentStatus below. Every price here is looked up server-side from
+ * data/products.ts (the single pricing source of truth) at order-
+ * creation time; nothing here invents, discounts, or accepts a
+ * client-submitted price.
+ *
+ * Deliberately separate from lib/account/types.ts's `Order`/`Account`
+ * shapes: those describe a future signed-in customer-account system
+ * (tied to a `customerId`) and remain untouched, unimplemented
+ * scaffolding. This is the guest-checkout order created by the flow
+ * built in this pass.
+ */
+
+export interface OrderLineItem {
+  productId: string;
+  slug: string;
+  productName: string;
+  quantity: number;
+  /** Looked up server-side from data/products.ts at order-creation time -- never client-supplied. */
+  unitPrice: { amount: number; currency: 'USD' };
+  lineTotal: { amount: number; currency: 'USD' };
+}
+
+export interface CustomerInfo {
+  fullName: string;
+  email: string;
+  phone: string;
+}
+
+export interface ShippingInfo {
+  address: string;
+  city: string;
+  region: string; // state/province
+  postalCode: string;
+  /** ISO 3166-1 alpha-2. */
+  country: string;
+}
+
+/**
+ * Order-fulfilment lifecycle -- independent of PaymentStatus (Section
+ * 15). An order can be 'created' with payment still 'pending'; the two
+ * only move together once a real gateway's webhook confirms payment.
+ */
+export type OrderStatus = 'created' | 'awaiting_payment' | 'confirmed' | 'fulfilled' | 'cancelled';
+
+/**
+ * Payment state (Section 15). 'succeeded' must only ever be set from a
+ * server-side gateway verification/webhook (see lib/payment/types.ts,
+ * PaymentProvider.verifyWebhook) -- never from a frontend redirect.
+ */
+export type PaymentStatus = 'not_started' | 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'refunded';
+
+export interface Order {
+  orderId: string;
+  customer: CustomerInfo;
+  shipping: ShippingInfo;
+  items: OrderLineItem[];
+  /** Sum of item lineTotals. Server-computed, never client-supplied. */
+  subtotal: { amount: number; currency: 'USD' };
+  /**
+   * Undefined until Khatore's real shipping-cost rules exist (Section
+   * 10 -- "do not invent shipping costs"). The UI shows "Calculated at
+   * a later step" rather than a fabricated $0 or flat fee.
+   */
+  shippingCost?: { amount: number; currency: 'USD' };
+  /** Undefined until real tax rules exist -- same reasoning as shippingCost. */
+  tax?: { amount: number; currency: 'USD' };
+  /** subtotal + shippingCost + tax where those are known; otherwise equals subtotal. */
+  total: { amount: number; currency: 'USD' };
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  /** Set once a payment attempt exists against a real configured provider. */
+  paymentProviderId?: string;
+  /** The gateway's own transaction/order id, once a payment attempt exists. */
+  gatewayTransactionId?: string;
+  /** The gateway's own reference/receipt id, once available. */
+  gatewayReference?: string;
+  createdAt: string; // ISO 8601
+}

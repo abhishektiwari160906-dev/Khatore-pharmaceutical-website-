@@ -1,0 +1,20 @@
+.masthead {
+  background: var(--green-dk);
+  padding: 3.5rem 2.5rem 2.5rem;
+  text-align: center;
+}
+.eyebrow {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+.title {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  color: var(--ivory);
+}

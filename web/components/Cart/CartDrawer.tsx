@@ -11,15 +11,14 @@ import styles from './CartDrawer.module.css';
 const WHATSAPP_PHONE = CONTACT.whatsappIndiaWorld;
 
 /**
- * Premium slide-over, not a generic cart template. Client-only state —
- * no order is created. The primary action is an honest WhatsApp
- * enquiry summarizing the cart, not a "Proceed to Checkout" that would
- * lead nowhere: there is no real multi-item checkout endpoint yet
- * (Section 14 — Magento per-product links remain the only real
- * purchase path). That action fires the already-active whatsapp_click;
- * this component never fires checkout_started, any payment_* event, or
- * order_placed — those stay schema-only until the functionality they
- * describe exists.
+ * Premium slide-over, not a generic cart template. A real /checkout
+ * step now exists (Master Website Upgrade pass), so "Proceed to
+ * Checkout" is the primary action; the WhatsApp enquiry stays as a
+ * secondary, human-assisted path for anyone who'd rather order that
+ * way. Neither this component nor /checkout ever claims a payment
+ * succeeded — there is still no gateway configured (see
+ * lib/payment/providers.ts) — checkout_started/order_placed fire from
+ * the checkout flow itself, never from here.
  */
 export function CartDrawer() {
   const { items, itemCount, subtotal, isOpen, close, removeItem, setQuantity } = useCart();
@@ -135,6 +134,9 @@ export function CartDrawer() {
                 <span>Subtotal · {itemCount} item{itemCount === 1 ? '' : 's'}</span>
                 <span className={styles.subtotalVal}>{subtotal === null ? 'Contact for pricing' : `$${subtotal}`}</span>
               </div>
+              <Link href="/checkout" onClick={close} className={styles.checkoutBtn} tabIndex={isOpen ? 0 : -1}>
+                Proceed to Checkout
+              </Link>
               <a
                 href={whatsappHref}
                 target="_blank"
@@ -150,8 +152,8 @@ export function CartDrawer() {
                 Enquire About This Order
               </a>
               <p className={styles.footnote}>
-                Native checkout isn&apos;t live yet — this sends your cart to Khatore on WhatsApp to complete
-                the order.
+                Online payment isn&apos;t live yet — checkout records your order, then Khatore confirms
+                payment with you directly.
               </p>
             </div>
           </>
