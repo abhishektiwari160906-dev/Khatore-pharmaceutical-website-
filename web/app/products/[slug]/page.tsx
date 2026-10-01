@@ -6,6 +6,7 @@ import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { BuyButton } from '@/components/BuyButton';
 import { AddToCartButton } from '@/components/Cart/AddToCartButton';
+import { PriceTag } from '@/components/Pricing/PriceTag';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { TrackProductView } from '@/components/TrackProductView';
 import { PRODUCTS, getProductBySlug } from '@/data/products';
@@ -81,8 +82,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           )}
           {product.price ? (
             <div className={styles.priceArea}>
-              <span className={styles.price}>${product.price.amount}</span>
-              {product.priceNote ? <span className={styles.priceNote}>{product.priceNote}</span> : null}
+              <PriceTag product={product} />
             </div>
           ) : null}
           <div className={styles.actions}>

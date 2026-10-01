@@ -37,9 +37,34 @@
 .item {
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
   font-size: 0.82rem;
   color: var(--ink-mid);
   padding: 0.4rem 0;
+}
+.itemDiscount {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  color: var(--gold);
+}
+.itemPriceCol {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  white-space: nowrap;
+  color: var(--green-dk);
+}
+.itemPriceRegular {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted-lt);
+  text-decoration: line-through;
+}
+.pricingNote {
+  font-size: 0.68rem;
+  color: var(--muted-lt);
+  font-style: italic;
+  margin-top: 0.6rem;
 }
 .totalRow {
   display: flex;

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/components/Cart/CartContext';
 import { trackEvent } from '@/lib/events/client';
 import { CONTACT } from '@/lib/config';
+import { formatMoney } from '@/components/Pricing/PriceTag';
 import styles from './CartPageClient.module.css';
 
 /**
@@ -69,7 +70,21 @@ export function CartPageClient() {
               </div>
             </div>
             <span className={styles.itemPrice}>
-              {item.price ? `$${item.price.amount * item.quantity}` : 'Contact for pricing'}
+              {item.price ? (
+                <>
+                  {item.regularPrice && item.regularPrice > item.price.amount ? (
+                    <span className={styles.itemPriceRegular}>
+                      {formatMoney(item.regularPrice * item.quantity, item.price.currency)}
+                    </span>
+                  ) : null}
+                  {formatMoney(item.price.amount * item.quantity, item.price.currency)}
+                  {item.discountPercent ? (
+                    <span className={styles.itemDiscount}>{Math.round(item.discountPercent)}% off</span>
+                  ) : null}
+                </>
+              ) : (
+                'Contact for pricing'
+              )}
             </span>
           </li>
         ))}
@@ -79,7 +94,9 @@ export function CartPageClient() {
         <h2 className={styles.summaryTitle}>
           Subtotal · {itemCount} item{itemCount === 1 ? '' : 's'}
         </h2>
-        <p className={styles.summaryVal}>{subtotal === null ? 'Contact for pricing' : `$${subtotal}`}</p>
+        <p className={styles.summaryVal}>
+          {subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}
+        </p>
         <Link href="/checkout" className={styles.checkoutBtn}>
           Proceed to Checkout
         </Link>

@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/components/Cart/CartContext';
 import { trackEvent } from '@/lib/events/client';
+import { formatMoney } from '@/components/Pricing/PriceTag';
+import { COUNTRIES } from '@/data/countries';
 import type { Order } from '@/lib/order/types';
 import styles from './CheckoutForm.module.css';
 
@@ -141,7 +143,16 @@ export function CheckoutForm() {
             </label>
             <label className={styles.field}>
               <span>Country</span>
-              <input className={styles.input} type="text" name="country" required autoComplete="country-name" />
+              <select className={styles.input} name="country" required autoComplete="country" defaultValue="">
+                <option value="" disabled>
+                  Select your country
+                </option>
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
         </section>
@@ -170,29 +181,50 @@ export function CheckoutForm() {
               <div className={styles.summaryInfo}>
                 <span className={styles.summaryName}>{item.name}</span>
                 <span className={styles.summaryQty}>Qty {item.quantity}</span>
+                {item.discountPercent ? (
+                  <span className={styles.summaryDiscount}>{Math.round(item.discountPercent)}% off</span>
+                ) : null}
               </div>
               <span className={styles.summaryPrice}>
-                {item.price ? `$${item.price.amount * item.quantity}` : 'Contact for pricing'}
+                {item.price ? (
+                  <>
+                    {item.regularPrice && item.regularPrice > item.price.amount ? (
+                      <span className={styles.summaryPriceRegular}>
+                        {formatMoney(item.regularPrice * item.quantity, item.price.currency)}
+                      </span>
+                    ) : null}
+                    {formatMoney(item.price.amount * item.quantity, item.price.currency)}
+                  </>
+                ) : (
+                  'Contact for pricing'
+                )}
               </span>
             </li>
           ))}
         </ul>
         <div className={styles.summaryRow}>
           <span>Subtotal</span>
-          <span>{subtotal === null ? 'Contact for pricing' : `$${subtotal}`}</span>
+          <span>{subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}</span>
         </div>
         <div className={styles.summaryRow}>
           <span>Shipping</span>
-          <span className={styles.summaryMuted}>Calculated separately</span>
+          <span className={styles.summaryMuted}>
+            {items.every((i) => i.shippingIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
+          </span>
         </div>
         <div className={styles.summaryRow}>
           <span>Tax</span>
-          <span className={styles.summaryMuted}>Calculated separately</span>
+          <span className={styles.summaryMuted}>
+            {items.every((i) => i.taxIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
+          </span>
         </div>
         <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
           <span>Total</span>
-          <span>{subtotal === null ? 'Contact for pricing' : `$${subtotal}`}</span>
+          <span>{subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}</span>
         </div>
+        <p className={styles.countryNote}>
+          Final pricing is confirmed server-side for the country you select above.
+        </p>
       </aside>
     </div>
   );

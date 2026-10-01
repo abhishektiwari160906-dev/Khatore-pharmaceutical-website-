@@ -136,9 +136,34 @@
   color: var(--muted-lt);
 }
 .summaryPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   font-size: 0.78rem;
-  color: var(--ink-mid);
+  color: var(--green-dk);
   white-space: nowrap;
+}
+.summaryPriceRegular {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--muted-lt);
+  text-decoration: line-through;
+}
+.summaryDiscount {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.countryNote {
+  margin-top: 0.9rem;
+  font-size: 0.64rem;
+  line-height: 1.6;
+  color: var(--muted-lt);
+  font-style: italic;
 }
 .summaryRow {
   display: flex;

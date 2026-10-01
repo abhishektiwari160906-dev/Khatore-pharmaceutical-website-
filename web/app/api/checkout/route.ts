@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto';
 import { getProductBySlug } from '@/data/products';
 import { getConfiguredOrderStore } from '@/lib/order/store';
 import { getConfiguredPaymentProvider } from '@/lib/payment/providers';
+import { isValidCountryCode } from '@/data/countries';
+import { resolveProductPricing, resolveTierForCountry } from '@/lib/pricing/resolve';
 import type { CustomerInfo, Order, OrderLineItem, ShippingInfo } from '@/lib/order/types';
 
 export const runtime = 'nodejs';
@@ -44,6 +46,14 @@ function validateBody(body: unknown): { ok: true; value: CheckoutRequestBody } |
   ) {
     return { ok: false, error: 'missing or invalid shipping details' };
   }
+  // The submitted country drives server-side pricing-tier resolution
+  // below (Master Pricing pass, Section 13: "the selected checkout
+  // country must be validated server-side") -- an unrecognised code is
+  // rejected outright rather than silently falling back to a tier, so a
+  // client can't smuggle pricing data through a bogus country string.
+  if (!isValidCountryCode(String(shipping.country).toUpperCase())) {
+    return { ok: false, error: 'unrecognised shipping country' };
+  }
 
   const items = b.items;
   if (!Array.isArray(items) || items.length === 0) {
@@ -61,7 +71,7 @@ function validateBody(body: unknown): { ok: true; value: CheckoutRequestBody } |
     ok: true,
     value: {
       customer: customer as unknown as CustomerInfo,
-      shipping: shipping as unknown as ShippingInfo,
+      shipping: { ...shipping, country: String(shipping.country).toUpperCase() } as unknown as ShippingInfo,
       items: items as CheckoutRequestBody['items'],
     },
   };
@@ -82,10 +92,14 @@ export async function POST(request: Request): Promise<NextResponse> {
   const { customer, shipping, items } = validated.value;
 
   // Price every line server-side from the single pricing source of
-  // truth (data/products.ts) -- the request's own quantities are
-  // trusted, its prices never are. A line for a product with no
-  // approved price, or an unknown slug, fails the whole order rather
-  // than silently omitting or inventing a price for it.
+  // truth -- lib/pricing/resolve.ts, which resolves the VALIDATED
+  // shipping country to a tier and only then to a price (Master Pricing
+  // pass, Section 2/14). The request's own quantities are trusted, its
+  // prices never are -- CheckoutRequestBody has no price field at all,
+  // so there is nothing for a tampered request body to override here.
+  // A line for a product with no approved price, or an unknown slug,
+  // fails the whole order rather than silently omitting or inventing a
+  // price for it.
   const lineItems: OrderLineItem[] = [];
   for (const item of items) {
     const product = getProductBySlug(item.slug);
@@ -98,18 +112,40 @@ export async function POST(request: Request): Promise<NextResponse> {
         { status: 422 },
       );
     }
+    const pricing = resolveProductPricing(product, shipping.country);
+    const unitPrice = { amount: pricing.salePrice, currency: pricing.currency };
     lineItems.push({
       productId: product.productId,
       slug: product.slug,
       productName: product.name,
       quantity: item.quantity,
-      unitPrice: product.price,
-      lineTotal: { amount: product.price.amount * item.quantity, currency: product.price.currency },
+      unitPrice,
+      lineTotal: { amount: unitPrice.amount * item.quantity, currency: unitPrice.currency },
+      ...(pricing.isTiered
+        ? {
+            regularUnitPrice: { amount: pricing.regularPrice, currency: pricing.currency },
+            discountPercent: pricing.discountPercent,
+          }
+        : {}),
     });
   }
 
+  // Every line must share one currency to produce a real total -- never
+  // a summed-across-currencies number (same reasoning as the cart's own
+  // subtotal, lib/cart/CartContext.tsx). With today's catalogue this can
+  // only happen if a non-India cart pairs a non-Kamalahar USD product
+  // with an India-tier (INR) Kamalahar line.
+  const currencies = new Set(lineItems.map((l) => l.lineTotal.currency));
+  if (currencies.size > 1) {
+    return NextResponse.json(
+      { error: 'This order mixes products priced in different currencies for your country — please place separate orders, or contact Khatore directly.' },
+      { status: 422 },
+    );
+  }
+  const orderCurrency = lineItems[0]!.lineTotal.currency;
   const subtotalAmount = lineItems.reduce((sum, l) => sum + l.lineTotal.amount, 0);
-  const subtotal = { amount: subtotalAmount, currency: 'USD' as const };
+  const subtotal = { amount: subtotalAmount, currency: orderCurrency };
+  const pricingTier = resolveTierForCountry(shipping.country);
 
   const paymentProvider = getConfiguredPaymentProvider();
 
@@ -119,8 +155,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     shipping,
     items: lineItems,
     subtotal,
-    // shippingCost/tax intentionally omitted -- no approved rules exist yet (Section 10).
+    // shippingCost/tax intentionally omitted beyond what's already
+    // folded into a tiered line's price (Section 10 -- "do not invent
+    // shipping costs"); no separate rules exist for the untiered catalogue.
     total: subtotal,
+    country: shipping.country,
+    pricingTier,
     status: 'created',
     paymentStatus: 'not_started',
     paymentProviderId: paymentProvider.isConfigured ? paymentProvider.id : undefined,

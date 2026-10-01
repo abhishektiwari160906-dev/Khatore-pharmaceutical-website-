@@ -47,17 +47,6 @@
   border: 1px dashed var(--rule);
   padding: 0.35rem 0.6rem;
 }
-.price {
-  font-family: var(--sans);
-  font-size: 1.4rem;
-  font-weight: 300;
-  color: var(--blue);
-}
-.priceNote {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--muted);
-}
 .buy {
   margin-top: 0.5rem;
   display: inline-block;

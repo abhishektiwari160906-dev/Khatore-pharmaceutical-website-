@@ -1,0 +1,67 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import type { Product } from '@/data/products';
+import { resolveProductPricing, type ResolvedPricing } from '@/lib/pricing/resolve';
+import styles from './PriceTag.module.css';
+
+export function formatMoney(amount: number, currency: 'USD' | 'INR'): string {
+  const symbol = currency === 'INR' ? '₹' : '$';
+  return `${symbol}${amount.toLocaleString('en-IN')}`;
+}
+
+/**
+ * Regular (struck through) / Final (prominent) / Discount% display,
+ * resolved from the single pricing source (lib/pricing/resolve.ts),
+ * never a flat `$amount` render (Master Pricing pass, Section 4).
+ *
+ * Renders the no-country default tier immediately -- identical on the
+ * server and on first client render, so there is no hydration mismatch
+ * -- then fetches /api/pricing in the background and swaps in a
+ * country-aware price if geo-IP resolves one. A fetch failure leaves
+ * the already-shown default-tier price standing (Section 13: never
+ * guess, fall back to the defined default), so there is no loading
+ * flicker and no broken state.
+ */
+export function PriceTag({ product, size = 'md' }: { product: Product; size?: 'sm' | 'md' }) {
+  const [pricing, setPricing] = useState<ResolvedPricing>(() => resolveProductPricing(product));
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/pricing?productId=${encodeURIComponent(product.slug)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { pricing?: ResolvedPricing } | null) => {
+        if (!cancelled && data?.pricing) setPricing(data.pricing);
+      })
+      .catch(() => {
+        // Network/geo failure -- the default-tier price already shown stands.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [product.slug]);
+
+  const hasDiscount = pricing.isTiered && pricing.salePrice < pricing.regularPrice;
+  const includedNote =
+    pricing.isTiered && (pricing.taxIncluded || pricing.shippingIncluded)
+      ? pricing.taxIncluded && pricing.shippingIncluded
+        ? 'Includes taxes & shipping'
+        : pricing.taxIncluded
+          ? 'Includes taxes'
+          : 'Includes shipping'
+      : null;
+
+  return (
+    <div className={`${styles.wrap} ${size === 'sm' ? styles.sm : ''}`}>
+      <div className={styles.priceRow}>
+        {hasDiscount ? (
+          <span className={styles.regular}>{formatMoney(pricing.regularPrice, pricing.currency)}</span>
+        ) : null}
+        <span className={styles.final}>{formatMoney(pricing.salePrice, pricing.currency)}</span>
+        {hasDiscount ? <span className={styles.badge}>{Math.round(pricing.discountPercent)}% OFF</span> : null}
+      </div>
+      {includedNote ? <span className={styles.note}>{includedNote}</span> : null}
+      {!pricing.isTiered && product.priceNote ? <span className={styles.note}>{product.priceNote}</span> : null}
+    </div>
+  );
+}

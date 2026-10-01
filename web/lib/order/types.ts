@@ -22,9 +22,12 @@ export interface OrderLineItem {
   slug: string;
   productName: string;
   quantity: number;
-  /** Looked up server-side from data/products.ts at order-creation time -- never client-supplied. */
-  unitPrice: { amount: number; currency: 'USD' };
-  lineTotal: { amount: number; currency: 'USD' };
+  /** Looked up server-side from data/products.ts / lib/pricing/resolve.ts at order-creation time -- never client-supplied. */
+  unitPrice: { amount: number; currency: 'USD' | 'INR' };
+  lineTotal: { amount: number; currency: 'USD' | 'INR' };
+  /** Present only for a tiered product (today: Kamalahar) -- the pre-discount price and the authoritative discount percent used, from lib/pricing/config.ts (Master Pricing pass, Section 4). */
+  regularUnitPrice?: { amount: number; currency: 'USD' | 'INR' };
+  discountPercent?: number;
 }
 
 export interface CustomerInfo {
@@ -62,17 +65,25 @@ export interface Order {
   shipping: ShippingInfo;
   items: OrderLineItem[];
   /** Sum of item lineTotals. Server-computed, never client-supplied. */
-  subtotal: { amount: number; currency: 'USD' };
+  subtotal: { amount: number; currency: 'USD' | 'INR' };
   /**
    * Undefined until Khatore's real shipping-cost rules exist (Section
    * 10 -- "do not invent shipping costs"). The UI shows "Calculated at
    * a later step" rather than a fabricated $0 or flat fee.
    */
-  shippingCost?: { amount: number; currency: 'USD' };
+  shippingCost?: { amount: number; currency: 'USD' | 'INR' };
   /** Undefined until real tax rules exist -- same reasoning as shippingCost. */
-  tax?: { amount: number; currency: 'USD' };
+  tax?: { amount: number; currency: 'USD' | 'INR' };
   /** subtotal + shippingCost + tax where those are known; otherwise equals subtotal. */
-  total: { amount: number; currency: 'USD' };
+  total: { amount: number; currency: 'USD' | 'INR' };
+  /**
+   * The validated shipping.country and the pricing tier resolved from it
+   * at order-creation time (Master Pricing pass, Section 2: "store the
+   * country and pricing tier used when the order was created"). Always
+   * set -- every order resolves to a tier, even the default one.
+   */
+  country: string;
+  pricingTier: string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   /** Set once a payment attempt exists against a real configured provider. */

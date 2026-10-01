@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useCart } from './CartContext';
 import { trackEvent } from '@/lib/events/client';
 import { CONTACT } from '@/lib/config';
+import { formatMoney } from '@/components/Pricing/PriceTag';
 import styles from './CartDrawer.module.css';
 
 const WHATSAPP_PHONE = CONTACT.whatsappIndiaWorld;
@@ -90,7 +91,15 @@ export function CartDrawer() {
                     <span className={styles.itemFormat}>{item.format}</span>
                     {item.price ? (
                       <span className={styles.itemPrice}>
-                        ${item.price.amount * item.quantity}
+                        {item.regularPrice && item.regularPrice > item.price.amount ? (
+                          <span className={styles.itemPriceRegular}>
+                            {formatMoney(item.regularPrice * item.quantity, item.price.currency)}
+                          </span>
+                        ) : null}
+                        {formatMoney(item.price.amount * item.quantity, item.price.currency)}
+                        {item.discountPercent ? (
+                          <span className={styles.itemDiscount}>{Math.round(item.discountPercent)}% off</span>
+                        ) : null}
                       </span>
                     ) : (
                       <span className={styles.itemPriceNote}>Contact for pricing</span>
@@ -132,7 +141,9 @@ export function CartDrawer() {
             <div className={styles.footer}>
               <div className={styles.subtotalRow}>
                 <span>Subtotal · {itemCount} item{itemCount === 1 ? '' : 's'}</span>
-                <span className={styles.subtotalVal}>{subtotal === null ? 'Contact for pricing' : `$${subtotal}`}</span>
+                <span className={styles.subtotalVal}>
+                  {subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}
+                </span>
               </div>
               <Link href="/checkout" onClick={close} className={styles.checkoutBtn} tabIndex={isOpen ? 0 : -1}>
                 Proceed to Checkout

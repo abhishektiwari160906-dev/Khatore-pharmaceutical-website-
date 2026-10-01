@@ -121,9 +121,26 @@
   margin-bottom: 0.3rem;
 }
 .itemPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
   font-size: 0.85rem;
   color: var(--green-dk);
   margin-bottom: 0.5rem;
+}
+.itemPriceRegular {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted-lt);
+  text-decoration: line-through;
+}
+.itemDiscount {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
 }
 .itemPriceNote {
   font-family: var(--mono);

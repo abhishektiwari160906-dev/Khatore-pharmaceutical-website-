@@ -29,7 +29,7 @@ export interface Product {
   /** Undefined, not invented, where no approved description exists yet — see status. */
   description?: string;
   status: ContentStatus;
-  price?: { amount: number; currency: 'USD' };
+  price?: { amount: number; currency: 'USD' | 'INR' };
   priceNote?: string;
   /** External Magento product page — the only purchase path today (Section 14). */
   checkoutUrl: string;

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { CONTACT } from '@/lib/config';
+import { formatMoney } from '@/components/Pricing/PriceTag';
+import { getCountryName } from '@/data/countries';
 import type { Order } from '@/lib/order/types';
 import styles from './OrderConfirmationClient.module.css';
 
@@ -60,15 +62,28 @@ export function OrderConfirmationClient() {
           <li key={item.productId} className={styles.item}>
             <span>
               {item.productName} × {item.quantity}
+              {item.discountPercent ? (
+                <span className={styles.itemDiscount}> · {Math.round(item.discountPercent)}% off</span>
+              ) : null}
             </span>
-            <span>${item.lineTotal.amount}</span>
+            <span className={styles.itemPriceCol}>
+              {item.regularUnitPrice && item.regularUnitPrice.amount > item.unitPrice.amount ? (
+                <span className={styles.itemPriceRegular}>
+                  {formatMoney(item.regularUnitPrice.amount * item.quantity, item.regularUnitPrice.currency)}
+                </span>
+              ) : null}
+              {formatMoney(item.lineTotal.amount, item.lineTotal.currency)}
+            </span>
           </li>
         ))}
       </ul>
       <div className={styles.totalRow}>
         <span>Total</span>
-        <span>${order.total.amount}</span>
+        <span>{formatMoney(order.total.amount, order.total.currency)}</span>
       </div>
+      <p className={styles.pricingNote}>
+        Pricing confirmed for {getCountryName(order.country) ?? order.country}.
+      </p>
 
       <div className={styles.statusBlock}>
         <span className={styles.statusLabel}>Payment status</span>

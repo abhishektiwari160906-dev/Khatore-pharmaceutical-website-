@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/events/client';
 import { BuyButton } from './BuyButton';
+import { PriceTag } from './Pricing/PriceTag';
 import type { Product } from '@/data/products';
 import styles from './ProductCard.module.css';
 
@@ -49,12 +50,7 @@ export function ProductCard({ product }: { product: Product }) {
       ) : (
         <span className={styles.descPending}>Description pending Khatore approval</span>
       )}
-      {product.price ? (
-        <div className={styles.price}>
-          ${product.price.amount}
-          {product.priceNote ? <span className={styles.priceNote}> · {product.priceNote}</span> : null}
-        </div>
-      ) : null}
+      {product.price ? <PriceTag product={product} size="sm" /> : null}
       <BuyButton product={product} className={styles.buy} />
     </article>
   );

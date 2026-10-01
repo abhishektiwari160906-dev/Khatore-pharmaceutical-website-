@@ -71,9 +71,27 @@
   color: #b3261e;
 }
 .itemPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   font-size: 0.9rem;
-  color: var(--ink);
+  color: var(--green-dk);
   white-space: nowrap;
+}
+.itemPriceRegular {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted-lt);
+  text-decoration: line-through;
+}
+.itemDiscount {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
 }
 
 .summary {

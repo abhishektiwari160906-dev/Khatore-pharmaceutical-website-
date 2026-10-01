@@ -4,18 +4,31 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { trackEvent } from '@/lib/events/client';
 import type { Product } from '@/data/products';
 import type { CartItem } from '@/lib/cart/types';
+import type { ResolvedPricing } from '@/lib/pricing/resolve';
 
 const STORAGE_KEY = 'khatore_cart';
 
 interface CartContextValue {
   items: CartItem[];
   itemCount: number;
-  /** null when any line lacks an approved price — the drawer shows "Contact for pricing" rather than a partial/misleading total. */
-  subtotal: number | null;
+  /**
+   * null when any line lacks an approved price, OR when the cart's
+   * lines don't all share one currency -- summing across currencies
+   * would be a fabricated number, not a real total (Master Pricing
+   * pass, Section 5). The drawer/cart page/checkout show "Contact for
+   * pricing" for either case rather than a partial/misleading total.
+   */
+  subtotal: { amount: number; currency: 'USD' | 'INR' } | null;
   isOpen: boolean;
   open: () => void;
   close: () => void;
-  addItem: (product: Product, quantity?: number) => void;
+  /**
+   * `resolvedPricing`, when passed, snapshots the country-aware tiered
+   * price (Master Pricing pass, Section 5) into the cart line instead of
+   * the product's flat data/products.ts price. Only Kamalahar has one
+   * today -- AddToCartButton resolves it before calling this.
+   */
+  addItem: (product: Product, quantity?: number, resolvedPricing?: ResolvedPricing) => void;
   removeItem: (productId: string) => void;
   setQuantity: (productId: string, quantity: number) => void;
   /** Called after a successful order is created at checkout -- the order itself is the new record, the cart's job is done. */
@@ -39,7 +52,12 @@ function readStoredCart(): CartItem[] {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const hydrated = useRef(false);
+  // State, not a ref: the persist effect below must only see "hydrated"
+  // flip to true in the SAME render pass that also carries the
+  // hydrated `items`, otherwise it can fire with the stale pre-hydration
+  // `items` (still []) after the ref has already flipped, overwriting a
+  // real stored cart with "[]" on every hard reload.
+  const [hydrated, setHydrated] = useState(false);
   // Mirrors `items` synchronously (updated inside the same setItems
   // updater callback, not in a useEffect). A caller that adds an item
   // and immediately calls open() in the same synchronous handler would
@@ -54,20 +72,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const stored = readStoredCart();
     itemsRef.current = stored;
     setItems(stored);
-    hydrated.current = true;
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (!hydrated) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch {
       // Storage can be full or blocked (private browsing) — the cart
       // still works for the session, it just won't persist a reload.
     }
-  }, [items]);
+  }, [items, hydrated]);
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
+  const addItem = useCallback((product: Product, quantity = 1, resolvedPricing?: ResolvedPricing) => {
+    const price =
+      resolvedPricing && resolvedPricing.isTiered
+        ? { amount: resolvedPricing.salePrice, currency: resolvedPricing.currency }
+        : product.price;
+    const pricingExtras =
+      resolvedPricing && resolvedPricing.isTiered
+        ? {
+            regularPrice: resolvedPricing.regularPrice,
+            discountPercent: resolvedPricing.discountPercent,
+            tier: resolvedPricing.tier,
+            country: resolvedPricing.country,
+            taxIncluded: resolvedPricing.taxIncluded,
+            shippingIncluded: resolvedPricing.shippingIncluded,
+          }
+        : {};
+
     setItems((prev) => {
       const existing = prev.find((i) => i.productId === product.productId);
       const next = existing
@@ -80,9 +114,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
               name: product.name,
               image: product.image,
               format: product.format,
-              price: product.price,
+              price,
               priceNote: product.priceNote,
               quantity,
+              ...pricingExtras,
             },
           ];
       itemsRef.current = next;
@@ -141,9 +176,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const itemCount = useMemo(() => items.reduce((n, i) => n + i.quantity, 0), [items]);
   const subtotal = useMemo(() => {
-    if (items.length === 0) return 0;
+    if (items.length === 0) return { amount: 0, currency: 'USD' as const };
     if (items.some((i) => !i.price)) return null;
-    return items.reduce((sum, i) => sum + (i.price?.amount ?? 0) * i.quantity, 0);
+    const currencies = new Set(items.map((i) => i.price?.currency));
+    if (currencies.size > 1) return null;
+    const currency = items[0]?.price?.currency ?? 'USD';
+    const amount = items.reduce((sum, i) => sum + (i.price?.amount ?? 0) * i.quantity, 0);
+    return { amount, currency };
   }, [items]);
 
   const value: CartContextValue = {
