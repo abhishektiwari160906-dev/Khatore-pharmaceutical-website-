@@ -30,6 +30,7 @@ export interface EventEnvelope {
 // describes the order record being created, NOT payment succeeding;
 // there is still no payment_completed here — see FutureEventName.
 export type Phase1EventName =
+  | 'page_view'
   | 'product_viewed'
   | 'enquiry_submitted'
   | 'contact_form_submitted'
@@ -62,6 +63,7 @@ export type CommercialEventName = Phase1EventName | FutureEventName;
 
 /** Events actually allowed to be sent right now. Enforced in client.ts. */
 export const ACTIVE_EVENT_NAMES: readonly Phase1EventName[] = [
+  'page_view',
   'product_viewed',
   'enquiry_submitted',
   'contact_form_submitted',

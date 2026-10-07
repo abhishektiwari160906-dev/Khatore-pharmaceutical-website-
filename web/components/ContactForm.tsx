@@ -21,13 +21,38 @@ export function ContactForm() {
     const country = String(form.get('country') ?? '');
     const productContext = String(form.get('productContext') ?? '');
     const message = String(form.get('message') ?? '');
+    const consent = form.get('consent') === 'on';
+    const website = String(form.get('website') ?? ''); // honeypot -- real visitors never see/fill this
 
-    const ok = await trackEvent(
-      'contact_form_submitted',
-      { metadata: { name, email, phone, country, productContext, message, source: 'contact_page' } },
-      { confirmDelivery: true },
-    );
-    if (ok) {
+    const params = new URLSearchParams(window.location.search);
+
+    const [eventOk, leadRes] = await Promise.all([
+      trackEvent(
+        'contact_form_submitted',
+        { metadata: { name, email, phone, country, productContext, message, source: 'contact_page' } },
+        { confirmDelivery: true },
+      ),
+      fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          country,
+          productInterest: productContext,
+          message,
+          consent,
+          website,
+          source: 'contact_page',
+          utmSource: params.get('utm_source') ?? undefined,
+          utmMedium: params.get('utm_medium') ?? undefined,
+          utmCampaign: params.get('utm_campaign') ?? undefined,
+        }),
+      }).catch(() => null),
+    ]);
+
+    if (eventOk || leadRes?.ok) {
       setStatus('sent');
       e.currentTarget.reset();
     } else {
@@ -68,6 +93,19 @@ export function ContactForm() {
       <label className={styles.field}>
         <span>How can we assist?</span>
         <textarea className={styles.textarea} name="message" required />
+      </label>
+      {/* Honeypot: visually hidden from real visitors, off-screen rather than display:none so basic bots that skip hidden fields still fill it. Server rejects any submission with this field non-empty. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+      />
+      <label className={styles.consentField}>
+        <input type="checkbox" name="consent" required />
+        <span>I agree to be contacted by Khatore Pharmaceuticals about this enquiry.</span>
       </label>
       <p className={styles.disclaimer}>
         This is a commercial enquiry form, not a medical consultation. For medical advice, consult a

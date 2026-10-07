@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { HERITAGE_FOUNDING_YEAR, BRAND } from '@/lib/config';
 import { CartProvider } from '@/components/Cart/CartContext';
 import { CartDrawer } from '@/components/Cart/CartDrawer';
+import { PageViewTracker } from '@/components/PageViewTracker';
 import './globals.css';
 
 const SITE_URL = 'https://www.khatorepharma.com';
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <CartProvider>
+          <PageViewTracker />
           {children}
           <CartDrawer />
         </CartProvider>

@@ -5,6 +5,8 @@ import type {
   PaymentSessionResult,
   WebhookVerificationResult,
 } from './types';
+import { buildRazorpayProvider } from './razorpay';
+import { buildPayPalProvider } from './paypal';
 
 /**
  * The always-available default: no gateway is configured. Every method
@@ -52,16 +54,6 @@ function buildCashfreeProvider(): PaymentProvider | null {
   );
 }
 
-/** Same shape as Cashfree, for Razorpay -- not implemented, same reasoning. */
-function buildRazorpayProvider(): PaymentProvider | null {
-  const keyId = process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
-  if (!keyId || !keySecret) return null;
-  throw new Error(
-    'Razorpay credentials are present but no Razorpay integration is implemented yet -- see buildCashfreeProvider for the pattern to follow.',
-  );
-}
-
 /** Same shape again, for PayU -- not implemented, same reasoning. */
 function buildPayUProvider(): PaymentProvider | null {
   const merchantKey = process.env.PAYU_MERCHANT_KEY;
@@ -74,20 +66,27 @@ function buildPayUProvider(): PaymentProvider | null {
 
 const BUILDERS: Record<Exclude<PaymentProviderId, never>, () => PaymentProvider | null> = {
   cashfree: buildCashfreeProvider,
+  // Razorpay and PayPal are real implementations (razorpay.ts /
+  // paypal.ts) -- see STATUS.md for exactly what in each has been run
+  // against a live sandbox vs. built against the documented API shape
+  // only (createSession needs real keys to actually call the gateway;
+  // Razorpay's verifyWebhook is pure HMAC and unit-tested without any
+  // keys; PayPal's verifyWebhook needs a live sandbox call this
+  // environment cannot make, so it always returns invalid today).
   razorpay: buildRazorpayProvider,
+  paypal: buildPayPalProvider,
   payu: buildPayUProvider,
 };
 
 /**
  * The one place the app asks "which payment provider is active". Tries
- * providers in the order this project's own gateway evaluation
- * recommends (Cashfree first, Razorpay then PayU as alternatives), and
- * falls back to the always-safe UnconfiguredPaymentProvider when none
- * have credentials set -- which is the actual state of this deployment
- * right now.
+ * providers in order (Cashfree, Razorpay, PayPal, PayU) and falls back
+ * to the always-safe UnconfiguredPaymentProvider when none have
+ * credentials set -- which is the actual state of this deployment
+ * right now (no real keys exist in this environment for any of them).
  */
 export function getConfiguredPaymentProvider(): PaymentProvider {
-  for (const id of ['cashfree', 'razorpay', 'payu'] as const) {
+  for (const id of ['cashfree', 'razorpay', 'paypal', 'payu'] as const) {
     const provider = BUILDERS[id]();
     if (provider) return provider;
   }

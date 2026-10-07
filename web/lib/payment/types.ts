@@ -15,11 +15,11 @@
  * the checkout route, the checkout page, or the order model.
  */
 
-export type PaymentProviderId = 'cashfree' | 'razorpay' | 'payu';
+export type PaymentProviderId = 'cashfree' | 'razorpay' | 'payu' | 'paypal';
 
 export interface PaymentSessionRequest {
   orderId: string;
-  amount: { amount: number; currency: 'USD' };
+  amount: { amount: number; currency: 'USD' | 'INR' };
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -28,9 +28,22 @@ export interface PaymentSessionRequest {
 export interface PaymentSessionResult {
   /** True only when a real gateway session was created. */
   available: boolean;
-  /** Present only when available -- the URL/token the client uses to open the gateway's own hosted/tokenized checkout. */
+  /** Present only when available -- the URL/token the client uses to open the gateway's own hosted/tokenized checkout (PayPal's approve link, Cashfree's hosted page, etc.). */
   redirectUrl?: string;
+  /** Razorpay has no redirect URL -- the client opens Razorpay Checkout.js with this order id + the public key below. */
+  gatewayOrderId?: string;
+  /** Razorpay's publishable key id -- safe to expose to the client, required to open Checkout.js. */
+  publicKey?: string;
   providerId?: PaymentProviderId;
+  /**
+   * 'live' = a real sandbox/production API call to the gateway succeeded.
+   * 'mock' = no real credentials were available, so this is a
+   * documented-shape stand-in -- the request/response structure matches
+   * the provider's real API, but nothing was actually sent to them.
+   * Never omit this when mode is 'mock': a caller must not treat a mock
+   * session as a real one (Section 14 -- never fake a successful call).
+   */
+  mode?: 'live' | 'mock';
   /** Human-readable reason when unavailable (e.g. "no payment provider configured yet"). Never exposes secrets. */
   reason?: string;
 }
@@ -41,6 +54,8 @@ export interface WebhookVerificationResult {
   status?: 'succeeded' | 'failed' | 'cancelled';
   gatewayTransactionId?: string;
   gatewayReference?: string;
+  /** The gateway's own id for this specific event -- used to make webhook processing idempotent (a retried delivery of the same event must not be double-processed). */
+  eventId?: string;
 }
 
 /**

@@ -115,3 +115,36 @@ export const DEFAULT_TIER_ID: PricingTierId = 'TIER_1';
 export function getTier(id: PricingTierId): PricingTierDefinition {
   return PRICING_TIERS[id];
 }
+
+/**
+ * Demo mode (Area 3, 7 Oct build): the client's own meeting confirmed
+ * the Kamalahar discount should run for a 6-day window, but no actual
+ * start date has been given yet -- `PRICING_TIERS` above correctly
+ * still has `discountStartsAt`/`discountEndsAt` undefined on every
+ * tier, which resolve.ts treats as "always on" (today's real,
+ * confirmed behaviour). Setting DEMO_PRICING=1 overlays an OBVIOUSLY
+ * LABELLED fake 6-day window (centered on server start time) purely so
+ * the revert mechanism itself can be demonstrated live -- it is never
+ * read unless the env var is explicitly "1", so production is
+ * unaffected by default. This does NOT touch regularPrice/salePrice/
+ * discountPercent -- those are the real, workbook-confirmed numbers
+ * either way.
+ */
+const DEMO_WINDOW_STARTED_AT = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(); // 2 days before server start
+const DEMO_WINDOW_ENDS_AT = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(); // 4 days after server start (6-day window total)
+const DEMO_WINDOW_ALREADY_EXPIRED_ENDS_AT = new Date(Date.now() - 60 * 1000).toISOString(); // ended 1 minute ago -- lets the meeting demo show the REVERTED state too
+
+export function getDiscountWindow(tierId: PricingTierId): { startsAt?: string; endsAt?: string } {
+  const tier = PRICING_TIERS[tierId];
+  if (process.env.DEMO_PRICING === '1') {
+    // TIER_1 demonstrates "discount currently active, reverts in ~4 days".
+    // TIER_2 demonstrates "discount already expired, reverted to regular
+    // price" -- so both states are visible in one live demo without
+    // waiting for real time to pass.
+    if (tierId === 'TIER_2') {
+      return { startsAt: DEMO_WINDOW_STARTED_AT, endsAt: DEMO_WINDOW_ALREADY_EXPIRED_ENDS_AT };
+    }
+    return { startsAt: DEMO_WINDOW_STARTED_AT, endsAt: DEMO_WINDOW_ENDS_AT };
+  }
+  return { startsAt: tier.discountStartsAt, endsAt: tier.discountEndsAt };
+}

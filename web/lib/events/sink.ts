@@ -64,8 +64,42 @@ export class FanOutEventSink implements EventSink {
   }
 }
 
+/**
+ * Area 2 (dashboard) needs something QUERYABLE, not just log lines --
+ * this repo has no database (see STATUS.md), so this keeps the most
+ * recent events in process memory as a stand-in. Explicit limitations,
+ * stated rather than hidden:
+ *   - per-instance only: a second server instance (or a redeploy, or a
+ *     serverless cold start) has its own empty copy. Fine for a single
+ *     long-running `next start` process (e.g. a demo), not a reliable
+ *     analytics store for a real multi-instance/serverless deployment.
+ *   - capped at MAX_EVENTS (ring-buffer behaviour) so it can't leak
+ *     memory on a long-running process.
+ * A real deployment needs this replaced by a real database query, not
+ * this class -- see the "what this can and cannot tell you yet" note
+ * surfaced on the dashboard page itself.
+ */
+const MAX_EVENTS = 2000;
+
+export class InMemoryEventSink implements EventSink {
+  private readonly events: EventEnvelope[] = [];
+
+  async record(event: EventEnvelope): Promise<void> {
+    this.events.push(event);
+    if (this.events.length > MAX_EVENTS) this.events.shift();
+  }
+
+  getAll(): readonly EventEnvelope[] {
+    return this.events;
+  }
+}
+
+// Single process-lifetime instance, shared by getConfiguredEventSink()
+// (so every real event lands here too) and the dashboard's reads.
+export const inMemoryEvents = new InMemoryEventSink();
+
 export function getConfiguredEventSink(): EventSink {
-  const sinks: EventSink[] = [new ConsoleEventSink()];
+  const sinks: EventSink[] = [new ConsoleEventSink(), inMemoryEvents];
   const sheetWebhook = process.env.KHATORE_EVENTS_SHEET_WEBHOOK_URL;
   if (sheetWebhook) {
     sinks.push(new GoogleSheetEventSink(sheetWebhook));

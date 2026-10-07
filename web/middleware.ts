@@ -15,7 +15,43 @@ import { NextResponse, type NextRequest } from 'next/server';
  * authoritative source at order time -- see app/api/checkout/route.ts,
  * which re-resolves pricing itself and ignores this header entirely.
  */
+/**
+ * Internal dashboard gate (Area 2): HTTP Basic Auth against
+ * KHATORE_DASHBOARD_PASSWORD. Any username is accepted -- only the
+ * password is checked, since there is exactly one shared credential,
+ * not per-person accounts. With no password configured, the dashboard
+ * is refused entirely (fails closed, never silently open).
+ */
+function checkDashboardAuth(request: NextRequest): NextResponse | null {
+  const expected = process.env.KHATORE_DASHBOARD_PASSWORD;
+  if (!expected) {
+    return new NextResponse('Dashboard is not configured (KHATORE_DASHBOARD_PASSWORD unset).', { status: 503 });
+  }
+  const auth = request.headers.get('authorization');
+  if (auth?.startsWith('Basic ')) {
+    try {
+      const decoded = atob(auth.slice('Basic '.length));
+      const password = decoded.split(':').slice(1).join(':');
+      if (password === expected) return null; // authorized
+    } catch {
+      // fall through to challenge
+    }
+  }
+  return new NextResponse('Authentication required', {
+    status: 401,
+    headers: { 'WWW-Authenticate': 'Basic realm="Khatore Dashboard"' },
+  });
+}
+
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/dashboard')) {
+    const challenge = checkDashboardAuth(request);
+    if (challenge) return challenge;
+    return NextResponse.next();
+  }
+
   const country = request.geo?.country;
   if (!country) return NextResponse.next();
 
@@ -25,5 +61,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/pricing'],
+  matcher: ['/api/pricing', '/dashboard/:path*', '/api/dashboard/:path*'],
 };

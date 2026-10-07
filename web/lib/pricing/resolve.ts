@@ -12,7 +12,7 @@
  */
 
 import { getProductBySlug, type Product } from '@/data/products';
-import { COUNTRY_TIER_MAP, DEFAULT_TIER_ID, getTier, type PricingTierId } from './config';
+import { COUNTRY_TIER_MAP, DEFAULT_TIER_ID, getTier, getDiscountWindow, type PricingTierId } from './config';
 
 export type ResolvedTierId = PricingTierId | 'STANDARD';
 
@@ -30,6 +30,27 @@ export interface ResolvedPricing {
   country?: string;
   /** False means this is the flat, non-discounted data/products.ts price -- no workbook entry exists for this product yet. */
   isTiered: boolean;
+  /** True when a configured discount window is currently in effect (or no window is configured -- "always on"). False means the window has ended and salePrice has already reverted to regularPrice. Always true for a non-tiered product (no discount to be active). */
+  discountActive?: boolean;
+  /** The configured end of the discount window, when one exists -- undefined when the discount has no expiry configured. */
+  discountEndsAt?: string;
+}
+
+/**
+ * Pure, server-authoritative discount-window check (Area 3, 7 Oct
+ * build): the charged amount must match the displayed amount, and the
+ * discount must revert automatically once endsAt passes -- with no
+ * redeploy, since this is evaluated fresh on every call against the
+ * real clock, not baked into a cached value. No window configured
+ * (both undefined) means "always on", which is today's real, confirmed
+ * behaviour -- NOT the same as "expired". `now` is injected (not read
+ * internally) so this is fully unit-testable with synthetic clocks.
+ */
+export function isDiscountActive(window: { startsAt?: string; endsAt?: string }, now: Date): boolean {
+  if (!window.startsAt && !window.endsAt) return true; // no window configured -- always on
+  if (window.startsAt && now < new Date(window.startsAt)) return false;
+  if (window.endsAt && now > new Date(window.endsAt)) return false;
+  return true;
 }
 
 /**
@@ -50,17 +71,25 @@ export function resolveProductPricing(product: Product, countryCode?: string): R
   if (product.productId === 'kamalahar') {
     const tierId = resolveTierForCountry(normalizedCountry);
     const tier = getTier(tierId);
+    const window = getDiscountWindow(tierId);
+    const active = isDiscountActive(window, new Date());
+
     return {
       productId: product.productId,
       tier: tierId,
       currency: tier.currency,
+      // Reverted automatically once the configured window ends -- the
+      // charged amount (checkout calls this same function) always
+      // matches what was just displayed, with no redeploy needed.
       regularPrice: tier.regularPrice,
-      salePrice: tier.salePrice,
-      discountPercent: tier.discountPercent,
+      salePrice: active ? tier.salePrice : tier.regularPrice,
+      discountPercent: active ? tier.discountPercent : 0,
       taxIncluded: tier.taxIncluded,
       shippingIncluded: tier.shippingIncluded,
       country: normalizedCountry,
       isTiered: true,
+      discountActive: active,
+      discountEndsAt: window.endsAt,
     };
   }
 

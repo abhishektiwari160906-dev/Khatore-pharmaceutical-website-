@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getConfiguredPaymentProvider } from '@/lib/payment/providers';
+import { seenPaymentEvents } from '@/lib/payment/idempotency';
 
 export const runtime = 'nodejs';
 
@@ -37,6 +38,22 @@ export async function POST(request: Request): Promise<NextResponse> {
     // unconfigured/misdirected sender doesn't retry forever, but do
     // nothing with the contents.
     return NextResponse.json({ ok: true, processed: false }, { status: 200 });
+  }
+
+  // Idempotency: a gateway retries delivery on any non-200/timeout, so
+  // the exact same event can arrive more than once. Once verified, an
+  // already-seen event id is acknowledged but not reprocessed -- see
+  // lib/payment/idempotency.ts (shouldProcessEvent has the pure,
+  // unit-tested decision logic this mirrors) for why this in-memory
+  // store is not durable across a cold start, which still needs a real
+  // database.
+  const eventId = result.eventId;
+  if (eventId) {
+    const alreadySeen = await seenPaymentEvents.has(eventId);
+    if (alreadySeen) {
+      return NextResponse.json({ ok: true, processed: false, reason: 'duplicate event' }, { status: 200 });
+    }
+    await seenPaymentEvents.markSeen(eventId);
   }
 
   // eslint-disable-next-line no-console
