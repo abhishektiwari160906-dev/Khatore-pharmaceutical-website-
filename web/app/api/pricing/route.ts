@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getProductBySlug } from '@/data/products';
 import { isValidCountryCode } from '@/data/countries';
-import { resolveProductPricing } from '@/lib/pricing/resolve';
+import { resolveLocalCurrencyPricing } from '@/lib/pricing/resolve';
 
 export const runtime = 'nodejs';
 
@@ -37,6 +37,6 @@ export async function GET(request: Request): Promise<NextResponse> {
   const candidate = (queryCountry ?? headerCountry ?? '').trim().toUpperCase();
   const country = candidate && isValidCountryCode(candidate) ? candidate : undefined;
 
-  const pricing = resolveProductPricing(product, country);
+  const pricing = await resolveLocalCurrencyPricing(product, country);
   return NextResponse.json({ pricing });
 }

@@ -215,3 +215,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+.refundNote {
+  margin-top: 0.5rem;
+  font-size: 0.62rem;
+  line-height: 1.6;
+  color: var(--muted-lt);
+}

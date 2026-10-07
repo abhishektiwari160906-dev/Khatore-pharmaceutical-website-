@@ -5,6 +5,7 @@ import { trackEvent } from '@/lib/events/client';
 import type { Product } from '@/data/products';
 import type { CartItem } from '@/lib/cart/types';
 import type { ResolvedPricing } from '@/lib/pricing/resolve';
+import type { CurrencyCode } from '@/data/currencies';
 
 const STORAGE_KEY = 'khatore_cart';
 
@@ -18,7 +19,7 @@ interface CartContextValue {
    * pass, Section 5). The drawer/cart page/checkout show "Contact for
    * pricing" for either case rather than a partial/misleading total.
    */
-  subtotal: { amount: number; currency: 'USD' | 'INR' } | null;
+  subtotal: { amount: number; currency: CurrencyCode } | null;
   isOpen: boolean;
   open: () => void;
   close: () => void;

@@ -7,6 +7,8 @@
  * and are only filled in here where approved source data exists.
  */
 
+import type { CurrencyCode } from './currencies';
+
 /** Content-approval axis — has Khatore signed off the copy shown for this product. */
 export type ContentStatus = 'approved' | 'pending-description';
 
@@ -29,7 +31,7 @@ export interface Product {
   /** Undefined, not invented, where no approved description exists yet — see status. */
   description?: string;
   status: ContentStatus;
-  price?: { amount: number; currency: 'USD' | 'INR' };
+  price?: { amount: number; currency: CurrencyCode };
   priceNote?: string;
   /** External Magento product page — the only purchase path today (Section 14). */
   checkoutUrl: string;

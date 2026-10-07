@@ -17,17 +17,31 @@
  * built in this pass.
  */
 
+import type { CurrencyCode } from '@/data/currencies';
+
 export interface OrderLineItem {
   productId: string;
   slug: string;
   productName: string;
   quantity: number;
   /** Looked up server-side from data/products.ts / lib/pricing/resolve.ts at order-creation time -- never client-supplied. */
-  unitPrice: { amount: number; currency: 'USD' | 'INR' };
-  lineTotal: { amount: number; currency: 'USD' | 'INR' };
+  unitPrice: { amount: number; currency: CurrencyCode };
+  lineTotal: { amount: number; currency: CurrencyCode };
   /** Present only for a tiered product (today: Kamalahar) -- the pre-discount price and the authoritative discount percent used, from lib/pricing/config.ts (Master Pricing pass, Section 4). */
-  regularUnitPrice?: { amount: number; currency: 'USD' | 'INR' };
+  regularUnitPrice?: { amount: number; currency: CurrencyCode };
   discountPercent?: number;
+  /**
+   * Audit trail for a live-currency-converted line (Master Pricing
+   * pass, 7 Oct): the tier's own base currency/amount (USD or INR,
+   * never converted) and the live USD-based rate applied to produce
+   * `unitPrice` above, so a converted order can always be reconciled
+   * back to the real tier price it came from. Undefined when the
+   * visitor's local currency equals the tier's base currency already
+   * (no conversion happened).
+   */
+  baseAmount?: number;
+  baseCurrency?: CurrencyCode;
+  fxRate?: number;
 }
 
 export interface CustomerInfo {
@@ -65,17 +79,17 @@ export interface Order {
   shipping: ShippingInfo;
   items: OrderLineItem[];
   /** Sum of item lineTotals. Server-computed, never client-supplied. */
-  subtotal: { amount: number; currency: 'USD' | 'INR' };
+  subtotal: { amount: number; currency: CurrencyCode };
   /**
    * Undefined until Khatore's real shipping-cost rules exist (Section
    * 10 -- "do not invent shipping costs"). The UI shows "Calculated at
    * a later step" rather than a fabricated $0 or flat fee.
    */
-  shippingCost?: { amount: number; currency: 'USD' | 'INR' };
+  shippingCost?: { amount: number; currency: CurrencyCode };
   /** Undefined until real tax rules exist -- same reasoning as shippingCost. */
-  tax?: { amount: number; currency: 'USD' | 'INR' };
+  tax?: { amount: number; currency: CurrencyCode };
   /** subtotal + shippingCost + tax where those are known; otherwise equals subtotal. */
-  total: { amount: number; currency: 'USD' | 'INR' };
+  total: { amount: number; currency: CurrencyCode };
   /**
    * The validated shipping.country and the pricing tier resolved from it
    * at order-creation time (Master Pricing pass, Section 2: "store the

@@ -3,11 +3,23 @@
 import { useEffect, useState } from 'react';
 import type { Product } from '@/data/products';
 import { resolveProductPricing, type ResolvedPricing } from '@/lib/pricing/resolve';
+import { getCurrencySymbol, type CurrencyCode } from '@/data/currencies';
 import styles from './PriceTag.module.css';
 
-export function formatMoney(amount: number, currency: 'USD' | 'INR'): string {
-  const symbol = currency === 'INR' ? '₹' : '$';
-  return `${symbol}${amount.toLocaleString('en-IN')}`;
+/**
+ * Off by default (client decision, 8 Oct -- reversing the 7 Oct
+ * approval): there is no real 30-day price history behind this claim
+ * yet (the site hasn't been live), so it must not show until that
+ * history is genuinely there. Flip NEXT_PUBLIC_SHOW_LOWEST_PRICE_BADGE
+ * to "1" only once real data backs it.
+ */
+const SHOW_LOWEST_PRICE_BADGE = process.env.NEXT_PUBLIC_SHOW_LOWEST_PRICE_BADGE === '1';
+
+export function formatMoney(amount: number, currency: CurrencyCode): string {
+  // Whole-currency-unit formatting only -- client-confirmed rounding
+  // rule (7 Oct) is nearest whole number, so there are never decimals
+  // to show here regardless of currency.
+  return `${getCurrencySymbol(currency)}${Math.round(amount).toLocaleString('en-IN')}`;
 }
 
 /**
@@ -60,6 +72,11 @@ export function PriceTag({ product, size = 'md' }: { product: Product; size?: 's
         <span className={styles.final}>{formatMoney(pricing.salePrice, pricing.currency)}</span>
         {hasDiscount ? <span className={styles.badge}>{Math.round(pricing.discountPercent)}% OFF</span> : null}
       </div>
+      {hasDiscount && SHOW_LOWEST_PRICE_BADGE ? (
+        <span className={styles.lowestBadge}>
+          Lowest price in 30 days — {formatMoney(pricing.salePrice, pricing.currency)}
+        </span>
+      ) : null}
       {includedNote ? <span className={styles.note}>{includedNote}</span> : null}
       {!pricing.isTiered && product.priceNote ? <span className={styles.note}>{product.priceNote}</span> : null}
     </div>

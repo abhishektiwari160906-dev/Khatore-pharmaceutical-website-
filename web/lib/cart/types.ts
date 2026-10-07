@@ -5,6 +5,8 @@
  * server-side cart. See CartContext.tsx for why the checkout path
  * routes to a WhatsApp enquiry instead of a fake "Proceed to Checkout".
  */
+import type { CurrencyCode } from '@/data/currencies';
+
 export interface CartItem {
   productId: string;
   slug: string;
@@ -12,7 +14,7 @@ export interface CartItem {
   image: string;
   format: string;
   /** Undefined when the product has no approved price — the drawer shows "Contact for pricing" for that line instead of inventing one. */
-  price?: { amount: number; currency: 'USD' | 'INR' };
+  price?: { amount: number; currency: CurrencyCode };
   priceNote?: string;
   quantity: number;
   /**

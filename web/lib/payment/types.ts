@@ -15,11 +15,13 @@
  * the checkout route, the checkout page, or the order model.
  */
 
+import type { CurrencyCode } from '@/data/currencies';
+
 export type PaymentProviderId = 'cashfree' | 'razorpay' | 'payu' | 'paypal';
 
 export interface PaymentSessionRequest {
   orderId: string;
-  amount: { amount: number; currency: 'USD' | 'INR' };
+  amount: { amount: number; currency: CurrencyCode };
   customerName: string;
   customerEmail: string;
   customerPhone: string;

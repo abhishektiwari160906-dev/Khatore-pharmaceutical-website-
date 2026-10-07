@@ -13,12 +13,15 @@
  * consults this file for productId === 'kamalahar'.
  */
 
+import type { CurrencyCode } from '@/data/currencies';
+
 export type PricingTierId = 'TIER_1' | 'TIER_2' | 'TIER_3_INDIA';
 
 export interface PricingTierDefinition {
   id: PricingTierId;
   label: string;
-  currency: 'USD' | 'INR';
+  /** The tier's own BASE currency (USD or INR, per the workbook) -- never changes. The DISPLAYED/CHARGED currency a specific visitor sees may be their own local currency instead, via live conversion -- see lib/pricing/fx.ts and resolve.ts's resolveLocalCurrencyPricing(). */
+  currency: CurrencyCode;
   regularPrice: number;
   salePrice: number;
   /** Authoritative, from the workbook -- NOT recalculated from the rounded display prices (Section 4: "do not calculate discount from rounded display values"). */

@@ -225,6 +225,9 @@ export function CheckoutForm() {
         <p className={styles.countryNote}>
           Final pricing is confirmed server-side for the country you select above.
         </p>
+        <p className={styles.refundNote}>
+          *Refunds are available only before your order is dispatched. Once dispatched, the order cannot be refunded.
+        </p>
       </aside>
     </div>
   );

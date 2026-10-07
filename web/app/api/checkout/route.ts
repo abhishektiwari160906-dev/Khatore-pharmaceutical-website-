@@ -4,7 +4,7 @@ import { getProductBySlug } from '@/data/products';
 import { getConfiguredOrderStore } from '@/lib/order/store';
 import { getConfiguredPaymentProvider } from '@/lib/payment/providers';
 import { isValidCountryCode } from '@/data/countries';
-import { resolveProductPricing, resolveTierForCountry } from '@/lib/pricing/resolve';
+import { resolveLocalCurrencyPricing, resolveTierForCountry } from '@/lib/pricing/resolve';
 import type { CustomerInfo, Order, OrderLineItem, ShippingInfo } from '@/lib/order/types';
 
 export const runtime = 'nodejs';
@@ -112,7 +112,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         { status: 422 },
       );
     }
-    const pricing = resolveProductPricing(product, shipping.country);
+    const pricing = await resolveLocalCurrencyPricing(product, shipping.country);
     const unitPrice = { amount: pricing.salePrice, currency: pricing.currency };
     lineItems.push({
       productId: product.productId,
@@ -126,6 +126,12 @@ export async function POST(request: Request): Promise<NextResponse> {
             regularUnitPrice: { amount: pricing.regularPrice, currency: pricing.currency },
             discountPercent: pricing.discountPercent,
           }
+        : {}),
+      // Audit trail for a live-currency-converted line -- see
+      // lib/pricing/resolve.ts's resolveLocalCurrencyPricing(). Undefined
+      // when no conversion happened (base currency already matched).
+      ...(pricing.baseAmount !== undefined
+        ? { baseAmount: pricing.baseAmount, baseCurrency: pricing.baseCurrency, fxRate: pricing.fxRate }
         : {}),
     });
   }

@@ -13,13 +13,15 @@
 
 import { getProductBySlug, type Product } from '@/data/products';
 import { COUNTRY_TIER_MAP, DEFAULT_TIER_ID, getTier, getDiscountWindow, type PricingTierId } from './config';
+import { getCurrencyForCountry, type CurrencyCode } from '@/data/currencies';
+import { getRates, convertAmount, roundToWhole } from './fx';
 
 export type ResolvedTierId = PricingTierId | 'STANDARD';
 
 export interface ResolvedPricing {
   productId: string;
   tier: ResolvedTierId;
-  currency: 'USD' | 'INR';
+  currency: CurrencyCode;
   regularPrice: number;
   salePrice: number;
   /** Authoritative figure from the tier config -- never recomputed from rounded display prices (Section 4). */
@@ -34,6 +36,18 @@ export interface ResolvedPricing {
   discountActive?: boolean;
   /** The configured end of the discount window, when one exists -- undefined when the discount has no expiry configured. */
   discountEndsAt?: string;
+  /**
+   * Live-currency-conversion audit trail (Master Pricing pass, 7 Oct):
+   * when `currency` above has been converted from the tier's own base
+   * currency to the visitor's local currency, these record exactly
+   * what the conversion was, so it's always traceable back to the
+   * real, workbook-confirmed base price. Undefined when no conversion
+   * happened (the tier's base currency already matches, or no live
+   * rate was available and the base currency was shown instead).
+   */
+  baseAmount?: number;
+  baseCurrency?: CurrencyCode;
+  fxRate?: number;
 }
 
 /**
@@ -113,4 +127,52 @@ export function resolveProductPricingBySlug(slug: string, countryCode?: string):
   const product = getProductBySlug(slug);
   if (!product) return undefined;
   return resolveProductPricing(product, countryCode);
+}
+
+/**
+ * Applies live-currency conversion on top of resolveProductPricing()
+ * (Master Pricing pass, 7 Oct: client-confirmed "live exchange-rate
+ * conversion" over fixed client-supplied rates). ASYNC because it may
+ * do a real network fetch (cached -- see lib/pricing/fx.ts) -- kept
+ * entirely separate from the synchronous resolveProductPricing() above
+ * so every existing synchronous call site (PriceTag's instant default
+ * render, before its own effect re-fetches from the server) keeps
+ * working unchanged. Only called server-side today: app/api/pricing
+ * (display) and app/api/checkout (the actual charge).
+ *
+ * Rounding: nearest whole number in the target currency (client-
+ * confirmed, 7 Oct) -- 199.88 becomes 200, in every currency.
+ *
+ * Never invents a rate: if no country is known, the country isn't in
+ * COUNTRY_CURRENCY_MAP (Section 2's explicit-allow-list philosophy --
+ * no guessing a currency for an unlisted country), the local currency
+ * already equals the tier's base currency, or the live rate source is
+ * unreachable, this returns the base resolveProductPricing() result
+ * completely unchanged -- the tier's own USD/INR price, never a
+ * guessed conversion.
+ */
+export async function resolveLocalCurrencyPricing(product: Product, countryCode?: string): Promise<ResolvedPricing> {
+  const base = resolveProductPricing(product, countryCode);
+  if (!countryCode) return base;
+
+  const localCurrency = getCurrencyForCountry(countryCode);
+  if (!localCurrency || localCurrency === base.currency) return base;
+
+  const rates = await getRates();
+  if (!rates) return base; // live source unreachable -- show the base tier currency, never guess a rate
+
+  const fxRate = base.currency === 'USD' ? rates[localCurrency] : convertAmount(1, base.currency, localCurrency, rates);
+  const convertedSale = convertAmount(base.salePrice, base.currency, localCurrency, rates);
+  const convertedRegular = convertAmount(base.regularPrice, base.currency, localCurrency, rates);
+  if (convertedSale === null || convertedRegular === null || fxRate === null || fxRate === undefined) return base;
+
+  return {
+    ...base,
+    currency: localCurrency,
+    salePrice: roundToWhole(convertedSale),
+    regularPrice: roundToWhole(convertedRegular),
+    baseAmount: base.salePrice,
+    baseCurrency: base.currency,
+    fxRate,
+  };
 }

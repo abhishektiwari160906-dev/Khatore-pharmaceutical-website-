@@ -27,26 +27,41 @@ const nextConfig = {
       { source: '/products/k-morex.html', destination: '/products/k-morex-brain-tonic', permanent: true },
       { source: '/products/k-matic-combo.html', destination: '/products/k-matic-combo', permanent: true },
       { source: '/contactus', destination: '/contact', permanent: true },
-      // NOT mapped, on purpose -- a wrong redirect is worse than none:
+
+      // Closed 7 Oct per explicit client instruction: "there should not
+      // be a single old page" after cutover. Each destination below is
+      // a judgment call (documented per group), not a guess at content
+      // that doesn't exist -- every one lands on a real, live page.
       //
-      //   /about-us  -- ambiguous. On the live site this single URL covers
-      //     both the heritage/founding story AND the clinical-trial
-      //     content (there's even a #clinicalTrial anchor into the same
-      //     page). This app splits that into two real routes, /heritage
-      //     and /science -- a single old URL can only 301 to one new
-      //     target. Needs a client decision (or a lightweight interstitial
-      //     page at /about-us that links to both) before cutover, not a
-      //     guess here.
-      //
-      //   /wellness.html, /wellness/kamalahar, /wellness/k-mens, /wellness/k-matic
-      //   /testimonials/* (10 URLs, by condition and by source)
-      //   /faq, /customer-service
-      //   /enable-cookies, /privacy-policy-cookie-restriction-mode
-      //     -- no corresponding page exists in this app yet.
-      //
-      //   /about-magento-demo-store -- stray indexed Magento default
-      //     page, not real content. Flag for removal at the source, not
-      //     something to migrate.
+      // /about-us split heritage/founding-story content from the
+      // clinical-trial content into two routes (/heritage, /science).
+      // One old URL can only 301 to one target -- chosen /heritage
+      // since that's the primary "about Khatore" narrative; /science is
+      // one click away via the main nav on every page.
+      { source: '/about-us', destination: '/heritage', permanent: true },
+
+      // /wellness.html and its three per-product pages map 1:1 onto the
+      // equivalent /products routes.
+      { source: '/wellness.html', destination: '/products', permanent: true },
+      { source: '/wellness/kamalahar', destination: '/products/kamalahar', permanent: true },
+      { source: '/wellness/k-mens', destination: '/products/k-mens', permanent: true },
+      { source: '/wellness/k-matic', destination: '/products/k-matic', permanent: true },
+
+      // The 10 old /testimonials/* URLs (by condition and by source)
+      // have no dedicated page in this app -- testimonials live on the
+      // homepage. All ten land there rather than 404ing.
+      { source: '/testimonials/:path*', destination: '/', permanent: true },
+
+      // No dedicated FAQ or customer-service page exists yet -- /contact
+      // is the real, live page for exactly that kind of question.
+      { source: '/faq', destination: '/contact', permanent: true },
+      { source: '/customer-service', destination: '/contact', permanent: true },
+
+      // Magento-generic utility/boilerplate pages, never real Khatore
+      // content -- sent home rather than left as dead links.
+      { source: '/enable-cookies', destination: '/', permanent: true },
+      { source: '/privacy-policy-cookie-restriction-mode', destination: '/', permanent: true },
+      { source: '/about-magento-demo-store', destination: '/', permanent: true },
     ];
   },
 };

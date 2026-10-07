@@ -105,7 +105,10 @@ export function ContactForm() {
       />
       <label className={styles.consentField}>
         <input type="checkbox" name="consent" required />
-        <span>I agree to be contacted by Khatore Pharmaceuticals about this enquiry.</span>
+        <span>
+          I agree to be contacted by Khatore Pharmaceuticals about this enquiry. Your information is kept
+          strictly by Khatore Pharmaceuticals — it is never sold or shared with any third party or agency.
+        </span>
       </label>
       <p className={styles.disclaimer}>
         This is a commercial enquiry form, not a medical consultation. For medical advice, consult a
