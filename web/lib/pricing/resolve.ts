@@ -13,7 +13,7 @@
 
 import { getProductBySlug, type Product } from '@/data/products';
 import { COUNTRY_TIER_MAP, DEFAULT_TIER_ID, getTier, getDiscountWindow, type PricingTierId } from './config';
-import { getCurrencyForCountry, type CurrencyCode } from '@/data/currencies';
+import { getCurrencyForCountry, GATEWAY_UNSUPPORTED_CURRENCIES, type CurrencyCode } from '@/data/currencies';
 import { getRates, convertAmount, roundToWhole } from './fx';
 
 export type ResolvedTierId = PricingTierId | 'STANDARD';
@@ -146,10 +146,13 @@ export function resolveProductPricingBySlug(slug: string, countryCode?: string):
  * Never invents a rate: if no country is known, the country isn't in
  * COUNTRY_CURRENCY_MAP (Section 2's explicit-allow-list philosophy --
  * no guessing a currency for an unlisted country), the local currency
- * already equals the tier's base currency, or the live rate source is
- * unreachable, this returns the base resolveProductPricing() result
- * completely unchanged -- the tier's own USD/INR price, never a
- * guessed conversion.
+ * already equals the tier's base currency, the live rate source is
+ * unreachable, or the local currency isn't one either payment gateway
+ * can actually charge (client decision, 8 Oct -- see
+ * GATEWAY_UNSUPPORTED_CURRENCIES), this returns the base
+ * resolveProductPricing() result completely unchanged -- the tier's
+ * own USD/INR price, never a guessed conversion and never a price the
+ * visitor couldn't actually pay in.
  */
 export async function resolveLocalCurrencyPricing(product: Product, countryCode?: string): Promise<ResolvedPricing> {
   const base = resolveProductPricing(product, countryCode);
@@ -157,6 +160,7 @@ export async function resolveLocalCurrencyPricing(product: Product, countryCode?
 
   const localCurrency = getCurrencyForCountry(countryCode);
   if (!localCurrency || localCurrency === base.currency) return base;
+  if (GATEWAY_UNSUPPORTED_CURRENCIES.includes(localCurrency)) return base;
 
   const rates = await getRates();
   if (!rates) return base; // live source unreachable -- show the base tier currency, never guess a rate

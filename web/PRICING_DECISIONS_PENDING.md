@@ -91,27 +91,27 @@ still genuinely open.
    | TZS | Tanzania | ❌ | ❌ |
    | INR | India | ❌ | ✅ |
 
-   **Vrinda's instinct on 8 Oct was correct, and the gap is wider than just
-   the Naira:** 8 of our 16 configured currencies (AED, NGN, GHS, RON, KES,
-   UGX, TZS, plus INR itself) aren't in PayPal's supported-currency list at
-   all. The code already protects against this correctly today —
-   `lib/payment/paypal.ts`'s `createSession` only accepts USD and reports
-   `available: false` for anything else; `lib/payment/razorpay.ts` only
-   accepts INR the same way — so nothing in this codebase can ever attempt
-   to charge a customer in a currency the gateway doesn't support. But this
-   means, as built, a visitor from one of those 8 countries who sees their
-   price in NGN/AED/GHS/RON/KES/UGX/TZS would currently see **both
-   gateways report unavailable** — there's no automatic "charge in USD
-   instead" fallback wired in yet.
-   **Needs a decision, not a guess:** for those 8 countries, should
-   checkout (a) fall back to charging in the tier's base currency (USD)
-   even though the displayed price was local-currency, with that clearly
-   shown before payment, or (b) only ever offer a different gateway/manual
-   WhatsApp order flow for those countries? Razorpay does offer a broader
-   ~100+ currency "International Payments" product, but it requires a
-   specific account-level enablement and is only available for merchants
-   registered in India/Malaysia/Singapore/US — not assumed available here
-   without Khatore confirming that add-on is active.
+   **Correction to the 8 Oct writeup:** that version said "8 of 16
+   currencies," counting INR as one of them because PayPal alone doesn't
+   support INR. That overstated the real gap — Razorpay charges INR
+   natively, so **India already has a working gateway and was never
+   actually affected.** The real list of currencies neither gateway can
+   charge is **7, not 8**: AED, NGN, GHS, RON, KES, UGX, TZS.
+
+   **DECIDED 8 Oct — implemented and tested.** For a visitor whose local
+   currency is one of those 7, the site now shows the price in the tier's
+   own base currency (USD) instead of converting to a currency neither
+   gateway can charge — never a price the visitor couldn't actually pay in.
+   `data/currencies.ts`'s `GATEWAY_UNSUPPORTED_CURRENCIES` is the explicit
+   list; `lib/pricing/resolve.ts`'s `resolveLocalCurrencyPricing` checks it
+   before converting. Live-verified: Nigeria and UAE both now return
+   `currency: "USD"` from `/api/pricing`; India (INR, via Razorpay) and the
+   UK (GBP conversion) are unaffected. 2 new tests added, 57/57 passing.
+   The code already protected against ever *charging* in an unsupported
+   currency (`lib/payment/paypal.ts`'s `createSession` only accepts USD,
+   `lib/payment/razorpay.ts` only accepts INR) — this closes the display
+   side to match, so a visitor never sees a price in a currency that was
+   always going to fail at checkout.
 
 ## Already correct, no action needed (checked 7 Oct)
 

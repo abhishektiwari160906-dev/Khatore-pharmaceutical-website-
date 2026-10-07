@@ -55,6 +55,28 @@ export const CURRENCY_SYMBOLS: Record<string, string> = {
   INR: '₹',
 };
 
+/**
+ * Currencies with no path to actually being charged today -- checked
+ * against PayPal's and Razorpay's own published currency-support lists
+ * (8 Oct), documented in PRICING_DECISIONS_PENDING.md. INR is NOT in
+ * this list: Razorpay (lib/payment/razorpay.ts) charges INR natively,
+ * so India already has a working gateway and is unaffected.
+ *
+ * Client decision (8 Oct): for a visitor whose local currency is in
+ * this list, show the tier's own base currency (USD) instead of
+ * converting to a currency neither gateway can actually charge --
+ * never show a price the visitor could not pay in.
+ */
+export const GATEWAY_UNSUPPORTED_CURRENCIES: readonly string[] = [
+  'AED',
+  'NGN',
+  'GHS',
+  'RON',
+  'KES',
+  'UGX',
+  'TZS',
+];
+
 export function getCurrencyForCountry(countryCode: string): string | undefined {
   return COUNTRY_CURRENCY_MAP[countryCode.trim().toUpperCase()];
 }

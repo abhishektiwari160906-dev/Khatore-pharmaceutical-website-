@@ -28,7 +28,7 @@ No real payment credentials exist anywhere in this environment (checked: no Razo
 | Refund/chargeback policy | Khatore |
 | Wire `createSession` into `/api/checkout` + build the client-side Razorpay Checkout.js / PayPal redirect flow | Dev, once keys exist |
 | PayPal's actual verify-webhook-signature API call | Dev, once a PayPal sandbox account exists to test against |
-| **Decide the fallback for 8 of 16 local-display currencies PayPal doesn't support at all** (AED, NGN, GHS, RON, KES, UGX, TZS, plus INR) — checked against PayPal's own published currency list, 8 Oct. See `PRICING_DECISIONS_PENDING.md` for the full table and the two options. | Vijay/Vrinda |
+| ~~Decide the fallback for currencies neither gateway can charge~~ — **RESOLVED 8 Oct.** 7 currencies (AED, NGN, GHS, RON, KES, UGX, TZS) have no working gateway (India/INR is fine via Razorpay — not part of this list, correcting the earlier "8 of 16" writeup). Decision: show USD instead for those 7. Implemented in `lib/pricing/resolve.ts` + `data/currencies.ts`, live-verified (Nigeria/UAE → USD; India/UK unaffected), 2 new tests, 57/57 passing. | Done |
 
 ### What IS real and tested in Area 1 today
 - Razorpay webhook HMAC signature verification — **8/8 tests pass**, including a simulated tampering attack (forged payload + a signature stolen from a different, real payload is correctly rejected).

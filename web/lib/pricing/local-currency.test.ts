@@ -62,4 +62,29 @@ describe('resolveLocalCurrencyPricing', () => {
     expect(pricing.salePrice).toBe(12999); // unchanged -- already INR, no conversion needed
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it('shows the base currency (USD), not NGN, for Nigeria -- neither gateway can charge NGN (client decision, 8 Oct)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }),
+    );
+    const { resolveLocalCurrencyPricing } = await import('./resolve');
+
+    const pricing = await resolveLocalCurrencyPricing(kamalahar, 'NG');
+    expect(pricing.currency).toBe('USD');
+    expect(pricing.salePrice).toBe(299);
+    expect(pricing.baseAmount).toBeUndefined(); // no conversion attempted at all
+  });
+
+  it('shows the base currency (USD), not AED, for the UAE -- same fallback as Nigeria', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }),
+    );
+    const { resolveLocalCurrencyPricing } = await import('./resolve');
+
+    const pricing = await resolveLocalCurrencyPricing(kamalahar, 'AE');
+    expect(pricing.currency).toBe('USD');
+    expect(pricing.salePrice).toBe(299);
+  });
 });
