@@ -17,6 +17,23 @@ describe('buildPayPalOrderBody', () => {
       ],
     });
   });
+
+  it('includes application_context with return/cancel URLs when both are supplied', () => {
+    const body = buildPayPalOrderBody({
+      orderId: 'KH-TEST-0001',
+      amount: { amount: 299, currency: 'USD' },
+      customerName: 'Test Buyer',
+      customerEmail: 'test@example.com',
+      customerPhone: '+15551234567',
+      successUrl: 'https://example.com/api/payments/return',
+      failureUrl: 'https://example.com/api/payments/return',
+    });
+    expect(body.application_context).toEqual({
+      return_url: 'https://example.com/api/payments/return',
+      cancel_url: 'https://example.com/api/payments/return',
+      user_action: 'PAY_NOW',
+    });
+  });
 });
 
 describe('buildPayPalVerifyWebhookBody', () => {

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { OrderConfirmationClient } from '@/components/OrderConfirmation/OrderConfirmationClient';
@@ -14,7 +15,9 @@ export default function OrderConfirmationPage() {
     <>
       <Nav />
       <main>
-        <OrderConfirmationClient />
+        <Suspense fallback={null}>
+          <OrderConfirmationClient />
+        </Suspense>
       </main>
       <Footer />
     </>

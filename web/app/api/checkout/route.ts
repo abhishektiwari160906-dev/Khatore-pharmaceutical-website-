@@ -2,18 +2,23 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { getProductBySlug } from '@/data/products';
 import { getConfiguredOrderStore } from '@/lib/order/store';
-import { getConfiguredPaymentProvider } from '@/lib/payment/providers';
+import { getConfiguredPaymentProvider, getPaymentProviderById } from '@/lib/payment/providers';
+import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import { isValidCountryCode } from '@/data/countries';
 import { resolveLocalCurrencyPricing, resolveTierForCountry } from '@/lib/pricing/resolve';
 import type { CustomerInfo, Order, OrderLineItem, ShippingInfo } from '@/lib/order/types';
 
 export const runtime = 'nodejs';
 
+const PAYABLE_PROVIDER_IDS: readonly PaymentProviderId[] = ['payu', 'paypal', 'razorpay'];
+
 interface CheckoutRequestBody {
   customer: CustomerInfo;
   shipping: ShippingInfo;
   /** Only slug + quantity -- price is never accepted from the client (Section 9: never trust a frontend-supplied price). */
   items: Array<{ slug: string; quantity: number }>;
+  /** Which gateway the customer picked at checkout, if any -- optional so the order-creation path keeps working even with no payment method selected (e.g. no provider configured for the resolved currency yet). */
+  paymentMethod?: PaymentProviderId;
 }
 
 function isNonEmptyString(v: unknown): v is string {
@@ -67,12 +72,18 @@ function validateBody(body: unknown): { ok: true; value: CheckoutRequestBody } |
     }
   }
 
+  const paymentMethod = b.paymentMethod;
+  if (paymentMethod !== undefined && !PAYABLE_PROVIDER_IDS.includes(paymentMethod as PaymentProviderId)) {
+    return { ok: false, error: 'unrecognised payment method' };
+  }
+
   return {
     ok: true,
     value: {
       customer: customer as unknown as CustomerInfo,
       shipping: { ...shipping, country: String(shipping.country).toUpperCase() } as unknown as ShippingInfo,
       items: items as CheckoutRequestBody['items'],
+      paymentMethod: paymentMethod as PaymentProviderId | undefined,
     },
   };
 }
@@ -89,7 +100,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!validated.ok) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
-  const { customer, shipping, items } = validated.value;
+  const { customer, shipping, items, paymentMethod } = validated.value;
 
   // Price every line server-side from the single pricing source of
   // truth -- lib/pricing/resolve.ts, which resolves the VALIDATED
@@ -153,6 +164,11 @@ export async function POST(request: Request): Promise<NextResponse> {
   const subtotal = { amount: subtotalAmount, currency: orderCurrency };
   const pricingTier = resolveTierForCountry(shipping.country);
 
+  // The provider used to STAMP the order (which gateway, if any, is
+  // generally active) is separate from the one actually used to CREATE
+  // the payment session below (the customer's chosen method) -- with
+  // PayU + PayPal both potentially configured at once (client decision,
+  // 8 Oct), "the" provider is no longer a single global answer.
   const paymentProvider = getConfiguredPaymentProvider();
 
   const order: Order = {
@@ -181,5 +197,39 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'failed to record order' }, { status: 502 });
   }
 
-  return NextResponse.json({ order }, { status: 201 });
+  // The order is already real and recorded at this point regardless of
+  // what happens below -- a payment-session failure must never lose the
+  // order itself (Section: never fail the whole checkout over a gateway
+  // hiccup). If no method was chosen, or the chosen gateway isn't
+  // configured, or session creation throws, the client falls back to
+  // the existing "order placed, Khatore will follow up" path.
+  let paymentSession: PaymentSessionResult | undefined;
+  if (paymentMethod) {
+    const provider = getPaymentProviderById(paymentMethod);
+    if (!provider) {
+      paymentSession = { available: false, reason: `${paymentMethod} is not configured yet.` };
+    } else {
+      const origin = new URL(request.url).origin;
+      try {
+        paymentSession = await provider.createSession({
+          orderId: order.orderId,
+          amount: order.total,
+          customerName: customer.fullName,
+          customerEmail: customer.email,
+          customerPhone: customer.phone,
+          successUrl: `${origin}/api/payments/return`,
+          failureUrl: `${origin}/api/payments/return`,
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('payment session creation failed', { orderId: order.orderId, paymentMethod, err });
+        paymentSession = {
+          available: false,
+          reason: 'Could not start the payment session -- please try again, or contact Khatore to complete payment.',
+        };
+      }
+    }
+  }
+
+  return NextResponse.json({ order, paymentSession }, { status: 201 });
 }

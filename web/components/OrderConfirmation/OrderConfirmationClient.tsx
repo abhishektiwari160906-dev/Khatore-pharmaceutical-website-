@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { CONTACT } from '@/lib/config';
 import { formatMoney } from '@/components/Pricing/PriceTag';
@@ -21,6 +22,14 @@ const LAST_ORDER_KEY = 'khatore_last_order';
  */
 export function OrderConfirmationClient() {
   const [order, setOrder] = useState<Order | null | undefined>(undefined);
+  const searchParams = useSearchParams();
+  // Set only by app/api/payments/return -- never a raw gateway redirect
+  // taken at face value (Section 15), because that route already
+  // verified the payment server-side (PayU's reverse hash, or a real
+  // PayPal capture call) before ever appending this param.
+  const paymentStatus = searchParams.get('paymentStatus');
+  const paymentProvider = searchParams.get('provider');
+  const txnid = searchParams.get('txnid');
 
   useEffect(() => {
     try {
@@ -86,18 +95,63 @@ export function OrderConfirmationClient() {
       </p>
 
       <div className={styles.statusBlock}>
-        <span className={styles.statusLabel}>Payment status</span>
-        <span className={styles.statusValue}>Pending — not yet paid</span>
-        <p className={styles.statusNote}>
-          Online payment isn&apos;t active yet. Your order has been recorded with Khatore — message us on
-          WhatsApp with your order ID above and we&apos;ll confirm final pricing and payment directly.
-        </p>
-        <WhatsAppCta
-          phone={CONTACT.whatsappIndiaWorld}
-          label="Complete via WhatsApp"
-          message={whatsappMessage}
-          className={styles.waBtn}
-        />
+        {paymentStatus === 'succeeded' ? (
+          <>
+            <span className={styles.statusLabel}>Payment status</span>
+            <span className={styles.statusValue}>Paid ✓</span>
+            <p className={styles.statusNote}>
+              Your payment{paymentProvider ? ` via ${paymentProvider === 'payu' ? 'PayU' : 'PayPal'}` : ''} was
+              received and verified{txnid ? ` (reference ${txnid})` : ''}. Khatore will begin preparing your
+              order.
+            </p>
+          </>
+        ) : paymentStatus === 'failed' ? (
+          <>
+            <span className={styles.statusLabel}>Payment status</span>
+            <span className={styles.statusValue}>Payment not completed</span>
+            <p className={styles.statusNote}>
+              Your order was recorded, but the payment didn&apos;t go through. You can message us on WhatsApp
+              with your order ID above to try again or arrange another way to pay.
+            </p>
+            <WhatsAppCta
+              phone={CONTACT.whatsappIndiaWorld}
+              label="Complete via WhatsApp"
+              message={whatsappMessage}
+              className={styles.waBtn}
+            />
+          </>
+        ) : paymentStatus === 'unverified' ? (
+          <>
+            <span className={styles.statusLabel}>Payment status</span>
+            <span className={styles.statusValue}>Couldn&apos;t confirm automatically</span>
+            <p className={styles.statusNote}>
+              Your order was recorded, but we couldn&apos;t automatically verify the payment result. If you
+              completed payment, please message us your order ID and we&apos;ll confirm it directly — you
+              will not be charged twice.
+            </p>
+            <WhatsAppCta
+              phone={CONTACT.whatsappIndiaWorld}
+              label="Confirm via WhatsApp"
+              message={whatsappMessage}
+              className={styles.waBtn}
+            />
+          </>
+        ) : (
+          <>
+            <span className={styles.statusLabel}>Payment status</span>
+            <span className={styles.statusValue}>Pending — not yet paid</span>
+            <p className={styles.statusNote}>
+              Online payment isn&apos;t active yet. Your order has been recorded with Khatore — message us on
+              WhatsApp with your order ID above and we&apos;ll confirm final pricing and payment directly.
+            </p>
+            <WhatsAppCta
+              phone={CONTACT.whatsappIndiaWorld}
+              label="Complete via WhatsApp"
+              message={whatsappMessage}
+              className={styles.waBtn}
+            />
+          </>
+        )}
       </div>
 
       <p className={styles.shipTo}>

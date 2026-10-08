@@ -9,18 +9,38 @@ import { trackEvent } from '@/lib/events/client';
 import { formatMoney } from '@/components/Pricing/PriceTag';
 import { COUNTRIES } from '@/data/countries';
 import type { Order } from '@/lib/order/types';
+import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import styles from './CheckoutForm.module.css';
 
 const LAST_ORDER_KEY = 'khatore_last_order';
 
 /**
- * Real checkout: collects real customer/shipping details and creates a
+ * Picks which gateway to attempt, purely from the order's resolved
+ * currency -- matches exactly what each provider's createSession
+ * already enforces (payu.ts/razorpay.ts: INR only; paypal.ts: USD
+ * only), so this never offers a method that would just be rejected
+ * server-side. Every non-INR currency, including the 7 that already
+ * fall back to USD display (lib/pricing/resolve.ts, 8 Oct), routes to
+ * PayPal -- which also covers "International Cards" via its own guest
+ * card checkout, with no separate integration needed.
+ */
+function paymentMethodForCurrency(currency: string): { id: PaymentProviderId; label: string } {
+  if (currency === 'INR') {
+    return { id: 'payu', label: 'UPI, Card or Net Banking (via PayU)' };
+  }
+  return { id: 'paypal', label: 'PayPal or International Card' };
+}
+
+/**
+ * Real checkout: collects real customer/shipping details, creates a
  * real Order (server-priced from data/products.ts, Section 9's pricing
- * safety rule). What it does NOT do is process payment -- there is no
- * gateway configured (Section 12/15), so a created order's
- * paymentStatus is always 'not_started', and the confirmation step
- * that follows is explicit about that rather than implying a payment
- * that didn't happen.
+ * safety rule), and -- once a gateway is actually configured -- takes
+ * the customer straight to pay: PayU's hosted page (UPI/cards/net
+ * banking) for INR orders, PayPal (incl. guest card checkout) for
+ * everything else. Until real gateway credentials exist, createSession
+ * reports `available: false` and this falls back to the original
+ * "order recorded, Khatore follows up" path -- never a dead end
+ * either way (Section: never fail the whole checkout over a gateway gap).
  */
 export function CheckoutForm() {
   const { items, subtotal, clearCart } = useCart();
@@ -28,12 +48,26 @@ export function CheckoutForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const startedRef = useRef(false);
+  const payUFormRef = useRef<HTMLFormElement>(null);
+  const [payUSubmit, setPayUSubmit] = useState<{ action: string; fields: Record<string, string> } | null>(null);
 
   useEffect(() => {
     if (items.length === 0 || startedRef.current) return;
     startedRef.current = true;
     trackEvent('checkout_started', { metadata: { item_count: items.reduce((n, i) => n + i.quantity, 0) } });
   }, [items]);
+
+  const paymentMethod = subtotal ? paymentMethodForCurrency(subtotal.currency) : null;
+
+  useEffect(() => {
+    // Fires once payUSubmit is set and the hidden form below has
+    // actually rendered with those field values -- a real browser form
+    // POST (full navigation to PayU), never a fetch/XHR, because that's
+    // what PayU's flow requires.
+    if (payUSubmit && payUFormRef.current) {
+      payUFormRef.current.submit();
+    }
+  }, [payUSubmit]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,6 +89,7 @@ export function CheckoutForm() {
         country: String(form.get('country') ?? ''),
       },
       items: items.map((i) => ({ slug: i.slug, quantity: i.quantity })),
+      paymentMethod: paymentMethod?.id,
     };
 
     try {
@@ -63,7 +98,7 @@ export function CheckoutForm() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       });
-      const data = (await res.json()) as { order?: Order; error?: string };
+      const data = (await res.json()) as { order?: Order; paymentSession?: PaymentSessionResult; error?: string };
       if (!res.ok || !data.order) {
         setError(data.error ?? 'Something went wrong creating your order — please try again.');
         setSubmitting(false);
@@ -81,6 +116,26 @@ export function CheckoutForm() {
         // order was still created and recorded server-side either way.
       }
       clearCart();
+
+      const session = data.paymentSession;
+      if (session?.available && session.formAction && session.formFields) {
+        // PayU: render the hidden form (below) with these exact fields,
+        // then the effect above submits it -- leaves the site entirely
+        // for PayU's hosted page. The order is already saved in
+        // sessionStorage above, so order-confirmation can still show it
+        // once PayU redirects back.
+        setPayUSubmit({ action: session.formAction, fields: session.formFields });
+        return;
+      }
+      if (session?.available && session.redirectUrl) {
+        // PayPal: full navigation to their approval page.
+        window.location.href = session.redirectUrl;
+        return;
+      }
+
+      // No gateway available for this order (not configured yet, or the
+      // session call failed) -- never a dead end, fall back to the
+      // original "order recorded, Khatore follows up" path.
       router.push('/order-confirmation');
     } catch {
       setError('Something went wrong creating your order — please try again.');
@@ -158,17 +213,28 @@ export function CheckoutForm() {
         </section>
 
         <p className={styles.paymentNote}>
-          Placing this order creates your order with Khatore — online payment isn&apos;t active yet. Once
-          submitted, Khatore will contact you directly (via WhatsApp or email) to confirm final pricing and
-          complete payment.
+          {paymentMethod
+            ? `You'll pay by ${paymentMethod.label} on the next step. If that's not available right now, Khatore will contact you directly (via WhatsApp or email) to complete payment.`
+            : "Placing this order creates your order with Khatore. Khatore will contact you directly (via WhatsApp or email) to confirm final pricing and complete payment."}
         </p>
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
         <button type="submit" className={styles.submit} disabled={submitting}>
-          {submitting ? 'Placing Order…' : 'Place Order'}
+          {submitting ? 'Processing…' : paymentMethod ? `Pay with ${paymentMethod.label}` : 'Place Order'}
         </button>
       </form>
+
+      {/* Never submitted via fetch/XHR -- PayU's hosted checkout requires
+          a real browser form POST. Rendered hidden and auto-submitted
+          (see the effect above) only once a PayU session is created. */}
+      {payUSubmit ? (
+        <form ref={payUFormRef} action={payUSubmit.action} method="POST" hidden aria-hidden="true">
+          {Object.entries(payUSubmit.fields).map(([name, value]) => (
+            <input key={name} type="hidden" name={name} value={value} />
+          ))}
+        </form>
+      ) : null}
 
       <aside className={styles.summary}>
         <h2 className={styles.summaryTitle}>Order Summary</h2>

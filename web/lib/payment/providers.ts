@@ -7,6 +7,7 @@ import type {
 } from './types';
 import { buildRazorpayProvider } from './razorpay';
 import { buildPayPalProvider } from './paypal';
+import { buildPayUProviderReal } from './payu';
 
 /**
  * The always-available default: no gateway is configured. Every method
@@ -54,36 +55,45 @@ function buildCashfreeProvider(): PaymentProvider | null {
   );
 }
 
-/** Same shape again, for PayU -- not implemented, same reasoning. */
-function buildPayUProvider(): PaymentProvider | null {
-  const merchantKey = process.env.PAYU_MERCHANT_KEY;
-  const merchantSalt = process.env.PAYU_MERCHANT_SALT;
-  if (!merchantKey || !merchantSalt) return null;
-  throw new Error(
-    'PayU credentials are present but no PayU integration is implemented yet -- see buildCashfreeProvider for the pattern to follow.',
-  );
-}
-
 const BUILDERS: Record<Exclude<PaymentProviderId, never>, () => PaymentProvider | null> = {
   cashfree: buildCashfreeProvider,
-  // Razorpay and PayPal are real implementations (razorpay.ts /
-  // paypal.ts) -- see STATUS.md for exactly what in each has been run
-  // against a live sandbox vs. built against the documented API shape
-  // only (createSession needs real keys to actually call the gateway;
-  // Razorpay's verifyWebhook is pure HMAC and unit-tested without any
-  // keys; PayPal's verifyWebhook needs a live sandbox call this
+  // Razorpay, PayPal, and PayU are real implementations (razorpay.ts /
+  // paypal.ts / payu.ts) -- see STATUS.md for exactly what in each has
+  // been run against a live account vs. built against the documented
+  // API/hash shape only (createSession needs real keys to actually
+  // reach the gateway; Razorpay's webhook HMAC and PayU's request/
+  // response hash are both pure math and fully unit-tested without any
+  // real account; PayPal's verifyWebhook needs a live sandbox call this
   // environment cannot make, so it always returns invalid today).
   razorpay: buildRazorpayProvider,
   paypal: buildPayPalProvider,
-  payu: buildPayUProvider,
+  payu: buildPayUProviderReal,
 };
 
 /**
- * The one place the app asks "which payment provider is active". Tries
- * providers in order (Cashfree, Razorpay, PayPal, PayU) and falls back
- * to the always-safe UnconfiguredPaymentProvider when none have
- * credentials set -- which is the actual state of this deployment
- * right now (no real keys exist in this environment for any of them).
+ * Client decision, 8 Oct: PayU + PayPal run simultaneously (Razorpay
+ * joins once that account is live) -- the site is never limited to one
+ * active gateway at a time, so every caller that needs "the" provider
+ * for a specific currency/method must ask for it by id, not get
+ * whichever one happens to be configured first.
+ */
+export function getPaymentProviderById(id: PaymentProviderId): PaymentProvider | null {
+  return BUILDERS[id]();
+}
+
+/** Every provider with real credentials set, in a stable order. Used wherever the app needs to know "what can a customer pay with right now" (e.g. deciding which methods to show at checkout). */
+export function getConfiguredPaymentProviders(): PaymentProvider[] {
+  return (['payu', 'paypal', 'razorpay', 'cashfree'] as const)
+    .map((id) => BUILDERS[id]())
+    .filter((p): p is PaymentProvider => p !== null);
+}
+
+/**
+ * Back-compat single-provider lookup (used by the generic webhook route
+ * when no ?provider= is given, and anywhere that only ever expected one
+ * gateway to be active). Tries providers in order and falls back to the
+ * always-safe UnconfiguredPaymentProvider when none have credentials
+ * set.
  */
 export function getConfiguredPaymentProvider(): PaymentProvider {
   for (const id of ['cashfree', 'razorpay', 'paypal', 'payu'] as const) {

@@ -33,6 +33,19 @@ export function buildPayPalOrderBody(request: PaymentSessionRequest): Record<str
         },
       },
     ],
+    // Without this, PayPal has nowhere to send the customer back to
+    // after they approve -- they'd be stranded on PayPal's own site.
+    // Only included when the caller supplies both URLs, so the
+    // existing pure-shape test (no URLs given) stays unaffected.
+    ...(request.successUrl && request.failureUrl
+      ? {
+          application_context: {
+            return_url: request.successUrl,
+            cancel_url: request.failureUrl,
+            user_action: 'PAY_NOW',
+          },
+        }
+      : {}),
   };
 }
 
@@ -104,6 +117,40 @@ export class PayPalPaymentProvider implements PaymentProvider {
         providerId: 'paypal',
         reason: `PayPal order create threw: ${err instanceof Error ? err.message : String(err)}`,
       };
+    }
+  }
+
+  /**
+   * The second half of PayPal's Orders v2 flow: creating the order only
+   * gets the customer to PayPal's approval page. After they approve and
+   * PayPal redirects back here with the order's id (the `token` query
+   * param), the payment isn't actually taken until this capture call
+   * succeeds -- called from app/api/payments/return's GET handler.
+   */
+  async captureOrder(paypalOrderId: string): Promise<{ ok: boolean; status?: string; captureId?: string; referenceId?: string; reason?: string }> {
+    try {
+      const token = await this.getAccessToken();
+      const res = await fetch(`${paypalApiBase(this.env)}/v2/checkout/orders/${encodeURIComponent(paypalOrderId)}/capture`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        status?: string;
+        purchase_units?: Array<{ reference_id?: string; payments?: { captures?: Array<{ id?: string; status?: string }> } }>;
+      };
+      if (!res.ok) {
+        return { ok: false, reason: `PayPal capture failed: ${res.status} ${JSON.stringify(data).slice(0, 200)}` };
+      }
+      const unit = data.purchase_units?.[0];
+      const capture = unit?.payments?.captures?.[0];
+      return {
+        ok: data.status === 'COMPLETED',
+        status: data.status,
+        captureId: capture?.id,
+        referenceId: unit?.reference_id,
+      };
+    } catch (err) {
+      return { ok: false, reason: `PayPal capture threw: ${err instanceof Error ? err.message : String(err)}` };
     }
   }
 

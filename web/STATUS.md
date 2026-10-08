@@ -26,7 +26,7 @@ No real payment credentials exist anywhere in this environment (checked: no Razo
 | Real test/sandbox API keys supplied | Khatore (gateway dashboards) |
 | Confirmed fees (not the rough WhatsApp estimates) | Gateway, relayed by Khatore |
 | Refund/chargeback policy | Khatore |
-| Wire `createSession` into `/api/checkout` + build the client-side Razorpay Checkout.js / PayPal redirect flow | Dev, once keys exist |
+| ~~Wire `createSession` into `/api/checkout` + build the client-side payment flow~~ — **DONE 8 Oct** for PayU + PayPal (see "UPDATE — 8 Oct" section below). Razorpay's client-side Checkout.js step is still not built. | Dev, once Razorpay keys exist |
 | PayPal's actual verify-webhook-signature API call | Dev, once a PayPal sandbox account exists to test against |
 | ~~Decide the fallback for currencies neither gateway can charge~~ — **RESOLVED 8 Oct.** 7 currencies (AED, NGN, GHS, RON, KES, UGX, TZS) have no working gateway (India/INR is fine via Razorpay — not part of this list, correcting the earlier "8 of 16" writeup). Decision: show USD instead for those 7. Implemented in `lib/pricing/resolve.ts` + `data/currencies.ts`, live-verified (Nigeria/UAE → USD; India/UK unaffected), 2 new tests, 57/57 passing. | Done |
 
@@ -34,6 +34,29 @@ No real payment credentials exist anywhere in this environment (checked: no Razo
 - Razorpay webhook HMAC signature verification — **8/8 tests pass**, including a simulated tampering attack (forged payload + a signature stolen from a different, real payload is correctly rejected).
 - Idempotent webhook processing — a gateway event delivered twice (retry behaviour all gateways exhibit) is only processed once. **5/5 tests pass**, including a direct simulation of a duplicate delivery.
 - `app/api/payments/webhook/route.ts` now uses that idempotency store before trusting any verified event.
+
+---
+
+## UPDATE — 8 Oct: checkout now actually takes a payment (PayU + PayPal)
+
+Client decision that day: lead with **PayU + PayPal + International Cards**, Razorpay once that
+account is live. This closed the single biggest gap from the section above — `createSession` was
+built but never called. It's called now.
+
+| Bullet | Status | Evidence |
+|---|---|---|
+| PayU integration | **PARTIAL (mechanism VERIFIED, no real account)** | `lib/payment/payu.ts` — real SHA-512 request-hash and reverse-hash verification, built strictly from PayU's documented formula (array-join construction, not hand-counted pipe characters, specifically to avoid a silent off-by-one). **9/9 unit tests pass**, including hash-tamper and status-flip attack simulations. **Live-verified beyond unit tests**: ran the dev server with PayU's own published test credentials, called `/api/checkout` for an India order, got back a real formAction + hash: 12,999 ₹ flowed through end-to-end from `resolveLocalCurrencyPricing` into PayU's exact field. Then independently recomputed PayU's reverse hash in a separate Python process (simulating PayU itself) and POSTed it to `/api/payments/return` — the server correctly verified it and redirected to `paymentStatus=succeeded`; a second POST with the amount tampered (same stolen hash) was correctly rejected as `unverified`. What's NOT verified: an actual payment on PayU's real servers, which needs Khatore's real merchant key/salt (still in the PDF Vrinda sent, not read by this session — see note below). |
+| PayPal integration | **PARTIAL (one real gap closed, one remains)** | `createSession` now includes `application_context.return_url`/`cancel_url` (8 Oct) — previously the customer would approve on PayPal and have nowhere to come back to. Added `PayPalPaymentProvider.captureOrder()` — the real second API call Orders v2 requires after approval — wired into `/api/payments/return`'s GET handler (PayPal redirects with `?token=&PayerID=`). This capture call is the actual payment confirmation for PayPal now, not just the separate async webhook (which still can't be verified — see 7 Oct note above, unchanged). Still no real PayPal sandbox account to test the live call against. |
+| Checkout → payment session wiring | **VERIFIED** | `app/api/checkout/route.ts` now accepts `paymentMethod` and actually calls `createSession`, returning a `paymentSession` the client acts on. A provider failure or missing config never loses the order — verified live: requesting PayPal with no PayPal keys configured correctly returns `{available:false, reason:"paypal is not configured yet."}` alongside a normal, already-recorded order. |
+| Client-side "Pay Now" flow | **VERIFIED (mechanism)** | `CheckoutForm.tsx` picks PayU (INR) or PayPal (everything else, incl. the 7 fallback-to-USD currencies) automatically from the resolved currency — never offers a method a provider would reject. PayU session → real hidden-form browser POST (not fetch) to PayU's hosted page. PayPal session → full-page redirect to the approval URL. Verified in a real Chromium browser (Playwright) against the live dev server for all 4 post-payment states. |
+| Order-confirmation payment status | **VERIFIED** | `OrderConfirmationClient.tsx` now reads `?paymentStatus=` — set only by `/api/payments/return` after it has already verified the result server-side, never trusted from an unverified redirect. Real-browser-tested, all 4 states render correctly: `succeeded` → "Paid ✓" with provider + reference; `failed` → WhatsApp retry CTA; `unverified` → "couldn't confirm automatically," explicitly promises no double-charge, WhatsApp CTA; no param (today's existing no-provider-configured case) → unchanged "Pending — not yet paid." |
+| "Never failing" | Honest limit | Every failure mode that can be built and tested without a live gateway account has been: tampered hash, missing config, thrown exception during session creation, missing return URLs. What **cannot** be verified without Khatore's real PayU/PayPal credentials: an actual charge succeeding or being declined on their live/sandbox servers, real currency/amount limits on their side, or their actual approval-page UX. That gap closes the moment real keys are set in Netlify's environment variables — no code change needed. |
+
+**Still needed from Khatore before this is live, not just correct:** real PayU merchant key/salt and
+real PayPal client ID/secret/webhook ID (Vrinda's PDF has the PayU ones; not opened by this session
+per the standing rule — keys only via `.env`/the hosting dashboard, never through chat or any tool
+that would log them). Razorpay stays PARTIAL exactly as in the 7 Oct section above, unchanged, until
+that account goes live.
 
 ---
 

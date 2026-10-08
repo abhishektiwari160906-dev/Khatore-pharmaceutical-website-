@@ -25,6 +25,9 @@ export interface PaymentSessionRequest {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  /** Where the gateway should send the customer back after payment (PayU requires both; derived server-side from the request origin, never hardcoded). */
+  successUrl?: string;
+  failureUrl?: string;
 }
 
 export interface PaymentSessionResult {
@@ -36,6 +39,9 @@ export interface PaymentSessionResult {
   gatewayOrderId?: string;
   /** Razorpay's publishable key id -- safe to expose to the client, required to open Checkout.js. */
   publicKey?: string;
+  /** PayU has no redirect URL or SDK -- the client builds a real HTML form with these exact fields and submits it (full navigation) to formAction. Never submitted via fetch/XHR -- PayU's flow expects a browser form POST. */
+  formAction?: string;
+  formFields?: Record<string, string>;
   providerId?: PaymentProviderId;
   /**
    * 'live' = a real sandbox/production API call to the gateway succeeded.
