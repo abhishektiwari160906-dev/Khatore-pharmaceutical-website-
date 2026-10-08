@@ -280,6 +280,47 @@ export default function HomePage() {
         </Reveal>
       </section>
 
+      {/* 09b — TRUST & EVIDENCE GALLERY — real Khatore-supplied marketing
+          banners (clinical stat, testimonial, ingredient callouts, trust
+          badges), used as-is; no new claims authored here, see
+          public/assets/MANIFEST.md discipline. Sits in solid paper,
+          continuing straight off Shop by Concern, same as that section
+          continues off Science's own paper-ending tail. */}
+      <section className={styles.galleryChapter} aria-label="Evidence and trust">
+        <Reveal as="div" className={styles.galleryHead}>
+          <span className={styles.eyebrow}>In Their Words, By The Numbers</span>
+          <h2 className={styles.chapterHeading}>Trusted by patients, backed by evidence.</h2>
+        </Reveal>
+        <Reveal as="div" className={styles.galleryStrip}>
+          {[
+            {
+              src: '/assets/marketing/banner-clinical-evaluation.png',
+              alt: '82.35% of patients reached serum bilirubin below 3 mg/100 mL after 12 days — published clinical evaluation, source PubMed / NIH National Library of Medicine',
+            },
+            {
+              src: '/assets/marketing/banner-liver-formula.png',
+              alt: 'Traditional herbs, one powerful liver formula — clinically evaluated, GMP certified, natural antioxidant support',
+            },
+            {
+              src: '/assets/marketing/banner-testimonial-guatemala.png',
+              alt: 'Patient testimonial: "After six months, I finally felt like myself again." — Andres Franco, verified patient, Guatemala City',
+            },
+            {
+              src: '/assets/marketing/banner-modern-evaluation.png',
+              alt: 'Traditional formula, modern clinical evaluation — clinically evaluated, GMP certified, published clinical evaluation',
+            },
+            {
+              src: '/assets/marketing/banner-trusted-herbs.png',
+              alt: "Nature's most trusted liver herbs — a blend of time-tested Ayurvedic herbs: Roheda, Bhuiavla, Vidanga",
+            },
+          ].map((banner) => (
+            <div key={banner.src} className={styles.galleryItem}>
+              <Image src={banner.src} alt={banner.alt} width={1800} height={942} className={styles.galleryImg} />
+            </div>
+          ))}
+        </Reveal>
+      </section>
+
       {/* 10 — PRODUCTS */}
       <section className={styles.productsChapter} aria-label="Products">
         <div className={styles.productsInner}>

@@ -1,7 +1,14 @@
 /**
- * Video manifest — the 5 assets from the client's "Final Content" Drive
- * pack, mapped to their approved site placements (Website Direction
- * Document). Source-of-truth discipline per that document:
+ * Video manifest — originally the 5 assets from the client's "Final
+ * Content" Drive pack covered by the Website Direction Document's
+ * approved placements (brand + reel1-4 below). A 6th asset, Reel 5,
+ * was discovered in that same Drive folder later (see STATUS.md,
+ * "Report Drive-video download constraint + Reel5 discovery") without
+ * a placement named in that document -- it's added here (8 Oct) once
+ * Khatore's own message explicitly asked for everything in the Drive
+ * folder to be added, placed by inspected content (B-label) into the
+ * existing "Behind the Scenes" context (heritage page), not invented.
+ * Source-of-truth discipline per that document still applies:
  *   A = title-confirmed, B = inspection-confirmed, C = design inference.
  * Nothing here states a video's visual content beyond what's labeled B.
  *
@@ -89,5 +96,17 @@ export const VIDEOS: Record<string, VideoAsset> = {
     poster: '/assets/video/reel4-herb-to-habit-poster.jpg',
     aspect: '9 / 16',
     captionSourceLabel: 'B — inspected in full; mortar-and-pestle herb grinding, on-screen title "Herbs to Habit"; transcoded from 58.1MB source (H.264/AAC, faststart)',
+  },
+  reel5: {
+    id: 'reel5',
+    title: 'Meet the People Behind Kamalahar',
+    role: 'Heritage / manufacturing authenticity — second clip, same role as reel1',
+    section: 'heritage',
+    treatment: 'editorial',
+    status: 'ready',
+    src: '/assets/video/reel5.mp4',
+    poster: '/assets/video/reel5-poster.jpg',
+    aspect: '9 / 16',
+    captionSourceLabel: 'B — inspected in full; on-screen title "POV: Meet the people behind Kamalahar\'"; manufacturing-floor footage (capsule filling line, staff in GMP PPE); re-encoded from 54.8MB source (already H.264/AAC) to CRF 24 for web delivery',
   },
 };

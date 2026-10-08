@@ -53,6 +53,19 @@ export default function HeritagePage() {
           </div>
         </Reveal>
 
+        <Reveal as="section" className={styles.bts} aria-label="Meet the people behind Kamalahar">
+          <div className={styles.btsVideo}>
+            <VideoBlock id="reel5" caption="Meet the People Behind Kamalahar" />
+          </div>
+          <div className={styles.btsText}>
+            <h2 className={styles.btsHeading}>The people behind it</h2>
+            <p className={styles.btsCopy}>
+              Every bottle passes through real hands on the manufacturing floor — capsule filling,
+              checked and packed under GMP conditions, batch by batch.
+            </p>
+          </div>
+        </Reveal>
+
         <section className={styles.archiveSection} aria-label="Photographic archive">
           <Reveal as="div" className={styles.archiveHead}>
             <span className={styles.archiveEyebrow}>The Archive</span>

@@ -532,6 +532,47 @@
 }
 
 /* ============================================================
+   TRUST & EVIDENCE GALLERY
+   Sits in solid paper, continuing straight off Shop by Concern's own
+   paper background -- same continuity pattern as .concernsChapter
+   itself continuing off Science's gradient tail.
+============================================================ */
+.galleryChapter {
+  background: var(--paper);
+  padding: 0 2.5rem 6rem;
+  text-align: center;
+}
+.galleryHead {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.galleryStrip {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.galleryItem {
+  position: relative;
+  aspect-ratio: 1800 / 942;
+  overflow: hidden;
+  background: white;
+}
+.galleryImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (max-width: 640px) {
+  .galleryStrip {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
    06 — PRODUCTS
    Full-bleed wrapper carries the gradient (paper, matching Science's
    tail, settling to white); .productsInner holds the max-width
