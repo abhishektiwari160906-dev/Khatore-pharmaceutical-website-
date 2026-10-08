@@ -42,7 +42,8 @@ export type Phase1EventName =
   | 'remove_from_cart'
   | 'cart_viewed'
   | 'checkout_started'
-  | 'order_placed';
+  | 'order_placed'
+  | 'buy_now_click';
 
 // ---- Future: schema placeholders only. Do NOT fire these yet — see
 // Section 15, payment is an absolute phase boundary (Phase 5: no
@@ -76,4 +77,5 @@ export const ACTIVE_EVENT_NAMES: readonly Phase1EventName[] = [
   'cart_viewed',
   'checkout_started',
   'order_placed',
+  'buy_now_click',
 ];

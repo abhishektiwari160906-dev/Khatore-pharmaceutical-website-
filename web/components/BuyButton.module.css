@@ -1,0 +1,13 @@
+/* Resets native <button> defaults so this renders identically to the
+   <a> it replaced -- callers' own className (styles.buy etc.) still
+   supplies the actual background/padding/color. */
+.reset {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+}
+.reset:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
