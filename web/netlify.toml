@@ -4,3 +4,16 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Netlify's post-processing (HTML snippet injection -- the "hosted on
+# Netlify" comment Netlify adds to every response) rewrites the SSR'd
+# HTML AFTER Next.js renders it but before the browser sees it. That
+# mismatch between what Next's hydration payload expects and what the
+# browser actually receives caused real, reproducible hydration errors
+# (React #329/#418/#423) on the live review site -- confirmed 8 Oct:
+# Add to Cart's click handler silently stopped working because of it
+# (no local build ever showed this). Disabling all post-processing
+# fixes it at the source, since this site needs none of it (no pretty
+# URLs, no asset optimization dependency).
+[build.processing]
+  skip_processing = true
