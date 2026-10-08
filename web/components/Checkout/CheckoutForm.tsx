@@ -15,17 +15,22 @@ import styles from './CheckoutForm.module.css';
 const LAST_ORDER_KEY = 'khatore_last_order';
 
 /**
- * Picks which gateway to attempt, purely from the order's resolved
- * currency -- matches exactly what each provider's createSession
- * already enforces (payu.ts/razorpay.ts: INR only; paypal.ts: USD
- * only), so this never offers a method that would just be rejected
- * server-side. Every non-INR currency, including the 7 that already
- * fall back to USD display (lib/pricing/resolve.ts, 8 Oct), routes to
- * PayPal -- which also covers "International Cards" via its own guest
- * card checkout, with no separate integration needed.
+ * Picks which gateway to attempt, from the shipping COUNTRY actually
+ * selected in this form -- not the cart's `subtotal.currency`, which
+ * is resolved once at add-to-cart time (geo-guess or whatever country
+ * was selected on an earlier visit) and can silently go stale by the
+ * time this form is submitted with a different country. The server
+ * (app/api/checkout/route.ts) resolves the order's real currency from
+ * this exact same field, so matching it here is what keeps the
+ * displayed/submitted method from ever being one the server would
+ * reject. Only India (lib/pricing/config.ts's COUNTRY_TIER_MAP) prices
+ * in INR -- every other country's order, including the locally
+ * converted ones (lib/pricing/resolve.ts), prices in whatever currency
+ * PayPal's Orders v2 API itself accepts, which also covers
+ * "International Cards" via its own guest card checkout.
  */
-function paymentMethodForCurrency(currency: string): { id: PaymentProviderId; label: string } {
-  if (currency === 'INR') {
+function paymentMethodForCountry(countryCode: string): { id: PaymentProviderId; label: string } {
+  if (countryCode === 'IN') {
     return { id: 'payu', label: 'UPI, Card or Net Banking (via PayU)' };
   }
   return { id: 'paypal', label: 'PayPal or International Card' };
@@ -47,6 +52,7 @@ export function CheckoutForm() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [country, setCountry] = useState('');
   const startedRef = useRef(false);
   const payUFormRef = useRef<HTMLFormElement>(null);
   const [payUSubmit, setPayUSubmit] = useState<{ action: string; fields: Record<string, string> } | null>(null);
@@ -57,7 +63,7 @@ export function CheckoutForm() {
     trackEvent('checkout_started', { metadata: { item_count: items.reduce((n, i) => n + i.quantity, 0) } });
   }, [items]);
 
-  const paymentMethod = subtotal ? paymentMethodForCurrency(subtotal.currency) : null;
+  const paymentMethod = country ? paymentMethodForCountry(country) : null;
 
   useEffect(() => {
     // Fires once payUSubmit is set and the hidden form below has
@@ -198,7 +204,14 @@ export function CheckoutForm() {
             </label>
             <label className={styles.field}>
               <span>Country</span>
-              <select className={styles.input} name="country" required autoComplete="country" defaultValue="">
+              <select
+                className={styles.input}
+                name="country"
+                required
+                autoComplete="country"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              >
                 <option value="" disabled>
                   Select your country
                 </option>

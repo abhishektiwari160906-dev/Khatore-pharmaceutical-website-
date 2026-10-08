@@ -89,9 +89,6 @@ export class PayPalPaymentProvider implements PaymentProvider {
   }
 
   async createSession(request: PaymentSessionRequest): Promise<PaymentSessionResult> {
-    if (request.amount.currency !== 'USD') {
-      return { available: false, reason: 'PayPal in this integration is configured for USD orders only.' };
-    }
     try {
       const token = await this.getAccessToken();
       const res = await fetch(`${paypalApiBase(this.env)}/v2/checkout/orders`, {
