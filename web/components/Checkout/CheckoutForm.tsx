@@ -149,7 +149,16 @@ export function CheckoutForm() {
     }
   }
 
-  if (items.length === 0) {
+  // clearCart() above fires as soon as the order is created -- before
+  // the PayU branch's own render even happens, since that branch needs
+  // a SUBSEQUENT render (the hidden form below, then the effect that
+  // submits it) rather than an immediate `window.location` navigation
+  // like the PayPal branch. Without the `payUSubmit` escape hatch here,
+  // the empty cart would hit this early return on that very next
+  // render and the hidden form/effect would never run at all -- found
+  // live on the Vercel deployment (checkout API succeeded, PayU
+  // formAction/hash were correct, but the browser never navigated).
+  if (items.length === 0 && !payUSubmit) {
     return (
       <div className={styles.empty}>
         <p>Your cart is empty — add a product before checking out.</p>
