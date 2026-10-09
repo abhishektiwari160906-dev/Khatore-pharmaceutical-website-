@@ -1,19 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * Best-effort, DISPLAY-ONLY geo signal for dynamic country pricing
- * (Master Pricing pass, Section 2/13). Scoped to /api/pricing only --
- * every other route (including all statically generated product/concern
- * pages) is untouched, so none of them are forced out of SSG by this.
+ * Geo signal for IP-based country pricing (Master Pricing pass,
+ * Section 2/13; made authoritative at checkout too, Vrinda 9 Oct:
+ * "automatic IP-based detection... no customer choice"). Scoped to
+ * /api/pricing and /api/checkout only -- every other route (including
+ * all statically generated product/concern pages) is untouched, so
+ * none of them are forced out of SSG by this.
  *
- * `request.geo` is a Vercel-originated API; Netlify's Next Runtime
- * implements it for compatibility, but its real-world accuracy on this
- * deployment cannot be verified from this sandbox (no real visitor IP
- * exists here). That is exactly why it is never treated as
- * authoritative: it only ever informs a DISPLAY price before checkout.
- * The customer's own submitted shipping country remains the sole
- * authoritative source at order time -- see app/api/checkout/route.ts,
- * which re-resolves pricing itself and ignores this header entirely.
+ * Reads the `x-vercel-ip-country` header Vercel's own edge network
+ * sets on every request (https://vercel.com/docs/edge-network/headers)
+ * -- NOT `request.geo`, which this Next.js/Vercel combination does not
+ * reliably populate (an earlier version of this file relied on it;
+ * never actually verified working, since no real visitor IP exists in
+ * this sandbox -- switched to the documented header directly instead
+ * of continuing to trust an unverified API). A client cannot forge
+ * this exact header name -- Vercel's edge strips/overwrites it before
+ * the request reaches this code -- which is what makes it safe to use
+ * as the AUTHORITATIVE source for the actual charged price in
+ * app/api/checkout/route.ts, not just a display-only hint anymore.
+ * `request.geo?.country` is kept as a secondary fallback only (e.g. a
+ * non-Vercel host implementing the old API for compatibility).
  */
 /**
  * Internal dashboard gate (Area 2): HTTP Basic Auth against
@@ -52,7 +59,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const country = request.geo?.country;
+  const country = request.headers.get('x-vercel-ip-country') ?? request.geo?.country;
   if (!country) return NextResponse.next();
 
   const requestHeaders = new Headers(request.headers);
@@ -61,5 +68,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/pricing', '/dashboard/:path*', '/api/dashboard/:path*'],
+  matcher: ['/api/pricing', '/api/checkout', '/dashboard/:path*', '/api/dashboard/:path*'],
 };

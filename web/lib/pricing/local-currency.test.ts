@@ -72,7 +72,10 @@ describe('resolveLocalCurrencyPricing', () => {
 
     const pricing = await resolveLocalCurrencyPricing(kamalahar, 'NG');
     expect(pricing.currency).toBe('USD');
-    expect(pricing.salePrice).toBe(299);
+    // $199, not $299 -- Nigeria was reassigned Tier 1 -> Tier 3 on 9 Oct
+    // (World Bank income classification); the USD-fallback behavior
+    // under test here is unaffected by which tier it's falling back to.
+    expect(pricing.salePrice).toBe(199);
     expect(pricing.baseAmount).toBeUndefined(); // no conversion attempted at all
   });
 

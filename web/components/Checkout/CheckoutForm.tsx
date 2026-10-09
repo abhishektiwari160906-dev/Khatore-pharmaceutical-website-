@@ -36,13 +36,13 @@ interface PaymentOption {
 }
 
 /**
- * Which gateway(s) to offer, from the shipping COUNTRY actually
- * selected in this form -- not the cart's `subtotal.currency`, which
- * is resolved once at add-to-cart time (geo-guess or whatever country
- * was selected on an earlier visit) and can silently go stale by the
- * time this form is submitted with a different country. The server
- * (app/api/checkout/route.ts) resolves the order's real currency from
- * this exact same field, so matching it here is what keeps the
+ * Which gateway(s) to offer, from the visitor's IP-DETECTED country
+ * (Vrinda, 9 Oct: "automatic IP-based detection... no customer
+ * choice") -- NOT the shipping-address country typed into the form
+ * below, which is now a pure delivery-address field with no pricing or
+ * payment-method role at all. The server (app/api/checkout/route.ts)
+ * resolves the order's real currency the exact same way, from its own
+ * IP detection of the request, so matching it here is what keeps the
  * displayed/submitted method from ever being one the server would
  * reject.
  *
@@ -96,6 +96,12 @@ export function CheckoutForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [country, setCountry] = useState('');
+  // The visitor's IP-detected country (Vrinda, 9 Oct) -- drives pricing
+  // display/payment options; the `country` state above is now only the
+  // typed delivery address. '' while still loading or if detection
+  // genuinely fails (e.g. no geo signal at all) -- paymentOptions stays
+  // empty until this resolves, same "don't guess" pattern as before.
+  const [detectedCountry, setDetectedCountry] = useState('');
   const [selectedMethodId, setSelectedMethodId] = useState<CheckoutMethodId | null>(null);
   const startedRef = useRef(false);
   const payUFormRef = useRef<HTMLFormElement>(null);
@@ -108,17 +114,42 @@ export function CheckoutForm() {
     trackEvent('checkout_started', { metadata: { item_count: items.reduce((n, i) => n + i.quantity, 0) } });
   }, [items]);
 
-  const paymentOptions = country ? paymentOptionsForCountry(country) : [];
-  // Defaults to the first option whenever the country changes the
-  // available set (e.g. switching from India's PayU-only to an export
-  // country's two options, or between two export countries) -- a
-  // stale selectedMethodId from a previous country never silently
-  // carries over to one the new country doesn't actually offer.
+  // Reuses the existing /api/pricing geo-detection (same middleware
+  // header this endpoint already reads for product-page pricing) rather
+  // than adding a second detection endpoint -- the `country` field on
+  // its response is exactly the server's IP-resolved country, not an
+  // echo of whatever this request happened to pass in.
+  useEffect(() => {
+    if (items.length === 0 || detectedCountry) return;
+    let cancelled = false;
+    fetch(`/api/pricing?productId=${encodeURIComponent(items[0]!.slug)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { pricing?: { country?: string } } | null) => {
+        if (cancelled || !data?.pricing?.country) return;
+        setDetectedCountry(data.pricing.country);
+        // Pre-fills the delivery-address country as a convenience --
+        // still freely editable, and editing it never changes price or
+        // payment options anymore (those are fixed to detectedCountry).
+        setCountry((prev) => prev || data.pricing!.country!);
+      })
+      .catch(() => {
+        // No geo signal available -- paymentOptions stays empty below,
+        // same as the old "no country selected yet" state, never a guess.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [items, detectedCountry]);
+
+  const paymentOptions = detectedCountry ? paymentOptionsForCountry(detectedCountry) : [];
+  // Defaults to the first option whenever detectedCountry resolves or
+  // changes the available set -- a stale selectedMethodId never
+  // silently carries over to one the new tier doesn't actually offer.
   const paymentMethod = paymentOptions.find((o) => o.id === selectedMethodId) ?? paymentOptions[0] ?? null;
 
   useEffect(() => {
     setSelectedMethodId(null);
-  }, [country]);
+  }, [detectedCountry]);
 
   useEffect(() => {
     // Fires once payUSubmit is set and the hidden form below has
@@ -328,7 +359,7 @@ export function CheckoutForm() {
               <input className={styles.input} type="text" name="postalCode" required autoComplete="postal-code" />
             </label>
             <label className={styles.field}>
-              <span>Country</span>
+              <span>Country (for delivery — doesn&apos;t affect price)</span>
               <select
                 className={styles.input}
                 name="country"
@@ -448,7 +479,8 @@ export function CheckoutForm() {
           <span>{subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}</span>
         </div>
         <p className={styles.countryNote}>
-          Final pricing is confirmed server-side for the country you select above.
+          Pricing is based on your detected location, confirmed server-side — not the delivery country you enter
+          above, which only controls where your order ships.
         </p>
         <p className={styles.refundNote}>
           *Refunds are available only before your order is dispatched. Once dispatched, the order cannot be refunded.

@@ -6,6 +6,7 @@ import { getConfiguredPaymentProvider, getPaymentProviderById } from '@/lib/paym
 import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import { isValidCountryCode } from '@/data/countries';
 import { resolveLocalCurrencyPricing, resolveTierForCountry } from '@/lib/pricing/resolve';
+import { getTier } from '@/lib/pricing/config';
 import { getRates, convertAmount, roundToWhole } from '@/lib/pricing/fx';
 import { computeIndiaShippingCost } from '@/lib/shipping/indiaShipping';
 import type { CustomerInfo, Order, OrderLineItem, ShippingInfo } from '@/lib/order/types';
@@ -104,15 +105,28 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
   const { customer, shipping, items, paymentMethod } = validated.value;
 
+  // Vrinda, 9 Oct: "automatic IP-based detection... show that tier's
+  // price directly with no customer choice" -- pricing is no longer
+  // resolved from the customer's TYPED shipping country (which stays,
+  // used only for the actual delivery address below). Instead it comes
+  // from x-khatore-country, set by middleware.ts from Vercel's own
+  // edge-network geo header on THIS request -- a client cannot forge
+  // that header (Vercel's edge strips/overwrites it), so this is a
+  // stronger server-authoritative source than the old shipping-country
+  // field ever was, not a weaker one. Falls back to the shipping
+  // country only when no geo signal exists at all (local dev without a
+  // real edge in front of it; never happens in production on Vercel).
+  const detectedCountry = request.headers.get('x-khatore-country')?.trim().toUpperCase() || undefined;
+  const pricingCountry = detectedCountry ?? shipping.country;
+
   // Price every line server-side from the single pricing source of
-  // truth -- lib/pricing/resolve.ts, which resolves the VALIDATED
-  // shipping country to a tier and only then to a price (Master Pricing
-  // pass, Section 2/14). The request's own quantities are trusted, its
-  // prices never are -- CheckoutRequestBody has no price field at all,
-  // so there is nothing for a tampered request body to override here.
-  // A line for a product with no approved price, or an unknown slug,
-  // fails the whole order rather than silently omitting or inventing a
-  // price for it.
+  // truth -- lib/pricing/resolve.ts, which resolves pricingCountry to a
+  // tier and only then to a price (Master Pricing pass, Section 2/14).
+  // The request's own quantities are trusted, its prices never are --
+  // CheckoutRequestBody has no price field at all, so there is nothing
+  // for a tampered request body to override here. A line for a product
+  // with no approved price, or an unknown slug, fails the whole order
+  // rather than silently omitting or inventing a price for it.
   const lineItems: OrderLineItem[] = [];
   for (const item of items) {
     const product = getProductBySlug(item.slug);
@@ -125,7 +139,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         { status: 422 },
       );
     }
-    const pricing = await resolveLocalCurrencyPricing(product, shipping.country);
+    const pricing = await resolveLocalCurrencyPricing(product, pricingCountry);
     const unitPrice = { amount: pricing.salePrice, currency: pricing.currency };
     lineItems.push({
       productId: product.productId,
@@ -164,7 +178,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const orderCurrency = lineItems[0]!.lineTotal.currency;
   const subtotalAmount = lineItems.reduce((sum, l) => sum + l.lineTotal.amount, 0);
   const subtotal = { amount: subtotalAmount, currency: orderCurrency };
-  const pricingTier = resolveTierForCountry(shipping.country);
+  const pricingTier = resolveTierForCountry(pricingCountry);
   // Reverted 9 Oct: Tier 1/2 are back to a flat, all-inclusive total
   // (lib/pricing/config.ts) -- no separate shippingCost/tax line items.
   const total = subtotal;
@@ -183,7 +197,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     items: lineItems,
     subtotal,
     total,
-    country: shipping.country,
+    // The country that actually determined pricing (IP-detected, falling
+    // back to shipping.country only when no geo signal exists) -- NOT
+    // necessarily the same as shipping.country below anymore, now that
+    // the two are deliberately decoupled (Vrinda, 9 Oct). This keeps
+    // OrderConfirmationClient's "Pricing confirmed for X" line correct
+    // without needing its own change.
+    country: pricingCountry,
     pricingTier,
     status: 'created',
     paymentStatus: 'not_started',
@@ -191,18 +211,32 @@ export async function POST(request: Request): Promise<NextResponse> {
     createdAt: new Date().toISOString(),
   };
 
-  // India backend-only shipping-by-location (Vrinda, 9 Oct: customer
-  // still sees only the flat ₹12,999 inclusive price -- this is
-  // Khatore's own internal record, never the charged amount and never
-  // part of the `order` returned to the client below). Placeholder
-  // zone rates (lib/shipping/indiaShipping.ts) are all zero until the
-  // real logistics provider's rate card replaces them -- a pure data
-  // swap at that point, no changes needed here.
-  let orderForStore: Order = order;
+  // Internal-only metadata (Khatore's own record, never part of the
+  // `order` returned to the client below) -- two independent pieces,
+  // merged together since they key off different things:
+  //  - India backend shipping-by-location keys off the DELIVERY
+  //    address (shipping.country) -- where the package physically goes.
+  //  - The base+shipping+tax tier breakdown keys off pricingCountry --
+  //    which tier's price was actually charged. The two are no longer
+  //    the same field (Vrinda, 9 Oct), so an India-priced order and an
+  //    India-shipped order are each checked on their own terms rather
+  //    than assumed to be the same order.
+  let internalMeta: NonNullable<Order['internalMeta']> = {};
   if (shipping.country === 'IN') {
     const { zone, cost } = computeIndiaShippingCost(shipping.region, shipping.city, shipping.postalCode);
-    orderForStore = { ...order, internalMeta: { indiaShippingZone: zone, indiaShippingCost: cost } };
+    internalMeta = { ...internalMeta, indiaShippingZone: zone, indiaShippingCost: cost };
   }
+  const resolvedTier = getTier(pricingTier);
+  if (resolvedTier.breakdown) {
+    // Always in the TIER's own base currency (USD for Tier 1/2/3,
+    // never whatever a local-currency FX conversion produced for
+    // order.total) -- the figures Vrinda gave were USD figures.
+    internalMeta = {
+      ...internalMeta,
+      tierBreakdown: { tier: pricingTier, currency: resolvedTier.currency, ...resolvedTier.breakdown },
+    };
+  }
+  const orderForStore: Order = Object.keys(internalMeta).length > 0 ? { ...order, internalMeta } : order;
 
   try {
     await getConfiguredOrderStore().record(orderForStore);

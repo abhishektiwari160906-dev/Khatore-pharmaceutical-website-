@@ -91,10 +91,14 @@ export interface Order {
   /** subtotal + shippingCost + tax where those are known; otherwise equals subtotal. */
   total: { amount: number; currency: CurrencyCode };
   /**
-   * The validated shipping.country and the pricing tier resolved from it
-   * at order-creation time (Master Pricing pass, Section 2: "store the
-   * country and pricing tier used when the order was created"). Always
-   * set -- every order resolves to a tier, even the default one.
+   * The country that actually determined pricing, and the tier
+   * resolved from it, at order-creation time (Master Pricing pass,
+   * Section 2: "store the country and pricing tier used when the order
+   * was created"). Always set -- every order resolves to a tier, even
+   * the default one. Since 9 Oct this is the server's own IP-detected
+   * country (app/api/checkout/route.ts), NOT necessarily the same as
+   * shipping.country below, which is the customer's typed delivery
+   * address and is no longer used for pricing at all.
    */
   country: string;
   pricingTier: string;
@@ -118,5 +122,7 @@ export interface Order {
   internalMeta?: {
     indiaShippingZone?: string;
     indiaShippingCost?: { amount: number; currency: CurrencyCode };
+    /** Per-unit base/shipping/tax split for the tier actually charged (Vrinda, 9 Oct) -- see lib/pricing/config.ts's PricingTierDefinition.breakdown. Absent for TIER_4_INDIA, which has no itemized breakdown. */
+    tierBreakdown?: { tier: string; currency: CurrencyCode; base: number; shipping: number; tax: number };
   };
 }

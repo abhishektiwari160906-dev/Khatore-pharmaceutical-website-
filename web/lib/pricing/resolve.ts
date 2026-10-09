@@ -48,6 +48,8 @@ export interface ResolvedPricing {
   baseAmount?: number;
   baseCurrency?: CurrencyCode;
   fxRate?: number;
+  /** Internal-only base/shipping/tax split, passed through from the tier config (Vrinda, 9 Oct) -- see PricingTierDefinition.breakdown. Undefined for TIER_4_INDIA and for non-tiered products. */
+  breakdown?: { base: number; shipping: number; tax: number };
 }
 
 /**
@@ -104,6 +106,7 @@ export function resolveProductPricing(product: Product, countryCode?: string): R
       isTiered: true,
       discountActive: active,
       discountEndsAt: window.endsAt,
+      breakdown: tier.breakdown,
     };
   }
 

@@ -15,7 +15,7 @@
 
 import type { CurrencyCode } from '@/data/currencies';
 
-export type PricingTierId = 'TIER_1' | 'TIER_2' | 'TIER_3_INDIA';
+export type PricingTierId = 'TIER_1' | 'TIER_2' | 'TIER_3' | 'TIER_4_INDIA';
 
 export interface PricingTierDefinition {
   id: PricingTierId;
@@ -28,6 +28,17 @@ export interface PricingTierDefinition {
   discountPercent: number;
   taxIncluded: boolean;
   shippingIncluded: boolean;
+  /**
+   * Internal-only base/shipping/tax split (Vrinda, 9 Oct) -- base +
+   * shipping + tax always equals salePrice. Never shown to the
+   * customer (checkout/order-confirmation still display only the
+   * single flat total, same as India's own all-inclusive treatment);
+   * recorded on the order as internalMeta for Khatore's own records
+   * only, same pattern as the India backend-shipping scaffolding
+   * (lib/shipping/indiaShipping.ts). Undefined for TIER_4_INDIA, which
+   * has no itemized breakdown by design.
+   */
+  breakdown?: { base: number; shipping: number; tax: number };
   notes: string;
   /**
    * Both undefined today -- no real campaign expiry has been
@@ -50,6 +61,7 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
     taxIncluded: true,
     shippingIncluded: true,
     notes: 'Includes taxes and shipping, no hidden charges. (Reverted 9 Oct: the itemized $50 shipping / $15 tax tried earlier the same day was rolled back to this single flat total, same treatment as India.)',
+    breakdown: { base: 237, shipping: 50, tax: 12 },
   },
   TIER_2: {
     id: 'TIER_2',
@@ -61,9 +73,26 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
     taxIncluded: true,
     shippingIncluded: true,
     notes: 'Test-discount tier -- revisit once more order volume comes in. Includes taxes and shipping, same reverted treatment as TIER_1.',
+    breakdown: { base: 187, shipping: 50, tax: 12 },
   },
-  TIER_3_INDIA: {
-    id: 'TIER_3_INDIA',
+  TIER_3: {
+    id: 'TIER_3',
+    label: 'International (Lower/Lower-Middle Income)',
+    currency: 'USD',
+    // No regular/pre-discount price was given for this tier -- $199 is
+    // the whole number Vrinda supplied, not a discounted-from figure,
+    // so regularPrice == salePrice and there is no discount badge
+    // (Section: never invent a discount percentage that wasn't given).
+    regularPrice: 199,
+    salePrice: 199,
+    discountPercent: 0,
+    taxIncluded: true,
+    shippingIncluded: true,
+    notes: 'Income-based tier (Vrinda, 9 Oct, World Bank Country and Lending Groups classification: Low/Lower-middle income) -- a reassignment of countries previously on Tier 1/2, not a new addition.',
+    breakdown: { base: 137, shipping: 50, tax: 12 },
+  },
+  TIER_4_INDIA: {
+    id: 'TIER_4_INDIA',
     label: 'India',
     currency: 'INR',
     regularPrice: 17400,
@@ -71,7 +100,7 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
     discountPercent: 25.2931034482759,
     taxIncluded: true,
     shippingIncluded: true,
-    notes: 'Includes taxes and shipping, no hidden charges.',
+    notes: 'Includes taxes and shipping, no hidden charges. (Renamed from TIER_3_INDIA 9 Oct when TIER_3 -- a genuinely different, income-based USD tier -- was introduced, to avoid two different things both being called "Tier 3" in code vs in conversation with Vrinda.)',
   },
 };
 
@@ -81,9 +110,16 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
  * automatically assign every African or Southeast Asian country
  * unless the country is explicitly configured"). Every country below
  * is one the client actually named; nothing here is inferred.
+ *
+ * Reassigned 9 Oct per World Bank income classification (client-
+ * supplied table, sourced from
+ * https://datahelpdesk.worldbank.org/knowledgebase/articles/906519):
+ * Nigeria and Ghana move DOWN from Tier 1 ($299) to Tier 3 ($199);
+ * Kenya, Tanzania and Uganda move DOWN from Tier 2 ($249) to Tier 3
+ * ($199). Philippines and Malaysia (Upper-middle income) stay on Tier 2.
  */
 export const COUNTRY_TIER_MAP: Record<string, PricingTierId> = {
-  // Tier 1 -- primary international markets
+  // Tier 1 -- primary international markets (High income)
   US: 'TIER_1',
   GB: 'TIER_1',
   CA: 'TIER_1',
@@ -91,17 +127,18 @@ export const COUNTRY_TIER_MAP: Record<string, PricingTierId> = {
   DE: 'TIER_1',
   SG: 'TIER_1',
   AE: 'TIER_1',
-  NG: 'TIER_1',
-  GH: 'TIER_1',
   RO: 'TIER_1',
-  // Tier 2 -- test / secondary international markets
+  // Tier 2 -- secondary international markets (Upper-middle income)
   MY: 'TIER_2',
   PH: 'TIER_2',
-  KE: 'TIER_2',
-  UG: 'TIER_2',
-  TZ: 'TIER_2',
-  // Tier 3 -- India
-  IN: 'TIER_3_INDIA',
+  // Tier 3 -- income-based lower tier (Low / Lower-middle income)
+  NG: 'TIER_3',
+  GH: 'TIER_3',
+  KE: 'TIER_3',
+  UG: 'TIER_3',
+  TZ: 'TIER_3',
+  // Tier 4 -- India
+  IN: 'TIER_4_INDIA',
 };
 
 /**
