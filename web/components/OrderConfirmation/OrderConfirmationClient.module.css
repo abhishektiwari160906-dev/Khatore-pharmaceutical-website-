@@ -76,6 +76,17 @@
   margin-top: 0.5rem;
   padding-top: 0.9rem;
 }
+.totalRow + .totalRow {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0.35rem;
+}
+.totalRow:last-of-type {
+  border-top: 1px solid var(--rule);
+  margin-top: 0.35rem;
+  padding-top: 0.9rem;
+  font-weight: 700;
+}
 .statusBlock {
   text-align: left;
   background: var(--green-pale);

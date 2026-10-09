@@ -28,6 +28,16 @@ export interface PricingTierDefinition {
   discountPercent: number;
   taxIncluded: boolean;
   shippingIncluded: boolean;
+  /**
+   * Set only when shippingIncluded is false -- a real, fixed per-order
+   * charge in the tier's own base currency (Vrinda, 9 Oct: "$50 USD"
+   * for the international tiers). Converted to the visitor's local
+   * display currency the same way the product price itself is, in
+   * app/api/checkout/route.ts.
+   */
+  shippingCostBase?: number;
+  /** Set only when taxIncluded is false -- same reasoning as shippingCostBase (Vrinda, 9 Oct: "$15 USD"). */
+  taxBase?: number;
   notes: string;
   /**
    * Both undefined today -- no real campaign expiry has been
@@ -47,9 +57,11 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
     regularPrice: 399,
     salePrice: 299,
     discountPercent: 25.062656641604,
-    taxIncluded: true,
-    shippingIncluded: true,
-    notes: 'Includes taxes and shipping, no hidden charges.',
+    taxIncluded: false,
+    shippingIncluded: false,
+    shippingCostBase: 50,
+    taxBase: 15,
+    notes: 'Client decision, 9 Oct: shipping ($50) and tax ($15) now charged as separate line items on top of the product price, no longer folded in.',
   },
   TIER_2: {
     id: 'TIER_2',
@@ -58,9 +70,11 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
     regularPrice: 399,
     salePrice: 249,
     discountPercent: 37.593984962406,
-    taxIncluded: true,
-    shippingIncluded: true,
-    notes: 'Test-discount tier -- revisit once more order volume comes in.',
+    taxIncluded: false,
+    shippingIncluded: false,
+    shippingCostBase: 50,
+    taxBase: 15,
+    notes: 'Test-discount tier -- revisit once more order volume comes in. Same 9 Oct shipping/tax decision as TIER_1 applied here too (both are the "international" USD tiers).',
   },
   TIER_3_INDIA: {
     id: 'TIER_3_INDIA',

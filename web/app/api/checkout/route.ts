@@ -6,6 +6,8 @@ import { getConfiguredPaymentProvider, getPaymentProviderById } from '@/lib/paym
 import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import { isValidCountryCode } from '@/data/countries';
 import { resolveLocalCurrencyPricing, resolveTierForCountry } from '@/lib/pricing/resolve';
+import { getTier } from '@/lib/pricing/config';
+import { getRates, convertAmount, roundToWhole } from '@/lib/pricing/fx';
 import type { CustomerInfo, Order, OrderLineItem, ShippingInfo } from '@/lib/order/types';
 
 export const runtime = 'nodejs';
@@ -164,6 +166,41 @@ export async function POST(request: Request): Promise<NextResponse> {
   const subtotal = { amount: subtotalAmount, currency: orderCurrency };
   const pricingTier = resolveTierForCountry(shipping.country);
 
+  // Separate shipping/tax line items (client decision, 9 Oct: $50
+  // shipping + $15 tax, added on top of the product price, for the two
+  // international USD tiers only -- TIER_3_INDIA keeps its existing
+  // all-inclusive pricing untouched). The tier's own fees are defined
+  // in its base currency (USD); converted to orderCurrency the same
+  // way resolveLocalCurrencyPricing() converts the product price
+  // itself, so the two always end up in one consistent currency. If a
+  // local conversion was needed for the product price, a live rate was
+  // necessarily available then too (resolveLocalCurrencyPricing falls
+  // back to the base currency entirely when no rate is available), so
+  // this conversion can't land on a currency mismatch here.
+  const tierDef = getTier(pricingTier);
+  let shippingCost: { amount: number; currency: string } | undefined;
+  let tax: { amount: number; currency: string } | undefined;
+  if (tierDef.shippingCostBase !== undefined || tierDef.taxBase !== undefined) {
+    const needsConversion = orderCurrency !== tierDef.currency;
+    const rates = needsConversion ? await getRates() : null;
+    const convert = (baseAmount: number) => {
+      if (!needsConversion) return baseAmount;
+      if (!rates) return null;
+      const converted = convertAmount(baseAmount, tierDef.currency, orderCurrency, rates);
+      return converted === null ? null : roundToWhole(converted);
+    };
+    if (tierDef.shippingCostBase !== undefined) {
+      const amount = convert(tierDef.shippingCostBase);
+      if (amount !== null) shippingCost = { amount, currency: orderCurrency };
+    }
+    if (tierDef.taxBase !== undefined) {
+      const amount = convert(tierDef.taxBase);
+      if (amount !== null) tax = { amount, currency: orderCurrency };
+    }
+  }
+  const totalAmount = subtotalAmount + (shippingCost?.amount ?? 0) + (tax?.amount ?? 0);
+  const total = { amount: totalAmount, currency: orderCurrency };
+
   // The provider used to STAMP the order (which gateway, if any, is
   // generally active) is separate from the one actually used to CREATE
   // the payment session below (the customer's chosen method) -- with
@@ -177,10 +214,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     shipping,
     items: lineItems,
     subtotal,
-    // shippingCost/tax intentionally omitted beyond what's already
-    // folded into a tiered line's price (Section 10 -- "do not invent
-    // shipping costs"); no separate rules exist for the untiered catalogue.
-    total: subtotal,
+    ...(shippingCost ? { shippingCost } : {}),
+    ...(tax ? { tax } : {}),
+    total,
     country: shipping.country,
     pricingTier,
     status: 'created',

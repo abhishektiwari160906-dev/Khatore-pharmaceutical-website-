@@ -8,6 +8,8 @@ import { useCart } from '@/components/Cart/CartContext';
 import { trackEvent } from '@/lib/events/client';
 import { formatMoney } from '@/components/Pricing/PriceTag';
 import { COUNTRIES } from '@/data/countries';
+import { resolveTierForCountry } from '@/lib/pricing/resolve';
+import { getTier } from '@/lib/pricing/config';
 import type { Order } from '@/lib/order/types';
 import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import styles from './CheckoutForm.module.css';
@@ -64,6 +66,15 @@ export function CheckoutForm() {
   }, [items]);
 
   const paymentMethod = country ? paymentMethodForCountry(country) : null;
+
+  // Preview-only (app/api/checkout/route.ts computes and converts the
+  // authoritative figures server-side, same source data) -- shown in
+  // the tier's own base currency (USD) rather than the visitor's
+  // locally-converted display currency, since that conversion needs a
+  // live rate fetch this preview doesn't do. Close enough for the vast
+  // majority of orders (US itself is already USD), and the note below
+  // already says final pricing is confirmed server-side.
+  const feesPreview = country ? getTier(resolveTierForCountry(country)) : null;
 
   useEffect(() => {
     // Fires once payUSubmit is set and the hidden form below has
@@ -296,19 +307,34 @@ export function CheckoutForm() {
         </div>
         <div className={styles.summaryRow}>
           <span>Shipping</span>
-          <span className={styles.summaryMuted}>
-            {items.every((i) => i.shippingIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
-          </span>
+          {feesPreview?.shippingCostBase !== undefined ? (
+            <span>{formatMoney(feesPreview.shippingCostBase, feesPreview.currency)}</span>
+          ) : (
+            <span className={styles.summaryMuted}>
+              {!country || items.every((i) => i.shippingIncluded) ? 'Included in price' : 'Calculated separately'}
+            </span>
+          )}
         </div>
         <div className={styles.summaryRow}>
           <span>Tax</span>
-          <span className={styles.summaryMuted}>
-            {items.every((i) => i.taxIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
-          </span>
+          {feesPreview?.taxBase !== undefined ? (
+            <span>{formatMoney(feesPreview.taxBase, feesPreview.currency)}</span>
+          ) : (
+            <span className={styles.summaryMuted}>
+              {!country || items.every((i) => i.taxIncluded) ? 'Included in price' : 'Calculated separately'}
+            </span>
+          )}
         </div>
         <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
           <span>Total</span>
-          <span>{subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}</span>
+          <span>
+            {subtotal === null
+              ? 'Contact for pricing'
+              : formatMoney(
+                  subtotal.amount + (feesPreview?.shippingCostBase ?? 0) + (feesPreview?.taxBase ?? 0),
+                  feesPreview?.shippingCostBase !== undefined ? feesPreview.currency : subtotal.currency,
+                )}
+          </span>
         </div>
         <p className={styles.countryNote}>
           Final pricing is confirmed server-side for the country you select above.
