@@ -311,7 +311,13 @@ export function CheckoutForm() {
             <span>{formatMoney(feesPreview.shippingCostBase, feesPreview.currency)}</span>
           ) : (
             <span className={styles.summaryMuted}>
-              {!country || items.every((i) => i.shippingIncluded) ? 'Included in price' : 'Calculated separately'}
+              {/* Once a country is selected, its own resolved tier is the source of truth
+                  (feesPreview.shippingIncluded) -- not the cart items' flags, which were set
+                  at add-to-cart time under whatever tier applied then and can be stale by now
+                  (the same staleness this file's payment-method fix already addresses). Only
+                  falls back to the items' own flags before any country is chosen. */}
+              {feesPreview ? (feesPreview.shippingIncluded ? 'Included in price' : 'Calculated separately')
+                : items.every((i) => i.shippingIncluded) ? 'Included in price' : 'Calculated separately'}
             </span>
           )}
         </div>
@@ -321,7 +327,8 @@ export function CheckoutForm() {
             <span>{formatMoney(feesPreview.taxBase, feesPreview.currency)}</span>
           ) : (
             <span className={styles.summaryMuted}>
-              {!country || items.every((i) => i.taxIncluded) ? 'Included in price' : 'Calculated separately'}
+              {feesPreview ? (feesPreview.taxIncluded ? 'Included in price' : 'Calculated separately')
+                : items.every((i) => i.taxIncluded) ? 'Included in price' : 'Calculated separately'}
             </span>
           )}
         </div>
