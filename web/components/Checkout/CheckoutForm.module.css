@@ -257,3 +257,62 @@
   line-height: 1.6;
   color: var(--muted-lt);
 }
+
+.upiPay {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 5rem 2.5rem 6rem;
+  text-align: center;
+}
+.upiPayTitle {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.upiPayMeta {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+.upiQrWrap {
+  display: inline-block;
+  padding: 1rem;
+  background: white;
+  border: 1px solid var(--rule);
+  margin-bottom: 1.25rem;
+}
+.upiQrWrap img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.upiPayLabel {
+  font-size: 0.95rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+.upiPayId {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--green-dk);
+  margin-bottom: 1.25rem;
+}
+.upiPayNote {
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+.upiWaBtn {
+  display: inline-block;
+  background: var(--green-dk);
+  color: var(--ivory);
+  padding: 0.75rem 1.75rem;
+  font-size: 0.76rem;
+}
+.upiWaBtn:hover {
+  background: var(--green);
+}

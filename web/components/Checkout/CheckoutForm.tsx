@@ -8,14 +8,29 @@ import { useCart } from '@/components/Cart/CartContext';
 import { trackEvent } from '@/lib/events/client';
 import { formatMoney } from '@/components/Pricing/PriceTag';
 import { COUNTRIES } from '@/data/countries';
+import { WhatsAppCta } from '@/components/WhatsAppCta';
+import { CONTACT } from '@/lib/config';
 import type { Order } from '@/lib/order/types';
 import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import styles from './CheckoutForm.module.css';
 
 const LAST_ORDER_KEY = 'khatore_last_order';
+const UPI_ID = 'vijaykhatore2008@oksbi';
+const UPI_PAYEE_LABEL = 'Khatore Pharmaceuticals';
+
+/**
+ * 'manual_upi' is NOT a real gateway (no PaymentProvider/webhook exists
+ * for it, lib/payment/types.ts) -- it's a client-side-only option: the
+ * order is created with no paymentMethod sent to the server at all, and
+ * payment itself happens outside this site entirely (customer scans the
+ * QR, then confirms via WhatsApp). Kept as a separate union member
+ * rather than folded into PaymentProviderId so the server-side gateway
+ * abstraction never has to know this option exists.
+ */
+type CheckoutMethodId = PaymentProviderId | 'manual_upi';
 
 interface PaymentOption {
-  id: PaymentProviderId;
+  id: CheckoutMethodId;
   label: string;
   /** Shown only for the India-aside PayU option offered to export countries -- this merchant's PayU account is INR-only (no international/multi-currency acquiring enabled), so an export customer choosing PayU is charged in INR, converted from the order's own currency server-side (Vrinda, 9 Oct decision). PayPal has no such caveat. */
   note?: string;
@@ -32,23 +47,36 @@ interface PaymentOption {
  * displayed/submitted method from ever being one the server would
  * reject.
  *
- * India: PayU only, as before (this merchant's PayU account natively
+ * India: PayU, as before (this merchant's PayU account natively
  * charges INR, exactly India's own currency -- no conversion, no
- * caveat, nothing to choose between).
+ * caveat, nothing to choose between), plus the manual UPI QR option
+ * below.
  *
  * Every other country (Vrinda, 9 Oct: "show both PayPal/Card and PayU
  * as selectable payment options" for export): both PayPal (charges in
  * the order's own resolved currency) and PayU (charges in INR
  * regardless of the buyer's country -- see the PaymentOption.note
  * above) are offered, customer picks.
+ *
+ * manual_upi (Vrinda, 9 Oct: offered everywhere, not India-only) is a
+ * last, separate choice on every country -- it's a direct UPI QR scan,
+ * not a gateway session, so it's appended rather than replacing
+ * anything above. Flagged in the delivery report: UPI is an India-
+ * domestic payment rail: a non-Indian bank's UPI app generally can't
+ * complete it, so it's only really usable by an India-based payer even
+ * though it's shown on every country's checkout.
  */
 function paymentOptionsForCountry(countryCode: string): PaymentOption[] {
-  if (countryCode === 'IN') {
-    return [{ id: 'payu', label: 'UPI, Card or Net Banking (via PayU)' }];
-  }
+  const base: PaymentOption[] =
+    countryCode === 'IN'
+      ? [{ id: 'payu', label: 'UPI, Card or Net Banking (via PayU)' }]
+      : [
+          { id: 'paypal', label: 'PayPal or International Card' },
+          { id: 'payu', label: 'UPI, Card or Net Banking (via PayU)', note: 'Charged in ₹ INR, converted from your order total' },
+        ];
   return [
-    { id: 'paypal', label: 'PayPal or International Card' },
-    { id: 'payu', label: 'UPI, Card or Net Banking (via PayU)', note: 'Charged in ₹ INR, converted from your order total' },
+    ...base,
+    { id: 'manual_upi', label: 'Scan & Pay via UPI QR', note: 'Manual -- confirm with us on WhatsApp after paying' },
   ];
 }
 
@@ -69,10 +97,11 @@ export function CheckoutForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [country, setCountry] = useState('');
-  const [selectedMethodId, setSelectedMethodId] = useState<PaymentProviderId | null>(null);
+  const [selectedMethodId, setSelectedMethodId] = useState<CheckoutMethodId | null>(null);
   const startedRef = useRef(false);
   const payUFormRef = useRef<HTMLFormElement>(null);
   const [payUSubmit, setPayUSubmit] = useState<{ action: string; fields: Record<string, string> } | null>(null);
+  const [manualUpiOrder, setManualUpiOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     if (items.length === 0 || startedRef.current) return;
@@ -122,7 +151,10 @@ export function CheckoutForm() {
         country: String(form.get('country') ?? ''),
       },
       items: items.map((i) => ({ slug: i.slug, quantity: i.quantity })),
-      paymentMethod: paymentMethod?.id,
+      // manual_upi isn't a real gateway (no PaymentProvider for it) --
+      // never sent to the server, which would otherwise reject it as
+      // an unrecognised payment method (app/api/checkout/route.ts).
+      paymentMethod: paymentMethod?.id === 'manual_upi' ? undefined : paymentMethod?.id,
     };
 
     try {
@@ -157,6 +189,17 @@ export function CheckoutForm() {
       }
       clearCart();
 
+      if (paymentMethod?.id === 'manual_upi') {
+        // No gateway session to branch on -- the order is created and
+        // recorded exactly as any other, just with no paymentMethod
+        // sent (see body above). Show the QR inline instead of
+        // redirecting; the render guard below checks manualUpiOrder
+        // the same way it already checks payUSubmit.
+        setManualUpiOrder(data.order);
+        setSubmitting(false);
+        return;
+      }
+
       const session = data.paymentSession;
       if (session?.available && session.formAction && session.formFields) {
         // PayU: render the hidden form (below) with these exact fields,
@@ -181,6 +224,46 @@ export function CheckoutForm() {
       setError('Something went wrong creating your order — please try again.');
       setSubmitting(false);
     }
+  }
+
+  // manual_upi has no gateway redirect to navigate away to -- the QR
+  // itself is the "next step", rendered right here in place of the
+  // form. Checked before the empty-cart guard below (clearCart() above
+  // already emptied the cart by the time this is set) so it always
+  // wins once an order has been placed this way.
+  if (manualUpiOrder) {
+    const whatsappMessage = `Hi, I've just placed order ${manualUpiOrder.orderId} on the Khatore website and paid via UPI QR — here is my payment confirmation.`;
+    return (
+      <div className={styles.upiPay}>
+        <h1 className={styles.upiPayTitle}>Scan to Pay</h1>
+        <p className={styles.upiPayMeta}>
+          Order <strong>{manualUpiOrder.orderId}</strong> ·{' '}
+          {formatMoney(manualUpiOrder.total.amount, manualUpiOrder.total.currency)}
+        </p>
+        <div className={styles.upiQrWrap}>
+          <Image
+            src="/assets/payment/upi-qr.png"
+            alt={`${UPI_PAYEE_LABEL} UPI QR code`}
+            width={280}
+            height={243}
+          />
+        </div>
+        <p className={styles.upiPayLabel}>{UPI_PAYEE_LABEL}</p>
+        <p className={styles.upiPayId}>
+          UPI ID: <strong>{UPI_ID}</strong>
+        </p>
+        <p className={styles.upiPayNote}>
+          Scan this code with any UPI app (Google Pay, PhonePe, Paytm, BHIM, etc.) and pay the amount above.
+          Once paid, message us on WhatsApp with your order ID and a payment screenshot so we can confirm it.
+        </p>
+        <WhatsAppCta
+          phone={CONTACT.whatsappIndiaWorld}
+          label="I've paid — confirm via WhatsApp"
+          message={whatsappMessage}
+          className={styles.upiWaBtn}
+        />
+      </div>
+    );
   }
 
   // clearCart() above fires as soon as the order is created -- before
