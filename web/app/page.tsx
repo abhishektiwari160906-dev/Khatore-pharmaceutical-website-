@@ -313,6 +313,10 @@ export default function HomePage() {
               src: '/assets/marketing/banner-trusted-herbs.png',
               alt: "Nature's most trusted liver herbs — a blend of time-tested Ayurvedic herbs: Roheda, Bhuiavla, Vidanga",
             },
+            {
+              src: '/assets/marketing/banner-real-lab-progress.png',
+              alt: 'Real laboratory progress on Kamalahar: HBV DNA 4,060 IU/mL (July 2024) to 24 IU/mL (October 2024) to not detected (January 2025)',
+            },
           ].map((banner) => (
             <div key={banner.src} className={styles.galleryItem}>
               <Image src={banner.src} alt={banner.alt} width={1800} height={942} className={styles.galleryImg} />
