@@ -7,6 +7,7 @@ import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/type
 import { isValidCountryCode } from '@/data/countries';
 import { resolveLocalCurrencyPricing, resolveTierForCountry } from '@/lib/pricing/resolve';
 import { getRates, convertAmount, roundToWhole } from '@/lib/pricing/fx';
+import { computeIndiaShippingCost } from '@/lib/shipping/indiaShipping';
 import type { CustomerInfo, Order, OrderLineItem, ShippingInfo } from '@/lib/order/types';
 
 export const runtime = 'nodejs';
@@ -190,8 +191,21 @@ export async function POST(request: Request): Promise<NextResponse> {
     createdAt: new Date().toISOString(),
   };
 
+  // India backend-only shipping-by-location (Vrinda, 9 Oct: customer
+  // still sees only the flat ₹12,999 inclusive price -- this is
+  // Khatore's own internal record, never the charged amount and never
+  // part of the `order` returned to the client below). Placeholder
+  // zone rates (lib/shipping/indiaShipping.ts) are all zero until the
+  // real logistics provider's rate card replaces them -- a pure data
+  // swap at that point, no changes needed here.
+  let orderForStore: Order = order;
+  if (shipping.country === 'IN') {
+    const { zone, cost } = computeIndiaShippingCost(shipping.region, shipping.city, shipping.postalCode);
+    orderForStore = { ...order, internalMeta: { indiaShippingZone: zone, indiaShippingCost: cost } };
+  }
+
   try {
-    await getConfiguredOrderStore().record(order);
+    await getConfiguredOrderStore().record(orderForStore);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('order store failure', err);

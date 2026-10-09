@@ -10,13 +10,12 @@ import { formatMoney } from '@/components/Pricing/PriceTag';
 import { COUNTRIES } from '@/data/countries';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { CONTACT } from '@/lib/config';
+import { UPI_ID, UPI_PAYEE_LABEL } from '@/lib/payment/upiConfig';
 import type { Order } from '@/lib/order/types';
 import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import styles from './CheckoutForm.module.css';
 
 const LAST_ORDER_KEY = 'khatore_last_order';
-const UPI_ID = 'vijaykhatore2008@oksbi';
-const UPI_PAYEE_LABEL = 'Khatore Pharmaceuticals';
 
 /**
  * 'manual_upi' is NOT a real gateway (no PaymentProvider/webhook exists

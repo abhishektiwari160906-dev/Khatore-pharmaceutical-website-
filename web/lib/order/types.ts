@@ -107,4 +107,16 @@ export interface Order {
   /** The gateway's own reference/receipt id, once available. */
   gatewayReference?: string;
   createdAt: string; // ISO 8601
+  /**
+   * Backend-only -- Khatore's own operational data, never the charged
+   * amount and never returned to the customer's browser. The checkout
+   * API route only attaches this to the order object it hands to
+   * getConfiguredOrderStore().record() (console/Sheet), never to the
+   * Order object in its own JSON response -- so it can't reach
+   * sessionStorage or any rendered page. See lib/shipping/indiaShipping.ts.
+   */
+  internalMeta?: {
+    indiaShippingZone?: string;
+    indiaShippingCost?: { amount: number; currency: CurrencyCode };
+  };
 }
