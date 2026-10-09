@@ -86,26 +86,6 @@ export function OrderConfirmationClient() {
           </li>
         ))}
       </ul>
-      {order.shippingCost || order.tax ? (
-        <>
-          <div className={styles.totalRow}>
-            <span>Subtotal</span>
-            <span>{formatMoney(order.subtotal.amount, order.subtotal.currency)}</span>
-          </div>
-          {order.shippingCost ? (
-            <div className={styles.totalRow}>
-              <span>Shipping</span>
-              <span>{formatMoney(order.shippingCost.amount, order.shippingCost.currency)}</span>
-            </div>
-          ) : null}
-          {order.tax ? (
-            <div className={styles.totalRow}>
-              <span>Tax</span>
-              <span>{formatMoney(order.tax.amount, order.tax.currency)}</span>
-            </div>
-          ) : null}
-        </>
-      ) : null}
       <div className={styles.totalRow}>
         <span>Total</span>
         <span>{formatMoney(order.total.amount, order.total.currency)}</span>
