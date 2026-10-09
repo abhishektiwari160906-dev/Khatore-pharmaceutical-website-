@@ -67,8 +67,8 @@ export default function HomePage() {
           <Image
             src="/assets/products/01-kamalahar-cutout.png"
             alt=""
-            width={295}
-            height={295}
+            width={1407}
+            height={1198}
             className={styles.heroVisualImg}
             priority
           />
@@ -142,7 +142,21 @@ export default function HomePage() {
             return (
               <a key={t.id} href={t.sourceUrl} target="_blank" rel="noopener" className={styles.testimonialCard}>
                 <div className={styles.testimonialMedia}>
-                  {t.videoUrl ? (
+                  {t.youtubeId ? (
+                    // No onClick/stopPropagation needed here, unlike the
+                    // <video> branch below -- a cross-origin iframe's
+                    // internal clicks never bubble into this page's DOM
+                    // at all (browser same-origin policy), so the parent
+                    // <a> can never see them to begin with.
+                    <iframe
+                      className={styles.testimonialIframe}
+                      src={`https://www.youtube.com/embed/${t.youtubeId}`}
+                      title={`${t.name} — video testimonial`}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : t.videoUrl ? (
                     <video
                       className={styles.testimonialVideo}
                       src={t.videoUrl}
@@ -152,6 +166,17 @@ export default function HomePage() {
                       preload="metadata"
                       onClick={(e) => e.stopPropagation()}
                     />
+                  ) : t.documentUrl ? (
+                    <>
+                      <Image
+                        src={t.documentUrl}
+                        alt={t.documentCaption ?? 'Original testimonial document'}
+                        fill
+                        sizes="(max-width: 700px) 100vw, 360px"
+                        className={styles.testimonialDocumentImg}
+                      />
+                      <span className={styles.testimonialDocumentCaption}>{t.documentCaption}</span>
+                    </>
                   ) : (
                     <>
                       <span className={styles.testimonialInitials} aria-hidden="true">

@@ -34,17 +34,33 @@ Downloaded: 2026-09-19
 | `products/01-kamalahar-cutout.png` | Derived from `products/01-kamalahar.png` above | Background-knocked-out (white-point alpha threshold, no content added/altered) for the homepage hero's flanking product visual. |
 | `products/raw-botanical-ingredients-cutout.png` | Client-supplied product photograph (K-Cuff Cough Syrup with Tulsi, flat-lay with tulsi leaf, black pepper, cardamom and bay leaf) | Cropped to the raw-ingredient portion only (bottle excluded) and background-knocked-out. Real Khatore ingredient photography, not stock imagery — used here for the "raw botanicals" side of the hero rather than a specific "Gota Masala" claim, which is not attested anywhere in the repo's verified product data. |
 
-## Known limitation — flagging, not hiding
+## Resolution upgrade (2026-10-09)
 
-These are Magento's **295×295 cache-generated thumbnails** — the only
-product imagery reachable from the public site. This is genuinely real,
-unaltered product photography, but 295×295 is low resolution for a
-"premium" presentation at larger display sizes. I have no access to
-Magento's admin media library (original full-resolution source files) —
-that needs either admin/FTP access to Magento or the original photography
-files supplied directly by Khatore. Per instruction, I have **not**
-upscaled, AI-regenerated, or otherwise altered these to compensate —
-using them as-is until real higher-resolution sources are available.
+The 6 Magento-native products above were re-pulled at full native
+resolution — Magento serves the ORIGINAL uploaded file at
+`/media/catalog/product/<id-path>/<file>` (no cache/ resize segment in
+the URL), publicly reachable the same as the cache-generated
+thumbnails, just not linked from any page. Same real, unaltered
+photography as before, just not downsized:
+
+| Local file | Old (cache thumbnail) | New (original) |
+|---|---|---|
+| `products/01-kamalahar.png` | 650×650 | **1500×1500** |
+| `products/02-k-mens.png` | 650×650 | **1500×1500** |
+| `products/03-k-matic.png` | 650×650 | **1500×1500** |
+| `products/04-k-cuff-syrup.png` | 650×650 | **1500×1500** |
+| `products/05-k-matic-oil.png` | 650×650 | **1500×1500** |
+| `products/08-k-matic-combo.png` | 650×650 | **1080×1080** |
+| `products/01-kamalahar-cutout.png` | 295×295 (derived from the 650×650 source) | **1407×1198** (re-derived from the new 1500×1500 source, same white-point knockout method, no content added/altered) |
+
+`products/06-kaptone.jpg` and `products/07-k-morex-brain-tonic.jpg` are
+**not from Magento** — checked, these two have no Magento-native
+listing; their source is Amazon product photography Khatore reuploaded
+into Magento under a third-party filename
+(`61hvmbzrstl._sx425_.jpg` / `51yuuzjgj3l._sx425_.jpg`). 425×425 is the
+only resolution that filename exists at anywhere reachable — already
+in use, genuinely the best available, not a limitation introduced by
+this pass.
 
 ## Not included in this pass
 

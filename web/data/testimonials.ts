@@ -30,17 +30,27 @@ export interface TestimonialEntry {
   tag: string;
   sourceUrl: string;
   /**
-   * Real testimonial video/photo, once Khatore supplies one for this
-   * person -- currently undefined for every entry (see 2026-09-24
-   * FINAL CLIENT-REVIEW SPRINT: no real video/photo assets of these
-   * specific patients exist in the repo, and the brief explicitly
-   * prohibits fabricating or AI-generating people to fill this gap).
-   * The card component renders the real media when this is set, and
-   * an honestly-labeled pending placeholder otherwise -- so dropping
-   * in real assets later needs no component changes, only this field.
+   * Real testimonial media, pulled 9 Oct from the exact same page each
+   * entry's sourceUrl points to -- khatorepharma.com embeds each
+   * patient's own real YouTube testimonial next to their quote (visible
+   * in that page's raw HTML as a `data-src="youtube.com/embed/<id>"`
+   * button, in the same document order as the testimonials themselves
+   * -- verified by position, not guessed). youtubeId is that same real
+   * video, nothing fabricated or re-recorded.
    */
+  youtubeId?: string;
+  /** Direct-hosted video file, if Khatore ever supplies one outside YouTube -- unused today, every current entry with video uses youtubeId instead. */
   videoUrl?: string;
   posterUrl?: string;
+  /**
+   * For a person with no video on the old site but a real scanned
+   * document instead (e.g. Dr. B. C. Jha's page has no video embed,
+   * only his original handwritten letter to Khatore) -- the card shows
+   * this labeled as the letter it is, never implied to be a photo of
+   * the person (Section: never invent a face for a quote).
+   */
+  documentUrl?: string;
+  documentCaption?: string;
 }
 
 export const TESTIMONIALS: TestimonialEntry[] = [
@@ -51,6 +61,7 @@ export const TESTIMONIALS: TestimonialEntry[] = [
     location: 'Accra, Ghana',
     tag: 'Hepatitis',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/hepatitis',
+    youtubeId: '8P7PDRq1sro',
   },
   {
     id: 'sameer-preeti-badre',
@@ -59,6 +70,7 @@ export const TESTIMONIALS: TestimonialEntry[] = [
     location: 'Mumbai, India',
     tag: 'Hepatitis',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/hepatitis',
+    youtubeId: 'V_e1EWUARns',
   },
   {
     id: 'dr-venkat',
@@ -67,6 +79,7 @@ export const TESTIMONIALS: TestimonialEntry[] = [
     location: 'Guntur, Andhra Pradesh',
     tag: 'Hepatitis',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/hepatitis',
+    youtubeId: '3SBiU80Fpi0',
   },
   {
     id: 'yatin-shah',
@@ -75,6 +88,7 @@ export const TESTIMONIALS: TestimonialEntry[] = [
     location: 'Mount Abu, Rajasthan',
     tag: 'Fatty Liver',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
+    youtubeId: 'rtPJTsI_3kA',
   },
   {
     id: 'dr-soumen-ghosh',
@@ -83,6 +97,7 @@ export const TESTIMONIALS: TestimonialEntry[] = [
     location: 'San Jose, California',
     tag: 'Fatty Liver',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
+    youtubeId: 'bcI9SADpw9s',
   },
   {
     id: 'dr-bc-jha',
@@ -91,6 +106,12 @@ export const TESTIMONIALS: TestimonialEntry[] = [
     location: 'Patna, Bihar',
     tag: "Doctor's Testimonial",
     sourceUrl: 'https://www.khatorepharma.com/testimonials/doctor',
+    // The doctor-testimonials page has no video embeds at all (unlike
+    // the patient pages) -- this is the real document that page shows
+    // instead: Dr. Jha's own handwritten letter to Khatore, downloaded
+    // from khatorepharma.com's own media directory and self-hosted.
+    documentUrl: '/assets/testimonials/dr-bc-jha.jpg',
+    documentCaption: "Dr. Jha's original letter to Khatore",
   },
 ];
 

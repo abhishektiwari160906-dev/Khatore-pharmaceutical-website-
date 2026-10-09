@@ -800,6 +800,33 @@
   height: 100%;
   object-fit: cover;
 }
+.testimonialIframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+/* Real scanned document (e.g. a handwritten letter) standing in where
+   no video exists -- shown on its own paper-white ground, never
+   cropped to fill the frame like a portrait would be, since it's text
+   that needs to stay legible, not a face. */
+.testimonialDocumentImg {
+  object-fit: contain;
+  background: var(--paper);
+}
+.testimonialDocumentCaption {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.2rem 0.5rem;
+}
 .testimonialInitials {
   font-family: var(--serif);
   font-style: italic;
