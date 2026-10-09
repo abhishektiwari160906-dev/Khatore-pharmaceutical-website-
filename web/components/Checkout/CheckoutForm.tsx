@@ -16,8 +16,15 @@ import styles from './CheckoutForm.module.css';
 
 const LAST_ORDER_KEY = 'khatore_last_order';
 
+interface PaymentOption {
+  id: PaymentProviderId;
+  label: string;
+  /** Shown only for the India-aside PayU option offered to export countries -- this merchant's PayU account is INR-only (no international/multi-currency acquiring enabled), so an export customer choosing PayU is charged in INR, converted from the order's own currency server-side (Vrinda, 9 Oct decision). PayPal has no such caveat. */
+  note?: string;
+}
+
 /**
- * Picks which gateway to attempt, from the shipping COUNTRY actually
+ * Which gateway(s) to offer, from the shipping COUNTRY actually
  * selected in this form -- not the cart's `subtotal.currency`, which
  * is resolved once at add-to-cart time (geo-guess or whatever country
  * was selected on an earlier visit) and can silently go stale by the
@@ -25,17 +32,26 @@ const LAST_ORDER_KEY = 'khatore_last_order';
  * (app/api/checkout/route.ts) resolves the order's real currency from
  * this exact same field, so matching it here is what keeps the
  * displayed/submitted method from ever being one the server would
- * reject. Only India (lib/pricing/config.ts's COUNTRY_TIER_MAP) prices
- * in INR -- every other country's order, including the locally
- * converted ones (lib/pricing/resolve.ts), prices in whatever currency
- * PayPal's Orders v2 API itself accepts, which also covers
- * "International Cards" via its own guest card checkout.
+ * reject.
+ *
+ * India: PayU only, as before (this merchant's PayU account natively
+ * charges INR, exactly India's own currency -- no conversion, no
+ * caveat, nothing to choose between).
+ *
+ * Every other country (Vrinda, 9 Oct: "show both PayPal/Card and PayU
+ * as selectable payment options" for export): both PayPal (charges in
+ * the order's own resolved currency) and PayU (charges in INR
+ * regardless of the buyer's country -- see the PaymentOption.note
+ * above) are offered, customer picks.
  */
-function paymentMethodForCountry(countryCode: string): { id: PaymentProviderId; label: string } {
+function paymentOptionsForCountry(countryCode: string): PaymentOption[] {
   if (countryCode === 'IN') {
-    return { id: 'payu', label: 'UPI, Card or Net Banking (via PayU)' };
+    return [{ id: 'payu', label: 'UPI, Card or Net Banking (via PayU)' }];
   }
-  return { id: 'paypal', label: 'PayPal or International Card' };
+  return [
+    { id: 'paypal', label: 'PayPal or International Card' },
+    { id: 'payu', label: 'UPI, Card or Net Banking (via PayU)', note: 'Charged in ₹ INR, converted from your order total' },
+  ];
 }
 
 /**
@@ -55,6 +71,7 @@ export function CheckoutForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [country, setCountry] = useState('');
+  const [selectedMethodId, setSelectedMethodId] = useState<PaymentProviderId | null>(null);
   const startedRef = useRef(false);
   const payUFormRef = useRef<HTMLFormElement>(null);
   const [payUSubmit, setPayUSubmit] = useState<{ action: string; fields: Record<string, string> } | null>(null);
@@ -65,7 +82,17 @@ export function CheckoutForm() {
     trackEvent('checkout_started', { metadata: { item_count: items.reduce((n, i) => n + i.quantity, 0) } });
   }, [items]);
 
-  const paymentMethod = country ? paymentMethodForCountry(country) : null;
+  const paymentOptions = country ? paymentOptionsForCountry(country) : [];
+  // Defaults to the first option whenever the country changes the
+  // available set (e.g. switching from India's PayU-only to an export
+  // country's two options, or between two export countries) -- a
+  // stale selectedMethodId from a previous country never silently
+  // carries over to one the new country doesn't actually offer.
+  const paymentMethod = paymentOptions.find((o) => o.id === selectedMethodId) ?? paymentOptions[0] ?? null;
+
+  useEffect(() => {
+    setSelectedMethodId(null);
+  }, [country]);
 
   // Preview-only (app/api/checkout/route.ts computes and converts the
   // authoritative figures server-side, same source data) -- shown in
@@ -123,7 +150,14 @@ export function CheckoutForm() {
       }
 
       trackEvent('order_placed', {
-        metadata: { order_id: data.order.orderId, item_count: items.reduce((n, i) => n + i.quantity, 0) },
+        metadata: {
+          order_id: data.order.orderId,
+          item_count: items.reduce((n, i) => n + i.quantity, 0),
+          // Which gateway the customer actually chose (Vrinda, 9 Oct:
+          // export countries now pick between PayU and PayPal) -- null
+          // when no gateway is configured/available for this order.
+          payment_method: paymentMethod?.id ?? null,
+        },
       });
 
       try {
@@ -244,6 +278,27 @@ export function CheckoutForm() {
             </label>
           </div>
         </section>
+
+        {paymentOptions.length > 1 ? (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Payment Method</h2>
+            <div className={styles.methodChoice}>
+              {paymentOptions.map((option) => (
+                <label key={option.id} className={styles.methodOption}>
+                  <input
+                    type="radio"
+                    name="paymentMethodChoice"
+                    value={option.id}
+                    checked={paymentMethod?.id === option.id}
+                    onChange={() => setSelectedMethodId(option.id)}
+                  />
+                  <span className={styles.methodLabel}>{option.label}</span>
+                  {option.note ? <span className={styles.methodOptionNote}>{option.note}</span> : null}
+                </label>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <p className={styles.paymentNote}>
           {paymentMethod

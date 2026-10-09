@@ -56,6 +56,41 @@
 .input:focus {
   border-color: var(--green-dk);
 }
+.methodChoice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.methodOption {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.methodOption:has(input:checked) {
+  border-color: var(--green-dk);
+}
+.methodOption input[type='radio'] {
+  accent-color: var(--green-dk);
+}
+.methodLabel {
+  flex: 1;
+}
+.methodOptionNote {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 .paymentNote {
   font-size: 0.72rem;
   line-height: 1.7;

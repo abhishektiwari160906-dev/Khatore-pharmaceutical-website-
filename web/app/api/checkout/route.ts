@@ -247,15 +247,40 @@ export async function POST(request: Request): Promise<NextResponse> {
     } else {
       const origin = new URL(request.url).origin;
       try {
-        paymentSession = await provider.createSession({
-          orderId: order.orderId,
-          amount: order.total,
-          customerName: customer.fullName,
-          customerEmail: customer.email,
-          customerPhone: customer.phone,
-          successUrl: `${origin}/api/payments/return`,
-          failureUrl: `${origin}/api/payments/return`,
-        });
+        // PayU (Vrinda, 9 Oct decision): offered as a second option for
+        // export countries too, but this merchant account is INR-only
+        // (PayU's classic hosted-checkout hash has no currency field at
+        // all -- international/multi-currency acquiring is a separate,
+        // bank-approved add-on this account doesn't have). So a non-India
+        // customer choosing PayU is charged in INR, converted from the
+        // order's own currency via the same live-FX path already used
+        // for local-currency pricing -- never silently charged in the
+        // wrong currency, and never silently left as an un-payable USD
+        // amount PayU's classic endpoint can't actually process.
+        let paymentAmount = order.total;
+        if (paymentMethod === 'payu' && order.total.currency !== 'INR') {
+          const rates = await getRates();
+          const converted = rates ? convertAmount(order.total.amount, order.total.currency, 'INR', rates) : null;
+          if (converted === null) {
+            paymentSession = {
+              available: false,
+              reason: 'Could not convert this order to INR for PayU right now -- please try again, or choose PayPal.',
+            };
+          } else {
+            paymentAmount = { amount: roundToWhole(converted), currency: 'INR' };
+          }
+        }
+        if (!paymentSession) {
+          paymentSession = await provider.createSession({
+            orderId: order.orderId,
+            amount: paymentAmount,
+            customerName: customer.fullName,
+            customerEmail: customer.email,
+            customerPhone: customer.phone,
+            successUrl: `${origin}/api/payments/return`,
+            failureUrl: `${origin}/api/payments/return`,
+          });
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error('payment session creation failed', { orderId: order.orderId, paymentMethod, err });
