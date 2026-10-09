@@ -183,3 +183,42 @@ export async function resolveLocalCurrencyPricing(product: Product, countryCode?
     fxRate,
   };
 }
+
+export interface LocalDisplayEstimate {
+  currency: CurrencyCode;
+  amount: number;
+}
+
+/**
+ * Display-ONLY local-currency estimate (Vrinda, 9 Oct: "$199 USD (≈
+ * local)" -- the actual charge stays USD, nothing about the payment
+ * flow changes). Scoped deliberately to exactly the countries whose
+ * order is actually charged in the tier's base USD today -- i.e. local
+ * currency is in GATEWAY_UNSUPPORTED_CURRENCIES (AE/NG/GH/RO/KE/UG/TZ).
+ * For every other tiered country (GB/CA/AU/DE/SG/MY/PH), the local
+ * currency is ALREADY the real charged amount via
+ * resolveLocalCurrencyPricing above -- that is not an estimate, it's
+ * the actual price, so this deliberately returns null there rather
+ * than showing a second, redundant "estimate" figure next to it
+ * (client decision, 9 Oct, explicitly confirmed rather than assumed:
+ * leave those 7 countries' real local-currency charge untouched).
+ * Also null for India (its own ₹12,999 display needs no conversion)
+ * and for any country with no known local currency at all (never
+ * guess one).
+ */
+export async function resolveDisplayEstimate(
+  baseAmountUSD: number,
+  countryCode?: string,
+): Promise<LocalDisplayEstimate | null> {
+  if (!countryCode) return null;
+  const localCurrency = getCurrencyForCountry(countryCode);
+  if (!localCurrency || localCurrency === 'USD') return null;
+  if (!GATEWAY_UNSUPPORTED_CURRENCIES.includes(localCurrency)) return null;
+
+  const rates = await getRates();
+  if (!rates) return null; // live source unreachable -- no estimate rather than a guessed one
+
+  const converted = convertAmount(baseAmountUSD, 'USD', localCurrency, rates);
+  if (converted === null) return null;
+  return { currency: localCurrency, amount: roundToWhole(converted) };
+}

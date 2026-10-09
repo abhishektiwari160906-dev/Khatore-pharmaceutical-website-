@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getProductBySlug } from '@/data/products';
 import { isValidCountryCode } from '@/data/countries';
-import { resolveLocalCurrencyPricing } from '@/lib/pricing/resolve';
+import { resolveLocalCurrencyPricing, resolveDisplayEstimate } from '@/lib/pricing/resolve';
 
 export const runtime = 'nodejs';
 
@@ -38,5 +38,13 @@ export async function GET(request: Request): Promise<NextResponse> {
   const country = candidate && isValidCountryCode(candidate) ? candidate : undefined;
 
   const pricing = await resolveLocalCurrencyPricing(product, country);
-  return NextResponse.json({ pricing });
+  // Only meaningful when the tier's own base currency (USD) is what's
+  // actually being shown above -- i.e. pricing.baseAmount is unset,
+  // meaning resolveLocalCurrencyPricing did NOT already convert to a
+  // real local charge. See resolveDisplayEstimate's own doc comment.
+  const displayEstimate =
+    pricing.isTiered && pricing.baseAmount === undefined
+      ? await resolveDisplayEstimate(pricing.salePrice, country)
+      : null;
+  return NextResponse.json({ pricing, displayEstimate });
 }

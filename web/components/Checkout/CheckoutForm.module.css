@@ -200,6 +200,12 @@
   color: var(--muted-lt);
   font-style: italic;
 }
+.estimateNote {
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: right;
+}
 .summaryRow {
   display: flex;
   justify-content: space-between;

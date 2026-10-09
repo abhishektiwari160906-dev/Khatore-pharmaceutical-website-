@@ -91,3 +91,50 @@ describe('resolveLocalCurrencyPricing', () => {
     expect(pricing.salePrice).toBe(299);
   });
 });
+
+describe('resolveDisplayEstimate (Vrinda, 9 Oct -- "$199 USD (≈ local)", display only)', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllGlobals();
+  });
+
+  it('gives a NGN estimate for Nigeria (charge stays USD -- GATEWAY_UNSUPPORTED_CURRENCIES)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }));
+    const { resolveDisplayEstimate } = await import('./resolve');
+
+    const estimate = await resolveDisplayEstimate(199, 'NG');
+    expect(estimate).not.toBeNull();
+    expect(estimate!.currency).toBe('NGN');
+    // 199 USD * 1328.1 -> 264,291.9 -> rounds to 264292
+    expect(estimate!.amount).toBe(264292);
+  });
+
+  it('is null for the UK -- GBP is ALREADY the real charged currency there, not an estimate to show alongside it', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }));
+    const { resolveDisplayEstimate } = await import('./resolve');
+
+    expect(await resolveDisplayEstimate(299, 'GB')).toBeNull();
+  });
+
+  it('is null for the US -- local currency already equals the base, nothing to estimate', async () => {
+    const { resolveDisplayEstimate } = await import('./resolve');
+    expect(await resolveDisplayEstimate(299, 'US')).toBeNull();
+  });
+
+  it('is null for India -- the ₹12,999 display needs no conversion', async () => {
+    const { resolveDisplayEstimate } = await import('./resolve');
+    expect(await resolveDisplayEstimate(12999, 'IN')).toBeNull();
+  });
+
+  it('is null for an unlisted country -- never guesses a currency', async () => {
+    const { resolveDisplayEstimate } = await import('./resolve');
+    expect(await resolveDisplayEstimate(299, 'JP')).toBeNull();
+  });
+
+  it('is null (never invented) when the live rate source is unreachable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
+    const { resolveDisplayEstimate } = await import('./resolve');
+
+    expect(await resolveDisplayEstimate(199, 'NG')).toBeNull();
+  });
+});

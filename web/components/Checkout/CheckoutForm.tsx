@@ -12,6 +12,7 @@ import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { CONTACT } from '@/lib/config';
 import { UPI_ID, UPI_PAYEE_LABEL } from '@/lib/payment/upiConfig';
 import type { Order } from '@/lib/order/types';
+import type { LocalDisplayEstimate } from '@/lib/pricing/resolve';
 import type { PaymentProviderId, PaymentSessionResult } from '@/lib/payment/types';
 import styles from './CheckoutForm.module.css';
 
@@ -102,6 +103,10 @@ export function CheckoutForm() {
   // genuinely fails (e.g. no geo signal at all) -- paymentOptions stays
   // empty until this resolves, same "don't guess" pattern as before.
   const [detectedCountry, setDetectedCountry] = useState('');
+  // "$199 USD (≈ ₦xxx)" (Vrinda, 9 Oct) -- display-only, never sent to
+  // the server and never affects order.total; null whenever there's
+  // nothing to estimate (see resolveDisplayEstimate's doc comment).
+  const [displayEstimate, setDisplayEstimate] = useState<LocalDisplayEstimate | null>(null);
   const [selectedMethodId, setSelectedMethodId] = useState<CheckoutMethodId | null>(null);
   const startedRef = useRef(false);
   const payUFormRef = useRef<HTMLFormElement>(null);
@@ -124,9 +129,10 @@ export function CheckoutForm() {
     let cancelled = false;
     fetch(`/api/pricing?productId=${encodeURIComponent(items[0]!.slug)}`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { pricing?: { country?: string } } | null) => {
+      .then((data: { pricing?: { country?: string }; displayEstimate?: LocalDisplayEstimate | null } | null) => {
         if (cancelled || !data?.pricing?.country) return;
         setDetectedCountry(data.pricing.country);
+        setDisplayEstimate(data.displayEstimate ?? null);
         // Pre-fills the delivery-address country as a convenience --
         // still freely editable, and editing it never changes price or
         // payment options anymore (those are fixed to detectedCountry).
@@ -478,6 +484,12 @@ export function CheckoutForm() {
           <span>Total</span>
           <span>{subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}</span>
         </div>
+        {displayEstimate ? (
+          <p className={styles.estimateNote}>
+            approx. {formatMoney(displayEstimate.amount, displayEstimate.currency)} — estimate only, you are charged
+            in {subtotal?.currency ?? 'USD'}
+          </p>
+        ) : null}
         <p className={styles.countryNote}>
           Pricing is based on your detected location, confirmed server-side — not the delivery country you enter
           above, which only controls where your order ships.
