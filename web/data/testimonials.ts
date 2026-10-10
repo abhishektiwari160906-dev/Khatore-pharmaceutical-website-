@@ -44,10 +44,10 @@ export interface TestimonialEntry {
   posterUrl?: string;
   /**
    * For a person with no video on the old site but a real scanned
-   * document instead (e.g. Dr. B. C. Jha's page has no video embed,
-   * only his original handwritten letter to Khatore) -- the card shows
-   * this labeled as the letter it is, never implied to be a photo of
-   * the person (Section: never invent a face for a quote).
+   * document instead (the doctor-testimonials page has no video embeds
+   * at all -- every doctor entry there is a scanned letter) -- the card
+   * shows this labeled as the letter it is, never implied to be a photo
+   * of the person (Section: never invent a face for a quote).
    */
   documentUrl?: string;
   documentCaption?: string;
@@ -83,44 +83,56 @@ export const TESTIMONIALS: TestimonialEntry[] = [
   },
   {
     id: 'andres-franco',
-    // 10 Oct: swapped in for Mr. Yatin Shah at Abhishek's request (new
-    // video supplied). The excerpt/tag/sourceUrl below are carried over
-    // from the slot this replaced -- they are Yatin Shah's real words,
-    // NOT verified as Andres Franco's own testimonial text, so this is
-    // flagged back rather than silently shown as if it were his quote.
+    // 10 Oct: new video supplied by Vijay/Abhishek for this slot. The
+    // excerpt below is carried over from the slot this replaced -- NOT
+    // verified as Andres Franco's own words, flagged back rather than
+    // silently shown as if it were his quote (open item, see chat).
     excerpt: 'I had been suffering from fatty liver for 25 years. I finished 6 months of medicine and requested another 6 — I am fully recovered.',
     name: 'Mr. Andres Franco',
     location: 'Mount Abu, Rajasthan',
-    tag: 'Fatty Liver',
+    tag: 'Patient',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
     youtubeId: 'R83bgJbmHlE',
   },
   {
     id: 'nordin',
-    // 10 Oct: swapped in for Dr. Soumen Ghosh at Abhishek's request (new
-    // video + location supplied). Same caveat as above -- excerpt/tag/
-    // sourceUrl are carried over from the replaced slot, not verified as
-    // Nordin's own words.
+    // 10 Oct: new video + location supplied by Vijay/Abhishek for this
+    // slot. Same caveat as above -- excerpt carried over from the slot
+    // this replaced, not verified as Nordin's own words.
     excerpt: 'My blood profile became better and brought ALT/AST levels down to the normal range.',
     name: 'Mr. Nordin',
     location: 'Malaysia',
-    tag: 'Fatty Liver',
+    tag: 'Patient',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
     youtubeId: 'zFpXKaaJc2g',
   },
   {
-    id: 'dr-bc-jha',
-    excerpt: 'Kamalahar has given excellent results — its use in alcoholic hepatitis has especially yielded quick benefits.',
-    name: 'Dr. B. C. Jha',
-    location: 'Patna, Bihar',
+    id: 'dr-g-mohankumar',
+    // 10 Oct: this letter's own letterhead reads "Dr. G. MOHANKUMAR,
+    // Physician & Surgeon" (Nagpur) -- no "Sarda"/"Sharda" surname on it
+    // at all. The khatorepharma.com listing page names him "Dr. G Mohan
+    // Kumar Sharda", but "Sharda Chowk" in his own letterhead is the
+    // NAME OF THE LOCALITY his clinic is at ("CLINIC: Sharda Chowk
+    // (Kapse Chowk), Garoba Maidan, Nagpur-440008"), not part of his
+    // name -- the listing page appears to have picked that up by
+    // mistake. Using the letterhead's own spelling here; flagged back
+    // to Vijay/Abhishek in case "Sarda"/"Sharda" is in fact correct and
+    // this is a different doctor.
+    excerpt:
+      "I have been using your product 'Kamlahar' in cases of non-obstructive jaundice. Within 3 to 4 days patient's appetite comes to normal — jaundice disappears within 7 to 10 days.",
+    name: 'Dr. G. Mohankumar',
+    location: 'Nagpur, Maharashtra',
     tag: "Doctor's Testimonial",
     sourceUrl: 'https://www.khatorepharma.com/testimonials/doctor',
-    // The doctor-testimonials page has no video embeds at all (unlike
-    // the patient pages) -- this is the real document that page shows
-    // instead: Dr. Jha's own handwritten letter to Khatore, downloaded
-    // from khatorepharma.com's own media directory and self-hosted.
-    documentUrl: '/assets/testimonials/dr-bc-jha.jpg',
-    documentCaption: "Dr. Jha's original letter to Khatore",
+    // The doctor-testimonials page has no video embeds at all -- this is
+    // the real scanned letter that page shows instead, downloaded from
+    // khatorepharma.com's own media directory (Magento site) and
+    // self-hosted here, not hotlinked. Provisional per Vijay (10 Oct):
+    // he may send the original paper scan later to swap in instead --
+    // kept as a plain, clearly-named file (not inlined) for exactly
+    // that.
+    documentUrl: '/assets/testimonials/dr-g-mohankumar.jpg',
+    documentCaption: "Dr. G. Mohankumar's original letter to Khatore",
   },
 ];
 
