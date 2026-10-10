@@ -89,8 +89,12 @@ export const PRODUCTS: Product[] = [
     // 10 Oct: real product photography from Vrinda's Drive folder
     // (DSC09503.jpg), replacing the old flat white-background shot.
     image: '/assets/products/01-kamalahar.jpg',
+    // 10 Oct: replaced with the cleared copy deck's "Short Story" text
+    // (verbatim) -- see data/productCopy.ts for the full deck
+    // (benefits, conditions addressed, clinical info, lifestyle
+    // protocol), shown on this product's detail page.
     description:
-      'A traditional Ayurvedic formulation designed to help maintain liver wellness and overall vitality. Enriched with time-tested herbs, it supports healthy liver function, promotes natural detoxification, and aids in sustaining digestive balance.',
+      'High stress, heavy meals, urban pollution, and alcohol strain your liver first. Kamalahar works at the cellular level to optimize liver function tests (LFTs), protect liver parenchyma, and promote tissue regeneration.',
     status: 'approved',
     price: { amount: 399, currency: 'USD' },
     priceNote: 'Full 6-month course',
@@ -106,9 +110,13 @@ export const PRODUCTS: Product[] = [
     bgNum: '02',
     name: 'K-Mens',
     format: 'Capsule · Full Course 3 Months · 30 Caps × 12 Bottles',
-    image: '/assets/products/02-k-mens.png',
+    // 10 Oct: real product photography from Vrinda's Drive folder
+    // (DSC07098.jpg), replacing the old shot at this same path.
+    image: '/assets/products/02-k-mens.jpg',
+    // 10 Oct: replaced with the cleared copy deck's "Short Story" text
+    // (verbatim) -- see data/productCopy.ts for the full deck.
     description:
-      'K-Mens is a time-tested, Ashoka-based Ayurvedic formulation traditionally valued in women’s wellness — enriched with classical herbs that support healthy uterine function, promote natural blood circulation, and help in maintaining internal balance.',
+      "Period days shouldn't pause your life. K-Mens is a clinically inspired uterine sedative and hemostatic formulation that modulates reproductive endocrine pathways to soothe menstrual pain and restore cycle predictability.",
     status: 'approved',
     price: { amount: 149, currency: 'USD' },
     priceNote: 'Full 3-month course',
@@ -136,9 +144,14 @@ export const PRODUCTS: Product[] = [
     bgNum: '03',
     name: 'K-Matic',
     format: 'Capsule · Full Course 3 Months · 30 Caps × 12 Bottles',
-    image: '/assets/products/03-k-matic.png',
+    // 10 Oct: real product photography from Vrinda's Drive folder
+    // (DSC00906.jpg, the capsule-bottle shots from the shared "K-Matic"
+    // subfolder), replacing the old shot at this same path.
+    image: '/assets/products/03-k-matic.jpg',
+    // 10 Oct: replaced with the cleared copy deck's "Short Story" text
+    // (verbatim) -- see data/productCopy.ts for the full deck.
     description:
-      'An innovative Ayurvedic formulation made with twenty-one carefully selected ingredients, traditionally known in Ayurveda for their synergistic role in supporting joint comfort, musculoskeletal strength, and natural mobility.',
+      'Built for bodies in motion. K-Matic Capsules deliver systemic anti-inflammatory bio-actives internally to regulate cytokines, protect cartilage, and soothe deep neuro-muscular discomfort.',
     status: 'approved',
     price: { amount: 149, currency: 'USD' },
     priceNote: 'Full 3-month course',
@@ -153,7 +166,9 @@ export const PRODUCTS: Product[] = [
     bgNum: '04',
     name: 'K-Cuff Syrup',
     format: 'Syrup · 200 ML × 6 Bottles · Non-sedative, non-alcoholic',
-    image: '/assets/products/04-k-cuff-syrup.png',
+    // 10 Oct: real product photography from Vrinda's Drive folder
+    // (DSC07017.jpg), replacing the old shot at this same path.
+    image: '/assets/products/04-k-cuff-syrup.jpg',
     description:
       'K-Cuff is a time-tested Tulsi-based Ayurvedic cough syrup, carefully prepared without alcohol or sedatives — traditionally valued in Ayurveda for supporting respiratory comfort, soothing throat irritation, and promoting natural wellness.',
     status: 'approved',
@@ -183,9 +198,14 @@ export const PRODUCTS: Product[] = [
     bgNum: '05',
     name: 'K-Matic Oil',
     format: 'Topical Oil · Half Course 6 Weeks · 100 ML × 6 Bottles',
-    image: '/assets/products/05-k-matic-oil.png',
+    // 10 Oct: real product photography from Vrinda's Drive folder
+    // (DSC00895.jpg, the oil-bottle shots from the same shared
+    // "K-Matic" subfolder), replacing the old shot at this same path.
+    image: '/assets/products/05-k-matic-oil.jpg',
+    // 10 Oct: replaced with the cleared copy deck's "Short Story" text
+    // (verbatim) -- see data/productCopy.ts for the full deck.
     description:
-      'A unique Ayurvedic formulation prepared with twenty-one carefully selected ingredients that work in harmony to support joint flexibility, muscular comfort, and overall vitality — for external, topical use.',
+      'Your instant "off button" for localized pain. Formulated for rapid dermal penetration, this warming rub delivers targeted analgesic relief directly to tight muscles and painful nerve endings.',
     status: 'approved',
     price: { amount: 139, currency: 'USD' },
     priceNote: 'Half course 6 weeks',
@@ -275,9 +295,16 @@ export const PRODUCTS: Product[] = [
     bgNum: '08',
     name: 'K-Matic Combo',
     format: 'Combination · Half Course 6 Weeks · Capsules + Oil × 6 each',
+    // 10 Oct: the only one of 8 products NOT re-photographed this
+    // pass -- Vrinda's Drive "K-Matic" subfolder has real capsule shots
+    // (used for k-matic above) and real oil shots (used for
+    // k-matic-oil above), but no shot showing both together as a combo
+    // pack. Old image kept rather than guessing/compositing one.
     image: '/assets/products/08-k-matic-combo.png',
+    // 10 Oct: replaced with the cleared copy deck's "Short Story" text
+    // (verbatim) -- see data/productCopy.ts for the full deck.
     description:
-      'K-Matic available in two complementary Ayurvedic forms — K-Matic Oil, traditionally used for external massage to promote comfort and flexibility, and K-Matic Capsules, taken as a daily supplement to support musculoskeletal balance, vitality and overall wellness.',
+      'Why choose between surface comfort and root care? This dual-pathway clinical system combines internal capsular therapy for tissue repair with transdermal oil for rapid local pain suppression.',
     status: 'approved',
     price: { amount: 179, currency: 'USD' },
     priceNote: 'Half course combination',

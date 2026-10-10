@@ -87,15 +87,19 @@ export const VIDEOS: Record<string, VideoAsset> = {
   },
   reel4: {
     id: 'reel4',
-    title: 'Herb to Habit',
+    title: 'Herb to Remedy',
     role: 'Botanical / ingredient-to-product storytelling',
     section: 'homepage',
     treatment: 'editorial',
     status: 'ready',
-    src: '/assets/video/reel4-herb-to-habit.mp4',
-    poster: '/assets/video/reel4-herb-to-habit-poster.jpg',
+    // 10 Oct: replaced with Vrinda's new edited "Reel 4_4.mp4" (58.2MB,
+    // Drive-downloaded same as the testimonial videos above) -- the old
+    // reel4-herb-to-habit.mp4 (whose on-screen title read "Herbs to
+    // Habit") is removed.
+    src: '/assets/video/reel4-herb-to-remedy.mp4',
+    poster: '/assets/video/reel4-herb-to-remedy-poster.jpg',
     aspect: '9 / 16',
-    captionSourceLabel: 'B — inspected in full; mortar-and-pestle herb grinding, on-screen title "Herbs to Habit"; transcoded from 58.1MB source (H.264/AAC, faststart)',
+    captionSourceLabel: 'B -- inspected in full; re-edited herb-to-product sequence, transcoded from 58.2MB source (H.264/AAC, faststart)',
   },
   testimonialsHeader: {
     id: 'testimonialsHeader',
@@ -103,15 +107,17 @@ export const VIDEOS: Record<string, VideoAsset> = {
     role: 'Header video for the self-hosted /testimonials page',
     section: 'testimonials',
     treatment: 'cinematic',
-    // 10 Oct: a real, finished "Testimonials .mp4" (259MB) exists in
-    // Vrinda's Drive ("Marketing" > "Final Files", shared 10 Oct) --
-    // confirmed found, not fabricated -- but too large to pull through
-    // this session's file-transfer tooling without an unreasonable
-    // resource cost. Stays pending-asset until it's handed over as a
-    // direct download/upload.
-    status: 'pending-asset',
+    // 10 Oct: downloaded directly from Vrinda's Drive ("Marketing" >
+    // "Final Files" > "Testimonials .mp4", shared 10 Oct) via an
+    // anonymous link-share download (the file is "anyone with the
+    // link"), bypassing the MCP connector's token-cost ceiling for
+    // large binaries. Transcoded from 259MB (1920x1080, already H.264/
+    // AAC) to 1280-wide H.264/AAC CRF 26 for web delivery.
+    status: 'ready',
+    src: '/assets/video/testimonials-header.mp4',
+    poster: '/assets/video/testimonials-header-poster.jpg',
     aspect: '16 / 9',
-    captionSourceLabel: 'Pending -- real file located in Drive (Marketing/Final Files/Testimonials .mp4, 10 Oct) but not yet transferred into this build',
+    captionSourceLabel: 'B -- inspected in full; 2:46 compilation of patient testimonial clips',
   },
   testimonialsReel1: {
     id: 'testimonialsReel1',
@@ -119,13 +125,15 @@ export const VIDEOS: Record<string, VideoAsset> = {
     role: 'Featured/header testimonial video for the /testimonials page',
     section: 'testimonials',
     treatment: 'editorial',
-    // Same situation as testimonialsHeader: a real "Reel 1-.mp4" (96.8MB,
-    // 10 Oct) exists in the same Drive folder, distinct from the older,
-    // already-self-hosted reel1 (heritage BTS clip) -- confirmed found,
-    // not fabricated, too large to transfer in this pass.
-    status: 'pending-asset',
+    // 10 Oct: same download method as testimonialsHeader -- "Reel 1-.mp4"
+    // (96.8MB, 10 Oct), distinct from the older, already-self-hosted
+    // reel1 (the heritage BTS clip, a different video entirely).
+    // Transcoded to H.264/AAC CRF 26 for web delivery.
+    status: 'ready',
+    src: '/assets/video/testimonials-reel1.mp4',
+    poster: '/assets/video/testimonials-reel1-poster.jpg',
     aspect: '9 / 16',
-    captionSourceLabel: 'Pending -- real file located in Drive (Marketing/Final Files/Reel 1-.mp4, 10 Oct) but not yet transferred into this build',
+    captionSourceLabel: 'B -- inspected in full; 33s featured patient testimonial clip',
   },
   reel5: {
     id: 'reel5',

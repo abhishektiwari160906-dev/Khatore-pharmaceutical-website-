@@ -10,6 +10,7 @@ import { PriceTag } from '@/components/Pricing/PriceTag';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { TrackProductView } from '@/components/TrackProductView';
 import { PRODUCTS, getProductBySlug } from '@/data/products';
+import { getProductCopy } from '@/data/productCopy';
 import { CONTACT } from '@/lib/config';
 import styles from './page.module.css';
 
@@ -41,6 +42,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   if (!product) notFound();
 
   const related = PRODUCTS.filter((p) => p.productId !== product.productId).slice(0, 4);
+  const copy = getProductCopy(product.productId);
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -150,6 +152,70 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               </Link>
             </div>
           ) : null}
+        </section>
+      ) : null}
+
+      {/* Full cleared copy deck (10 Oct, data/productCopy.ts) -- only
+          the 5 products it actually covers get this; the rest fall
+          straight through to Related Products, same "only render what
+          exists" discipline as the section above. */}
+      {copy ? (
+        <section className={styles.copyDeck} aria-label={`${product.name} — full product information`}>
+          <p className={styles.tagline}>{copy.tagline}</p>
+
+          <div className={styles.infoSections}>
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>Key Clinical Benefits</h2>
+              <ul className={styles.benefitList}>
+                {copy.benefits.map((b) => (
+                  <li key={b.title}>
+                    <span className={styles.benefitTitle}>{b.title}</span>
+                    <span className={styles.infoText}>{b.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>Conditions &amp; Problems Addressed</h2>
+              <ul className={styles.benefitList}>
+                {copy.conditions.map((c) => (
+                  <li key={c.name}>
+                    <span className={styles.benefitTitle}>{c.name}</span>
+                    {c.text ? <span className={styles.infoText}>{c.text}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>Clinical &amp; Prescribing Information</h2>
+              <ul className={styles.infoList}>
+                <li>
+                  <strong>Herbal source:</strong> {copy.clinicalInfo.herbalSource}
+                </li>
+                <li>
+                  <strong>Dosage &amp; administration:</strong> {copy.clinicalInfo.dosage}
+                </li>
+                <li>
+                  <strong>Duration:</strong> {copy.clinicalInfo.duration}
+                </li>
+                <li>
+                  <strong>Complications &amp; contraindications:</strong> {copy.clinicalInfo.complications}
+                </li>
+              </ul>
+            </div>
+
+            <div className={styles.infoBlock}>
+              <h2 className={styles.infoHeading}>Lifestyle Protocol</h2>
+              <p className={styles.infoText}>
+                <strong className={styles.doLabel}>Do&apos;s:</strong> {copy.lifestyle.dos}
+              </p>
+              <p className={styles.infoText}>
+                <strong className={styles.dontLabel}>Don&apos;ts:</strong> {copy.lifestyle.donts}
+              </p>
+            </div>
+          </div>
         </section>
       ) : null}
 

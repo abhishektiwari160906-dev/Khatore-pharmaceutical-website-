@@ -163,6 +163,48 @@
   padding-bottom: 2px;
 }
 
+/* Full copy-deck section (10 Oct, data/productCopy.ts) */
+.copyDeck {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 2.5rem 3rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 3rem;
+}
+.tagline {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--green-dk);
+  margin-bottom: 2rem;
+}
+.copyDeck .infoSections {
+  padding: 0;
+  border-top: none;
+}
+.benefitList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.benefitList li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.benefitTitle {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.doLabel {
+  color: var(--green-dk);
+}
+.dontLabel {
+  color: #b3261e;
+}
+
 .related {
   max-width: 1300px;
   margin: 0 auto;
