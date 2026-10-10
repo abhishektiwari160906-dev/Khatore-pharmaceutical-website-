@@ -11,7 +11,7 @@ export const BRAND = {
   name: 'Khatore Pharmaceuticals',
   legalName: 'Khatore Pharmaceuticals Pvt. Ltd.',
   flagshipProduct: 'Kamalahar',
-  foundingCity: 'Barbil, Orissa',
+  foundingCity: 'Barbil, Odisha',
 } as const;
 
 /**

@@ -27,7 +27,7 @@ export default function HeritagePage() {
           <span className={styles.yearBig} aria-hidden="true">
             {HERITAGE_FOUNDING_YEAR}
           </span>
-          <span className={styles.yearLabel}>Year of founding · Barbil, Orissa</span>
+          <span className={styles.yearLabel}>Year of founding · Barbil, Odisha</span>
         </section>
 
         <Reveal as="section" className={styles.pull}>

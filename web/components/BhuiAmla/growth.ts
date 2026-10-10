@@ -510,7 +510,7 @@ export interface Stage {
 // shorter, editorial register for the growth caption, not invented or
 // re-dated. Stage order mirrors that same chronological record.
 export const STAGES: Stage[] = [
-  { p: 0.0, num: 'Stage 01 / 05', eyebrow: '1984 — Foundation', body: 'Khatore Pharmaceuticals launched in Barbil, Orissa — Ayurvedic formulations for patients with liver ailments and jaundice, built on <strong>efficacy, safety and accessibility</strong>.', rail: 'Roots' },
+  { p: 0.0, num: 'Stage 01 / 05', eyebrow: '1984 — Foundation', body: 'Khatore Pharmaceuticals launched in Barbil, Odisha — Ayurvedic formulations for patients with liver ailments and jaundice, built on <strong>efficacy, safety and accessibility</strong>.', rail: 'Roots' },
   { p: 0.17, num: 'Stage 02 / 05', eyebrow: '1987–1988 — Clinical Trials', body: 'Four clinical trials across Jhansi, Guntur, Patna and Ahmedabad — <strong>144 patients</strong> enrolled across blind and double-blind randomised protocols.', rail: 'Stem' },
   { p: 0.38, num: 'Stage 03 / 05', eyebrow: '1992–1993 — Peer-Reviewed Publication', body: 'Findings published in JAPI and the Indian Journal of Gastroenterology, listed on <strong>NIH/PubMed</strong> — Ayurvedic knowledge held to scientific record.', rail: 'Branches' },
   { p: 0.62, num: 'Stage 04 / 05', eyebrow: '2000 — Industry Recognition', body: 'Best Entrepreneur Award for Ayurvedic Medicine in Asia. <strong>GMP certification</strong> maintained — traditional practice, rigorously assured.', rail: 'Leaves' },

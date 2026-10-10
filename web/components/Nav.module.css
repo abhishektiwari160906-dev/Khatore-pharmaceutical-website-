@@ -76,6 +76,22 @@
 .searchBtn:hover {
   color: var(--ink);
 }
+.whatsappIconBtn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  background: #25d366;
+  border-radius: 50%;
+  transition: background 0.2s, transform 0.2s;
+}
+.whatsappIconBtn:hover {
+  background: #1ebc5a;
+  transform: scale(1.06);
+}
 
 .burger {
   display: none;

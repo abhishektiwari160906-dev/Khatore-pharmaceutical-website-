@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/`, priority: 1 },
     { url: `${SITE_URL}/heritage`, priority: 0.7 },
     { url: `${SITE_URL}/science`, priority: 0.7 },
+    { url: `${SITE_URL}/testimonials`, priority: 0.7 },
     { url: `${SITE_URL}/products`, priority: 0.9 },
     { url: `${SITE_URL}/global-presence`, priority: 0.5 },
     { url: `${SITE_URL}/contact`, priority: 0.5 },

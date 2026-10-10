@@ -97,6 +97,36 @@ export const VIDEOS: Record<string, VideoAsset> = {
     aspect: '9 / 16',
     captionSourceLabel: 'B — inspected in full; mortar-and-pestle herb grinding, on-screen title "Herbs to Habit"; transcoded from 58.1MB source (H.264/AAC, faststart)',
   },
+  testimonialsHeader: {
+    id: 'testimonialsHeader',
+    title: 'Testimonials',
+    role: 'Header video for the self-hosted /testimonials page',
+    section: 'testimonials',
+    treatment: 'cinematic',
+    // 10 Oct: a real, finished "Testimonials .mp4" (259MB) exists in
+    // Vrinda's Drive ("Marketing" > "Final Files", shared 10 Oct) --
+    // confirmed found, not fabricated -- but too large to pull through
+    // this session's file-transfer tooling without an unreasonable
+    // resource cost. Stays pending-asset until it's handed over as a
+    // direct download/upload.
+    status: 'pending-asset',
+    aspect: '16 / 9',
+    captionSourceLabel: 'Pending -- real file located in Drive (Marketing/Final Files/Testimonials .mp4, 10 Oct) but not yet transferred into this build',
+  },
+  testimonialsReel1: {
+    id: 'testimonialsReel1',
+    title: 'Reel 1 — Featured Testimonial',
+    role: 'Featured/header testimonial video for the /testimonials page',
+    section: 'testimonials',
+    treatment: 'editorial',
+    // Same situation as testimonialsHeader: a real "Reel 1-.mp4" (96.8MB,
+    // 10 Oct) exists in the same Drive folder, distinct from the older,
+    // already-self-hosted reel1 (heritage BTS clip) -- confirmed found,
+    // not fabricated, too large to transfer in this pass.
+    status: 'pending-asset',
+    aspect: '9 / 16',
+    captionSourceLabel: 'Pending -- real file located in Drive (Marketing/Final Files/Reel 1-.mp4, 10 Oct) but not yet transferred into this build',
+  },
   reel5: {
     id: 'reel5',
     title: 'Meet the People Behind Kamalahar',

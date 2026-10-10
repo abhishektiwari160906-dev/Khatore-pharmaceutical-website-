@@ -86,7 +86,9 @@ export const PRODUCTS: Product[] = [
     bgNum: '01',
     name: 'Kamalahar',
     format: 'Capsule · Full Course 6 Months · 100 Caps × 12 Bottles',
-    image: '/assets/products/01-kamalahar.png',
+    // 10 Oct: real product photography from Vrinda's Drive folder
+    // (DSC09503.jpg), replacing the old flat white-background shot.
+    image: '/assets/products/01-kamalahar.jpg',
     description:
       'A traditional Ayurvedic formulation designed to help maintain liver wellness and overall vitality. Enriched with time-tested herbs, it supports healthy liver function, promotes natural detoxification, and aids in sustaining digestive balance.',
     status: 'approved',
@@ -216,6 +218,8 @@ export const PRODUCTS: Product[] = [
     bgNum: '06',
     name: 'Kaptone',
     format: 'Tonic · Half Course 6 Weeks · 210 ML × 6 Bottles',
+    // 10 Oct: real product photography from Vrinda's Drive folder
+    // (DSC06992.jpg), replacing the old shot at this same path.
     image: '/assets/products/06-kaptone.jpg',
     description:
       'An Ayurvedic supplement for the restoration of health, nerves, energy and general well-being across all age groups for males and females — formulated to foster convalescence during fatigue or illness.',
@@ -242,6 +246,8 @@ export const PRODUCTS: Product[] = [
     bgNum: '07',
     name: 'K-Morex Brain-Tonic',
     format: 'Tonic · Half Course 6 Weeks · 200 ML × 6 Bottles',
+    // 10 Oct: real product photography from Vrinda's Drive folder
+    // (DSC09707.jpg), replacing the old shot at this same path.
     image: '/assets/products/07-k-morex-brain-tonic.jpg',
     description:
       'An Ayurvedic formulation traditionally valued for supporting mental clarity, concentration, learning, and overall cognitive wellness.',

@@ -176,9 +176,13 @@
 .heroWordmark {
   font-family: var(--sans);
   font-weight: 200;
-  font-size: clamp(4rem, 13vw, 9.5rem);
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  /* Scaled down from the old single-word "Khatore" treatment (was
+     clamp(4rem, 13vw, 9.5rem)) -- "Khatore Pharmaceuticals" is ~3x the
+     character count, so the same clamp would badly overflow/wrap on
+     most viewports. */
+  font-size: clamp(2.3rem, 6.4vw, 5.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
   color: var(--ink);
   margin-bottom: 1.25rem;
 }
@@ -272,16 +276,19 @@
   line-height: 1;
   letter-spacing: -0.04em;
   user-select: none;
-  /* Gold-sparkle treatment on the founding year — a slow shimmer across
-     a gold gradient fill, restrained (no confetti/particle effects),
-     matching the site's premium/editorial register. */
-  background: linear-gradient(100deg, #a9782f 15%, #f4d06f 35%, #fff6da 50%, #f4d06f 65%, #a9782f 85%);
+  /* Green-sparkle treatment on the founding year (10 Oct: was gold --
+     "change '1984' from golden to green everywhere") -- a slow shimmer
+     across a brand-green gradient fill, restrained (no confetti/particle
+     effects), matching the site's premium/editorial register. Same
+     structure as the old gold version, just remapped onto the green
+     palette (--green-dk/--green-lt) instead of a new one-off hue. */
+  background: linear-gradient(100deg, #0e6a3a 15%, #1bba63 35%, #d2f5e0 50%, #1bba63 65%, #0e6a3a 85%);
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(169, 120, 47, 0.4);
-  filter: drop-shadow(0 0 22px rgba(244, 208, 111, 0.22));
+  -webkit-text-stroke: 1px rgba(14, 106, 58, 0.4);
+  filter: drop-shadow(0 0 22px rgba(27, 186, 99, 0.22));
   animation: originGoldShimmer 7s ease-in-out infinite;
   /* Monumental emergence: a deliberate exception to the shared .rv
      fade (opacity/translateY only) — this is the site's origin point,
@@ -334,7 +341,10 @@
    .productsChapter for the same split pattern).
 ============================================================ */
 .archiveChapter {
-  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 78%, var(--paper) 100%);
+  /* 10 Oct reorder: now follows Products (ends white) instead of
+     Heritage/Origin (ended ink) -- fades in from white so the seam
+     stays smooth; still ends on --paper into Connect, unchanged. */
+  background: linear-gradient(180deg, white 0%, var(--ink) 10%, var(--ink) 78%, var(--paper) 100%);
   padding: 5rem 2.5rem 9rem;
   text-align: center;
 }
@@ -379,7 +389,12 @@
    04 — FROM PLANT TO PRODUCT
 ============================================================ */
 .plantToProduct {
-  background: linear-gradient(180deg, var(--paper) 0%, var(--paper) 88%, var(--ink) 100%);
+  /* 10 Oct reorder: this section now follows Heritage/Origin directly
+     (.origin ends on --ink), where it used to follow the Archive teaser
+     (which also ended on --ink) -- so the entry color is unchanged, but
+     made explicit here (was implicit via Archive) now that Archive has
+     moved elsewhere. Still ends on --ink, feeding into World below. */
+  background: linear-gradient(180deg, var(--ink) 0%, var(--paper) 6%, var(--paper) 88%, var(--ink) 100%);
   padding-bottom: 7rem;
 }
 .herbSection {
@@ -406,7 +421,10 @@
 ============================================================ */
 .scienceChapter {
   position: relative;
-  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 82%, var(--paper) 100%);
+  /* 10 Oct reorder: now follows World (ends white) instead of the Herb
+     to Remedy section (ended ink) -- fades in from white instead of
+     starting flat on ink, so the seam stays smooth. */
+  background: linear-gradient(180deg, white 0%, var(--ink) 8%, var(--ink) 82%, var(--paper) 100%);
   padding: 6rem 2.5rem 9rem;
   text-align: center;
   overflow: hidden;
@@ -428,6 +446,19 @@
   max-width: 700px;
   margin: 0 auto;
 }
+.gmpBadge {
+  display: inline-block;
+  margin-top: 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-lt);
+  border: 1px solid rgba(27, 186, 99, 0.4);
+  background: rgba(27, 186, 99, 0.08);
+  padding: 0.4rem 0.9rem;
+  border-radius: 2px;
+}
 .evidenceGrid {
   position: relative;
   z-index: 1;
@@ -440,22 +471,31 @@
 }
 .evidenceCard {
   background: var(--ink);
-  padding: 2.25rem 1.25rem;
+  /* De-emphasized (10 Oct) -- was 2.25rem 1.25rem. Khatore's own
+     program-level record (data/heritage.ts, "Clinical Trials") states
+     144 patients were enrolled "across blind and double-blind
+     randomised protocols," but does not say which of these 4 specific
+     trials used the double-blind design -- lib/../data/science.ts's
+     own `studyDesign` field is deliberately left unset on all 4 rather
+     than guess. So every card is toned down uniformly here (smaller,
+     more secondary) rather than guessing which one to single out as
+     "the" double-blind study; that needs Khatore's confirmation first. */
+  padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 .evidenceN {
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.56rem;
   color: rgba(255, 255, 255, 0.3);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 .evidenceStat {
   font-family: var(--sans);
   font-weight: 200;
-  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-size: clamp(1.9rem, 3.6vw, 2.6rem);
   color: var(--green-lt);
   line-height: 1;
 }
@@ -517,6 +557,18 @@
 .concernCard:hover {
   background: var(--green-pale);
   transform: translateY(-2px);
+}
+/* Liver Vitality (10 Oct) -- visually distinct in brand green to keep
+   focus on Kamalahar, the flagship product this category represents. */
+.concernCardHighlight {
+  background: var(--green-pale);
+  border-left: 3px solid var(--green-dk);
+}
+.concernCardHighlight .concernName {
+  color: var(--green-dk);
+}
+.concernCardHighlight:hover {
+  background: #d9efe3;
 }
 .concernName {
   font-family: var(--sans);
@@ -584,13 +636,15 @@
 .productsInner {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 6rem 2.5rem 5rem;
+  /* Tightened (10 Oct, "not visually longer than the rest of the page")
+     -- was 6rem/5rem top/bottom. */
+  padding: 3.5rem 2.5rem 3rem;
 }
 .productsHead {
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.75rem;
 }
 .flagship {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 .flagshipLink {
   display: grid;
@@ -632,112 +686,50 @@
   }
 }
 
-/* Exhibition, not e-commerce: a quiet asymmetric rhythm across a
-   6-column grid instead of 7 identical cells. Spans are set per item
-   (not a generic nth-child modulo) specifically so every row sums to
-   exactly 6 — an auto-fill/modulo pattern left a visible empty cell
-   here previously. Still editorial, not implying any of the 7 is more
-   "approved" than the others; the varied scale is decorative only. */
+/* Square-box cards (10 Oct) -- replaces the previous asymmetric
+   exhibition-style spans with a uniform grid of equal square tiles,
+   auto-reflowing by count rather than hand-tuned per-item nth-child
+   spans (simpler, and the layout no longer breaks if a product is
+   added/removed from data/products.ts). */
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1px;
   background: var(--rule);
   border: 1px solid var(--rule);
-  margin-bottom: 2rem;
-}
-.productTileWrap:nth-child(1) {
-  grid-column: span 4;
-}
-.productTileWrap:nth-child(2) {
-  grid-column: span 2;
-}
-.productTileWrap:nth-child(3) {
-  grid-column: span 2;
-}
-.productTileWrap:nth-child(4) {
-  grid-column: span 4;
-}
-.productTileWrap:nth-child(5) {
-  grid-column: span 4;
-}
-.productTileWrap:nth-child(6) {
-  grid-column: span 2;
-}
-.productTileWrap:nth-child(7) {
-  grid-column: span 6;
+  margin-bottom: 1.75rem;
 }
 .productTile {
   background: white;
-  padding: 2.5rem 1.5rem;
+  aspect-ratio: 1;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.85rem;
   text-align: center;
   transition: background 0.25s, transform 0.25s var(--ease);
-  height: 100%;
 }
 .productTile:hover {
   background: var(--paper);
   transform: translateY(-2px);
 }
-.productTileWrap:nth-child(1) .productTile,
-.productTileWrap:nth-child(4) .productTile,
-.productTileWrap:nth-child(5) .productTile {
-  padding: 3rem 1.5rem;
-}
-.productTileWrap:nth-child(7) .productTile {
-  flex-direction: row;
-  gap: 2rem;
-  padding: 2rem 2.5rem;
-}
 .productTileImg {
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.productTileWrap:nth-child(1) .productTileImg,
-.productTileWrap:nth-child(4) .productTileImg,
-.productTileWrap:nth-child(5) .productTileImg {
-  width: 130px;
-  height: 130px;
 }
 .productTileName {
   font-family: var(--sans);
   font-size: 0.85rem;
   color: var(--ink);
 }
-@media (max-width: 860px) {
-  .productsGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .productTileWrap:nth-child(1),
-  .productTileWrap:nth-child(4),
-  .productTileWrap:nth-child(5) {
-    grid-column: span 2;
-  }
-  .productTileWrap:nth-child(2),
-  .productTileWrap:nth-child(3),
-  .productTileWrap:nth-child(6) {
-    grid-column: span 2;
-  }
-  .productTileWrap:nth-child(7) {
-    grid-column: span 4;
-  }
-}
 @media (max-width: 480px) {
   .productsGrid {
-    grid-template-columns: 1fr;
-  }
-  .productTileWrap {
-    grid-column: span 1 !important;
-  }
-  .productTileWrap:nth-child(7) .productTile {
-    flex-direction: column;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -904,7 +896,11 @@
 ============================================================ */
 .worldChapter {
   position: relative;
-  background: linear-gradient(180deg, white 0%, var(--ink) 14%, var(--ink) 86%, white 100%);
+  /* 10 Oct reorder: now follows the Herb to Remedy section directly
+     (ends --ink), and is followed by Science (starts --ink) -- so this
+     chapter now opens AND closes on --ink instead of white, a pure
+     "ink island" rather than needing its own white entry fade. */
+  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 86%, white 100%);
   overflow: hidden;
 }
 .worldChapter::before {
@@ -969,6 +965,17 @@
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.35);
 }
+/* Logistics-reach line (10 Oct) -- deliberately small/secondary, never
+   a headline element. */
+.logisticsNote {
+  position: absolute;
+  left: 0;
+  bottom: -4.3rem;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.25);
+}
 @media (max-width: 860px) {
   .worldInner {
     grid-template-columns: 1fr;
@@ -981,6 +988,12 @@
     position: static;
     justify-content: center;
     margin-top: 2.75rem;
+  }
+  .logisticsNote {
+    position: static;
+    display: block;
+    text-align: center;
+    margin-top: 0.6rem;
   }
 }
 

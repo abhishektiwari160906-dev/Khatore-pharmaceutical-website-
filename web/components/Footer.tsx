@@ -17,7 +17,7 @@ export function Footer() {
           />
           <p className={styles.brandText}>
             Dedicated in service of mankind. Efficacious, safe and economic Ayurvedic products. Est. 1984,
-            Barbil, Orissa. GMP Certified.
+            Barbil, Odisha. GMP Certified.
           </p>
           <ul className={styles.social}>
             <li>
@@ -124,7 +124,7 @@ export function Footer() {
       </div>
 
       <div className={styles.bottom}>
-        <p className={styles.copy}>© Khatore Pharmaceuticals Pvt. Ltd. · P.O. Barbil, Dt. Keonjhar, Orissa, India – 758035</p>
+        <p className={styles.copy}>© Khatore Pharmaceuticals Pvt. Ltd. · P.O. Barbil, Dt. Keonjhar, Odisha, India – 758035</p>
       </div>
 
       <p className={styles.disclaimer}>

@@ -17,8 +17,20 @@ export const GLOBAL_PRESENCE: { region: string; countries: string[] }[] = [
     countries: ['India', 'United Arab Emirates', 'Sri Lanka', 'Nepal', 'Bangladesh'],
   },
   { region: 'Africa', countries: ['Nigeria', 'South Africa', 'Ghana', 'Kenya', 'Tanzania'] },
-  { region: 'Europe & Americas', countries: ['United Kingdom', 'United States', 'Canada', 'Netherlands', 'Germany'] },
+  {
+    region: 'Europe & Americas',
+    // Romania added 10 Oct per Abhishek/Vrinda -- confirmed Tier 2
+    // order-data country (lib/pricing/config.ts), now also on the globe.
+    countries: ['United Kingdom', 'United States', 'Canada', 'Netherlands', 'Germany', 'Romania'],
+  },
   { region: 'Asia-Pacific', countries: ['Australia', 'Malaysia', 'Singapore', 'Mauritius'] },
 ];
 
 export const GLOBAL_DATA_CAVEAT = 'Country data to be confirmed by Khatore.';
+
+/**
+ * Real, named logistics partners (Abhishek/Vrinda, 10 Oct) -- shown as a
+ * small/secondary line near the globe, signalling real-world shipping
+ * reach without becoming a headline claim.
+ */
+export const LOGISTICS_PARTNERS = ['DHL', 'FedEx', 'ShipGlobal', 'India Post'];

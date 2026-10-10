@@ -47,10 +47,15 @@ const nextConfig = {
       { source: '/wellness/k-mens', destination: '/products/k-mens', permanent: true },
       { source: '/wellness/k-matic', destination: '/products/k-matic', permanent: true },
 
-      // The 10 old /testimonials/* URLs (by condition and by source)
-      // have no dedicated page in this app -- testimonials live on the
-      // homepage. All ten land there rather than 404ing.
-      { source: '/testimonials/:path*', destination: '/', permanent: true },
+      // 10 Oct: a real, dedicated /testimonials page now exists in this
+      // app (self-hosted archive, no longer just the homepage teaser) --
+      // :path+ (one-or-more), not :path* (zero-or-more), so the exact
+      // /testimonials URL itself is NOT caught by this rule and falls
+      // through to that real page. Only the old per-category sub-paths
+      // (/testimonials/hepatitis, /testimonials/doctor, etc., which have
+      // no 1:1 equivalent here) still redirect, now to the new archive
+      // page itself rather than the homepage.
+      { source: '/testimonials/:path+', destination: '/testimonials', permanent: true },
 
       // No dedicated FAQ or customer-service page exists yet -- /contact
       // is the real, live page for exactly that kind of question.

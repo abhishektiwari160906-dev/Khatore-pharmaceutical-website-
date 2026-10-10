@@ -1,0 +1,175 @@
+/* New-site design system throughout (Navy #061A70 / Green #159552, via
+   app/globals.css's --blue/--green tokens) -- deliberately NOT the old
+   khatorepharma.com testimonial page's look. */
+
+.masthead {
+  background: var(--blue);
+  padding: 6rem 2.5rem 4rem;
+  text-align: center;
+}
+.mastheadInner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.eyebrow {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--green-lt);
+  margin-bottom: 1.25rem;
+}
+.title {
+  font-family: var(--sans);
+  font-weight: 200;
+  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+  color: white;
+  line-height: 1.08;
+  margin-bottom: 1rem;
+}
+.sub {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.headerVideoSection {
+  background: var(--ink);
+}
+
+.featuredSection {
+  background: var(--paper);
+  padding: 4rem 2.5rem;
+  text-align: center;
+}
+.featuredInner {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.grid {
+  background: white;
+  padding: 1rem 2.5rem 6rem;
+}
+.gridInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  text-align: left;
+}
+
+.card {
+  background: white;
+  padding: 0 0 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: background 0.2s;
+}
+.card:hover {
+  background: var(--green-pale);
+}
+.media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, var(--green-dk) 0%, #0a3323 70%);
+  overflow: hidden;
+}
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.documentImg {
+  object-fit: contain;
+  background: var(--paper);
+}
+.documentCaption {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.2rem 0.5rem;
+}
+.initials {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 3.4rem;
+  color: var(--green-lt);
+  opacity: 0.85;
+}
+.pending {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  color: rgba(243, 234, 210, 0.55);
+}
+.media .tag {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  color: var(--green-lt);
+  background: rgba(10, 51, 35, 0.55);
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(27, 186, 99, 0.35);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.text {
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: var(--ink-mid);
+  font-style: italic;
+  padding: 0 1.75rem;
+}
+.foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem 1.75rem 0;
+  border-top: 1px solid var(--rule);
+  margin: 0 1.75rem;
+}
+.name {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.source {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+  margin-top: 0.15rem;
+}

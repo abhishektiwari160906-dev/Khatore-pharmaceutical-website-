@@ -38,6 +38,7 @@ export const COUNTRY_GEO: CountryGeo[] = [
   { name: 'Canada', lat: 56.1, lon: -106.3, iso: '124' },
   { name: 'Netherlands', lat: 52.1, lon: 5.3, iso: '528' },
   { name: 'Germany', lat: 51.2, lon: 10.4, iso: '276' },
+  { name: 'Romania', lat: 45.9, lon: 25.0, iso: '642' },
   // Asia-Pacific
   { name: 'Australia', lat: -25.0, lon: 133.0, iso: '036' },
   { name: 'Malaysia', lat: 2.5, lon: 112.5, iso: '458' },

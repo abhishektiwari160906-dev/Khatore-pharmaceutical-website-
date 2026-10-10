@@ -14,7 +14,7 @@ import { HERITAGE_ENTRIES } from '@/data/heritage';
 import { CLEARED_CLINICAL_TRIALS } from '@/data/science';
 import { PRODUCTS } from '@/data/products';
 import { CONCERNS } from '@/data/concerns';
-import { GLOBAL_STATS, GLOBAL_PRESENCE } from '@/data/global';
+import { GLOBAL_STATS, GLOBAL_PRESENCE, LOGISTICS_PARTNERS } from '@/data/global';
 import { TESTIMONIALS, TESTIMONIALS_ARCHIVE_URL } from '@/data/testimonials';
 import styles from './page.module.css';
 
@@ -75,7 +75,7 @@ export default function HomePage() {
         </div>
         <div className={styles.heroInner}>
           <span className={styles.heroKicker}>Ayurvedic Knowledge</span>
-          <h1 className={styles.heroWordmark}>Khatore</h1>
+          <h1 className={styles.heroWordmark}>Khatore Pharmaceuticals</h1>
           <p className={styles.heroSince}>
             Since <strong>{HERITAGE_FOUNDING_YEAR}</strong>.
           </p>
@@ -118,7 +118,9 @@ export default function HomePage() {
       {/* 03 — TESTIMONIALS — real, attributed patient accounts already
           published on Khatore's own site (data/testimonials.ts), placed
           right after the brand film so the site's strongest trust signal
-          is visible early, before the visitor scrolls past it. */}
+          is visible early, before the visitor scrolls past it. Full
+          archive now lives on this site's own /testimonials page (10
+          Oct) -- no longer links out to khatorepharma.com. */}
       <section className={styles.testimonialsChapter} aria-label="Patient testimonials">
         <Reveal as="div" className={styles.testimonialsHead}>
           <span className={styles.eyebrow}>Patient Archive</span>
@@ -198,9 +200,9 @@ export default function HomePage() {
             );
           })}
         </Reveal>
-        <a href={TESTIMONIALS_ARCHIVE_URL} target="_blank" rel="noopener" className={styles.textLink}>
-          Full testimonial archive at khatorepharma.com →
-        </a>
+        <Link href="/testimonials" className={styles.textLink}>
+          Full testimonial archive →
+        </Link>
       </section>
 
       {/* 04 — HERITAGE / ORIGIN */}
@@ -210,41 +212,28 @@ export default function HomePage() {
         </Reveal>
         <Reveal className={styles.originText} delay={2}>
           <span className={styles.eyebrow}>Origin — {founding.title}</span>
-          <p className={styles.originLine}>Barbil, Orissa. Where the mission began.</p>
+          <p className={styles.originLine}>Barbil, Odisha. Where the mission began.</p>
           <Link href="/heritage" className={styles.textLink}>
             The full story →
           </Link>
         </Reveal>
       </section>
 
-      {/* 05 — ARCHIVE — visual teaser only; the real story lives on /heritage */}
-      <section className={styles.archiveChapter} aria-label="The Archive">
-        <Reveal as="div" className={styles.archiveHead}>
-          <span className={styles.eyebrowLight}>The Archive</span>
-          <h2 className={styles.chapterHeadingLight}>Our story, in frames.</h2>
-        </Reveal>
-        <Reveal as="div" className={styles.archiveGrid}>
-          <ArchivePhotoSlot number="01" caption="Open Heritage" href="/heritage" large />
-          <ArchivePhotoSlot number="02" caption="1984 · Origin" href="/heritage" />
-          <ArchivePhotoSlot number="03" caption="Archive · Detail" href="/heritage" />
-        </Reveal>
-        <Link href="/heritage" className={styles.textLinkLight}>
-          Explore the story →
-        </Link>
-      </section>
-
-      {/* 06 — BHUI AMLA */}
+      {/* 05 — BHUI AMLA + HERB TO REMEDY (product section) — 10 Oct:
+          moved directly after Heritage/Origin (was after a separate
+          Archive teaser, which has moved to just above Connect -- see
+          below) per the confirmed new section order. Renamed "Herb to
+          Habit" -> "Herb to Remedy" throughout (final name). */}
       <div className={styles.plantToProduct}>
         <BhuiAmlaExperience />
 
-        {/* 07 — HERB TO HABIT / PLANT-TO-PRODUCT */}
-        <section className={styles.herbSection} aria-label="Herb to habit">
+        <section className={styles.herbSection} aria-label="Herb to Remedy">
           <Reveal as="div" className={styles.herbVideo}>
-            <VideoBlock id="reel4" caption="Herb to Habit" />
+            <VideoBlock id="reel4" caption="Herb to Remedy" />
           </Reveal>
           <Reveal className={styles.herbText} delay={1}>
             <span className={styles.eyebrow}>The Product</span>
-            <h2 className={styles.chapterHeading}>From herb to habit.</h2>
+            <h2 className={styles.chapterHeading}>From herb to remedy.</h2>
             <p className={styles.chapterSub}>GMP-certified. No heavy metals. Every batch.</p>
             <Link href="/heritage" className={styles.textLink}>
               See how it&apos;s made →
@@ -253,11 +242,53 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* 08 — SCIENCE */}
+      {/* 06 — GLOBAL PRESENCE — 10 Oct: moved directly after the Herb to
+          Remedy product section, before Science, per the confirmed new
+          section order. */}
+      <section className={styles.worldChapter} aria-label="Global presence">
+        <div className={styles.worldInner}>
+          <Reveal as="div" className={styles.worldText}>
+            <span className={styles.eyebrowLight}>The World</span>
+            <h2 className={styles.chapterHeadingLight}>
+              100+ countries. <em>One mission.</em>
+            </h2>
+            <div className={styles.worldStats}>
+              {GLOBAL_STATS.map((s) => (
+                <div key={s.l} className={styles.worldStat}>
+                  <span className={styles.worldStatN}>{s.n}</span>
+                  <span className={styles.worldStatL}>{s.l}</span>
+                </div>
+              ))}
+            </div>
+            <Link href="/global-presence" className={styles.textLinkLight}>
+              See our global presence →
+            </Link>
+          </Reveal>
+
+          <Reveal as="div" className={styles.globe} delay={1}>
+            <GlobeSection compact />
+            <ul className={styles.globeLegend}>
+              {GLOBAL_PRESENCE.map((g) => (
+                <li key={g.region}>{g.region}</li>
+              ))}
+            </ul>
+            {/* Logistics-reach line (10 Oct) -- small/secondary by design,
+                never a headline element. */}
+            <p className={styles.logisticsNote}>Powered by {LOGISTICS_PARTNERS.join(', ')}</p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 07 — SCIENCE */}
       <section className={styles.scienceChapter} aria-label="Science">
         <Reveal as="div" className={styles.scienceHead}>
           <span className={styles.eyebrowLight}>The Science</span>
           <h2 className={styles.chapterHeadingLight}>Evidence, documented.</h2>
+          {/* GMP-certified badge (10 Oct) -- Vrinda has personally
+              confirmed current GMP certification status, so this is a
+              confirmed claim, not an assumption. The certificate
+              document itself is still pending upload (About Us page). */}
+          <span className={styles.gmpBadge}>✓ GMP Certified</span>
         </Reveal>
         <div className={styles.evidenceGrid}>
           {CLEARED_CLINICAL_TRIALS.map((trial, i) => (
@@ -274,10 +305,11 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* 09 — SHOP BY CONCERN — only categories backed by approved data;
+      {/* 08 — SHOP BY CONCERN — only categories backed by approved data;
           see data/concerns.ts. Not a full taxonomy, and not filled out
           to look complete — one real door plus the honest "see everything"
-          door. */}
+          door. Liver Vitality (Kamalahar's own category) is visually
+          highlighted in brand green (10 Oct) to keep focus on it. */}
       <section className={styles.concernsChapter} aria-label="Shop by concern">
         <Reveal as="div" className={styles.concernsHead}>
           <span className={styles.eyebrow}>Shop by Concern</span>
@@ -285,7 +317,11 @@ export default function HomePage() {
         </Reveal>
         <Reveal as="div" className={styles.concernGrid}>
           {CONCERNS.map((c) => (
-            <Link key={c.slug} href={`/concerns/${c.slug}`} className={styles.concernCard}>
+            <Link
+              key={c.slug}
+              href={`/concerns/${c.slug}`}
+              className={`${styles.concernCard} ${c.slug === 'liver-vitality' ? styles.concernCardHighlight : ''}`}
+            >
               <span className={styles.concernName}>
                 {c.cardLabel[0]}
                 <br />
@@ -305,12 +341,12 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 09b — TRUST & EVIDENCE GALLERY — real Khatore-supplied marketing
-          banners (clinical stat, testimonial, ingredient callouts, trust
-          badges), used as-is; no new claims authored here, see
-          public/assets/MANIFEST.md discipline. Sits in solid paper,
-          continuing straight off Shop by Concern, same as that section
-          continues off Science's own paper-ending tail. */}
+      {/* 08b — TRUST & EVIDENCE GALLERY — real Khatore-supplied marketing
+          banners (testimonial, ingredient callouts, trust badges), used
+          as-is; no new claims authored here, see public/assets/MANIFEST.md
+          discipline. The 82.35%-bilirubin banner was dropped 10 Oct per
+          Abhishek's note: that figure is from jaundice-specific research,
+          not relevant in this general trust strip. */}
       <section className={styles.galleryChapter} aria-label="Evidence and trust">
         <Reveal as="div" className={styles.galleryHead}>
           <span className={styles.eyebrow}>In Their Words, By The Numbers</span>
@@ -318,10 +354,6 @@ export default function HomePage() {
         </Reveal>
         <Reveal as="div" className={styles.galleryStrip}>
           {[
-            {
-              src: '/assets/marketing/banner-clinical-evaluation.png',
-              alt: '82.35% of patients reached serum bilirubin below 3 mg/100 mL after 12 days — published clinical evaluation, source PubMed / NIH National Library of Medicine',
-            },
             {
               src: '/assets/marketing/banner-liver-formula.png',
               alt: 'Traditional herbs, one powerful liver formula — clinically evaluated, GMP certified, natural antioxidant support',
@@ -350,7 +382,8 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* 10 — PRODUCTS */}
+      {/* 09 — PRODUCTS — square-card layout, tightened vertical rhythm
+          (10 Oct). */}
       <section className={styles.productsChapter} aria-label="Products">
         <div className={styles.productsInner}>
           <Reveal as="div" className={styles.productsHead}>
@@ -372,7 +405,7 @@ export default function HomePage() {
 
           <div className={styles.productsGrid}>
             {restProducts.map((p, i) => (
-              <Reveal key={p.productId} as="div" className={styles.productTileWrap} delay={((i % 3) + 1) as 1 | 2 | 3}>
+              <Reveal key={p.productId} as="div" delay={((i % 3) + 1) as 1 | 2 | 3}>
                 <Link href={`/products/${p.slug}`} className={styles.productTile}>
                   <div className={styles.productTileImg}>
                     <Image src={p.image} alt={p.name} width={140} height={140} />
@@ -388,39 +421,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 11 — GLOBAL PRESENCE */}
-      <section className={styles.worldChapter} aria-label="Global presence">
-        <div className={styles.worldInner}>
-          <Reveal as="div" className={styles.worldText}>
-            <span className={styles.eyebrowLight}>The World</span>
-            <h2 className={styles.chapterHeadingLight}>
-              100+ countries. <em>One mission.</em>
-            </h2>
-            <div className={styles.worldStats}>
-              {GLOBAL_STATS.map((s) => (
-                <div key={s.l} className={styles.worldStat}>
-                  <span className={styles.worldStatN}>{s.n}</span>
-                  <span className={styles.worldStatL}>{s.l}</span>
-                </div>
-              ))}
-            </div>
-            <Link href="/global-presence" className={styles.textLinkLight}>
-              See our global presence →
-            </Link>
-          </Reveal>
-
-          <Reveal as="div" className={styles.globe} delay={1}>
-            <GlobeSection compact />
-            <ul className={styles.globeLegend}>
-              {GLOBAL_PRESENCE.map((g) => (
-                <li key={g.region}>{g.region}</li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
+      {/* 10 — ARCHIVE — visual teaser only; the real story lives on
+          /heritage. 10 Oct: moved to just above the closing CTA, per the
+          confirmed new section order. */}
+      <section className={styles.archiveChapter} aria-label="The Archive">
+        <Reveal as="div" className={styles.archiveHead}>
+          <span className={styles.eyebrowLight}>The Archive</span>
+          <h2 className={styles.chapterHeadingLight}>Our story, in frames.</h2>
+        </Reveal>
+        <Reveal as="div" className={styles.archiveGrid}>
+          <ArchivePhotoSlot number="01" caption="Open Heritage" href="/heritage" large />
+          <ArchivePhotoSlot number="02" caption="1984 · Origin" href="/heritage" />
+          <ArchivePhotoSlot number="03" caption="Archive · Detail" href="/heritage" />
+        </Reveal>
+        <Link href="/heritage" className={styles.textLinkLight}>
+          Explore the story →
+        </Link>
       </section>
 
-      {/* 12 — ENQUIRY / CONNECT */}
+      {/* 11 — ENQUIRY / CONNECT */}
       <section className={styles.connect} aria-label="Begin your enquiry">
         <Reveal as="div" className={styles.connectInner}>
           <span className={styles.eyebrow}>The Journey Continues</span>

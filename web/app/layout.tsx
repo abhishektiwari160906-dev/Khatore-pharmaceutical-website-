@@ -26,7 +26,7 @@ const ORGANIZATION_JSON_LD = {
     '@type': 'PostalAddress',
     streetAddress: 'P.O. Barbil',
     addressLocality: 'Barbil',
-    addressRegion: 'Orissa',
+    addressRegion: 'Odisha',
     postalCode: '758035',
     addressCountry: 'IN',
   },
