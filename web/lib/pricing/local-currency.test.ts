@@ -40,15 +40,28 @@ describe('resolveLocalCurrencyPricing', () => {
     expect(pricing.baseAmount).toBeUndefined(); // no conversion happened at all
   });
 
-  it('does not convert when the country is not in the explicit currency allow-list', async () => {
+  it('does not convert when the country is not in the explicit currency allow-list at all (Vietnam -- no real order history, so no currency mapping either)', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }),
     );
     const { resolveLocalCurrencyPricing } = await import('./resolve');
 
-    const pricing = await resolveLocalCurrencyPricing(kamalahar, 'JP'); // Japan -- not configured
-    expect(pricing.currency).toBe('USD'); // Tier 1 fallback, no JPY conversion invented
+    const pricing = await resolveLocalCurrencyPricing(kamalahar, 'VN');
+    expect(pricing.currency).toBe('USD'); // Tier 1 fallback, no VND conversion invented
+    expect(pricing.baseAmount).toBeUndefined();
+  });
+
+  it('does not convert when the country IS configured but its currency is gateway-unsupported (Japan -- JPY is a real, known currency, but not yet individually verified as PayPal-chargeable in this build, so it stays conservative)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }),
+    );
+    const { resolveLocalCurrencyPricing } = await import('./resolve');
+
+    const pricing = await resolveLocalCurrencyPricing(kamalahar, 'JP');
+    expect(pricing.currency).toBe('USD'); // Tier 1 ($299) fallback, not a guessed JPY charge
+    expect(pricing.salePrice).toBe(299);
     expect(pricing.baseAmount).toBeUndefined();
   });
 
@@ -89,8 +102,9 @@ describe('resolveLocalCurrencyPricing', () => {
 
     const pricing = await resolveLocalCurrencyPricing(kamalahar, 'AE');
     expect(pricing.currency).toBe('USD');
-    // $249, not $299 -- UAE reassigned Tier 1 -> Tier 2 on 10 Oct.
-    expect(pricing.salePrice).toBe(249);
+    // $299 -- UAE is Tier 1 per the real order-data sheet (10 Oct),
+    // back where it started before the intermediate G7/dictated round.
+    expect(pricing.salePrice).toBe(299);
   });
 });
 
@@ -132,6 +146,18 @@ describe('resolveDisplayEstimate (Vrinda, 9 Oct -- "$199 USD (≈ local)", displ
   it('is null for a country with no known local currency -- never guesses one (Vietnam: used as a spoken test example, but has no currency mapping at all, same as its tier)', async () => {
     const { resolveDisplayEstimate } = await import('./resolve');
     expect(await resolveDisplayEstimate(299, 'VN')).toBeNull();
+  });
+
+  it('gives a JPY estimate for Japan -- newly added for the 57-country sheet, charge still stays USD (JPY is in GATEWAY_UNSUPPORTED_CURRENCIES, not yet individually verified as chargeable)', async () => {
+    const ratesWithJPY = { result: 'success', rates: { ...FAKE_RATES_RESPONSE.rates, JPY: 149.5 } };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ratesWithJPY }));
+    const { resolveDisplayEstimate } = await import('./resolve');
+
+    const estimate = await resolveDisplayEstimate(299, 'JP');
+    expect(estimate).not.toBeNull();
+    expect(estimate!.currency).toBe('JPY');
+    // 299 USD * 149.5 -> 44,700.5 -> rounds to 44701
+    expect(estimate!.amount).toBe(44701);
   });
 
   it('is null (never invented) when the live rate source is unreachable', async () => {

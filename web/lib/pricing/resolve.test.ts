@@ -1,51 +1,72 @@
 import { describe, it, expect } from 'vitest';
 import { resolveProductPricing, resolveTierForCountry, isDiscountActive } from './resolve';
-import { PRICING_TIERS } from './config';
+import { PRICING_TIERS, COUNTRY_TIER_MAP } from './config';
 import { getProductBySlug } from '@/data/products';
+import { isValidCountryCode } from '@/data/countries';
 
 const kamalahar = getProductBySlug('kamalahar')!;
 const nonTiered = getProductBySlug('k-mens')!;
 
+// 10 Oct: replaced entirely by Vrinda's real order-data tier sheet
+// (Kamalahar_Pricing_Tiers_Simple.xlsx) -- 57 countries total, every
+// one with real website-order history. Supersedes both the 9 Oct
+// World Bank-income version and the same-day-earlier G7/dictated
+// version. See lib/pricing/config.ts's own COUNTRY_TIER_MAP comment.
+const TIER_1_COUNTRIES = ['US', 'GB', 'AU', 'CA', 'AE', 'SG', 'DE', 'ES', 'SE', 'NL', 'NZ', 'KR', 'BE', 'JP', 'FI', 'IE', 'NO', 'KW', 'MT', 'HK'];
+const TIER_2_COUNTRIES = ['GH', 'NG', 'MY', 'RO', 'NA', 'TR', 'EE', 'HU', 'AL', 'CN', 'TH', 'ZA', 'AR', 'RU'];
+const TIER_3_COUNTRIES = ['PH', 'KE', 'TZ', 'LK', 'UG', 'JO', 'CM', 'PG', 'ZW', 'LR', 'KH', 'ID', 'MW', 'SD', 'IR', 'CD', 'RW', 'SO', 'AO', 'ZM', 'PK', 'LA'];
+
 describe('resolveTierForCountry', () => {
   it('maps India to TIER_4_INDIA', () => expect(resolveTierForCountry('IN')).toBe('TIER_4_INDIA'));
-  it('maps the US to TIER_1', () => expect(resolveTierForCountry('US')).toBe('TIER_1'));
-  it('falls back to TIER_1 for a genuinely unlisted country (Vietnam -- never named in any tier, despite being used as a spoken test example)', () =>
+  it('falls back to TIER_1 for a country with no real order history (Vietnam -- not in the 57-country sheet)', () =>
     expect(resolveTierForCountry('VN')).toBe('TIER_1'));
   it('falls back to TIER_1 when no country is known at all', () => expect(resolveTierForCountry(undefined)).toBe('TIER_1'));
 
-  // 10 Oct reassignment (Vrinda, dictated, confirmed explicitly after
-  // being shown it reverses part of the 9 Oct World Bank mapping):
-  // UAE down from Tier 1 to Tier 2; Nigeria/Ghana UP from Tier 3 to
-  // Tier 2; Malaysia DOWN from Tier 2 to Tier 3; Kenya/Tanzania/Uganda
-  // unchanged on Tier 3; Philippines left on Tier 2 (not named either
-  // way this round -- see lib/pricing/config.ts's own flagged note).
-  it('maps G7 members to TIER_1 (Canada, UK, France, Germany, Italy, Japan)', () => {
-    for (const code of ['CA', 'GB', 'FR', 'DE', 'IT', 'JP']) {
+  it('maps all 20 Tier 1 countries from the real order-data sheet', () => {
+    expect(TIER_1_COUNTRIES).toHaveLength(20);
+    for (const code of TIER_1_COUNTRIES) {
       expect(resolveTierForCountry(code)).toBe('TIER_1');
     }
   });
-  it('maps Singapore and Romania to TIER_1', () => {
-    expect(resolveTierForCountry('SG')).toBe('TIER_1');
-    expect(resolveTierForCountry('RO')).toBe('TIER_1');
+  it('maps all 14 Tier 2 countries from the real order-data sheet', () => {
+    expect(TIER_2_COUNTRIES).toHaveLength(14);
+    for (const code of TIER_2_COUNTRIES) {
+      expect(resolveTierForCountry(code)).toBe('TIER_2');
+    }
   });
-  it('maps the UAE to TIER_2 (reassigned from TIER_1)', () => expect(resolveTierForCountry('AE')).toBe('TIER_2'));
-  it('maps Nigeria to TIER_2 (reassigned from TIER_3)', () => expect(resolveTierForCountry('NG')).toBe('TIER_2'));
-  it('maps Ghana to TIER_2 (reassigned from TIER_3)', () => expect(resolveTierForCountry('GH')).toBe('TIER_2'));
-  it('maps Malaysia to TIER_3 (reassigned from TIER_2)', () => expect(resolveTierForCountry('MY')).toBe('TIER_3'));
-  it('keeps Kenya, Tanzania, Uganda on TIER_3', () => {
-    for (const code of ['KE', 'TZ', 'UG']) {
+  it('maps all 22 Tier 3 countries from the real order-data sheet', () => {
+    expect(TIER_3_COUNTRIES).toHaveLength(22);
+    for (const code of TIER_3_COUNTRIES) {
       expect(resolveTierForCountry(code)).toBe('TIER_3');
     }
   });
-  it('keeps the Philippines on TIER_2 (not reassigned this round)', () => expect(resolveTierForCountry('PH')).toBe('TIER_2'));
+  it('totals 57 countries + India, matching the source sheet\'s own count', () => {
+    expect(TIER_1_COUNTRIES.length + TIER_2_COUNTRIES.length + TIER_3_COUNTRIES.length).toBe(56);
+  });
 
   it('is deterministic -- the same country resolves to the same tier every time', () => {
-    for (const code of ['US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'SG', 'RO', 'AE', 'NG', 'GH', 'MY', 'KE', 'TZ', 'UG', 'PH', 'IN', 'VN']) {
+    for (const code of [...TIER_1_COUNTRIES, ...TIER_2_COUNTRIES, ...TIER_3_COUNTRIES, 'IN', 'VN']) {
       const first = resolveTierForCountry(code);
       for (let i = 0; i < 20; i++) {
         expect(resolveTierForCountry(code)).toBe(first);
       }
     }
+  });
+
+  // Regression test for a real bug found 10 Oct: 7 of the 57 countries
+  // in Vrinda's real order-data sheet (Liberia, Sudan, Iran, DR Congo,
+  // Somalia, Angola, Laos) were missing from data/countries.ts's
+  // master COUNTRIES list entirely. isValidCountryCode() rejected
+  // their IP-detected code, app/api/pricing's route silently treated
+  // them as "no country known", and every one of them silently priced
+  // at the Tier 1 default ($299) instead of their real Tier 3 ($199)
+  // -- caught only by testing the full pipeline live, not by unit-
+  // testing resolveTierForCountry() in isolation (which has no
+  // isValidCountryCode() check and would never have caught this).
+  // This asserts the two lists can never drift apart again.
+  it('every country in COUNTRY_TIER_MAP is also a valid country code (data/countries.ts) -- otherwise IP-detection silently falls back to the Tier 1 default for it', () => {
+    const missing = Object.keys(COUNTRY_TIER_MAP).filter((code) => !isValidCountryCode(code));
+    expect(missing).toEqual([]);
   });
 });
 
@@ -64,15 +85,15 @@ describe('resolveProductPricing -- correct price per tier', () => {
     expect(p.salePrice).toBe(299);
   });
 
-  it('Malaysia (Tier 3, reassigned 10 Oct) -- $199, base+shipping+tax = 137+50+12', () => {
+  it('Malaysia (Tier 2, per the real order-data sheet) -- $249, base+shipping+tax = 187+50+12', () => {
     const p = resolveProductPricing(kamalahar, 'MY');
     expect(p.currency).toBe('USD');
-    expect(p.salePrice).toBe(199);
-    expect(p.breakdown).toEqual({ base: 137, shipping: 50, tax: 12 });
+    expect(p.salePrice).toBe(249);
+    expect(p.breakdown).toEqual({ base: 187, shipping: 50, tax: 12 });
     expect(p.breakdown!.base + p.breakdown!.shipping + p.breakdown!.tax).toBe(p.salePrice);
   });
 
-  it('Nigeria (Tier 2, reassigned 10 Oct) -- $249, base+shipping+tax = 187+50+12', () => {
+  it('Nigeria (Tier 2, per the real order-data sheet) -- $249, base+shipping+tax = 187+50+12', () => {
     const p = resolveProductPricing(kamalahar, 'NG');
     expect(p.currency).toBe('USD');
     expect(p.salePrice).toBe(249);
@@ -80,10 +101,17 @@ describe('resolveProductPricing -- correct price per tier', () => {
     expect(p.breakdown!.base + p.breakdown!.shipping + p.breakdown!.tax).toBe(p.salePrice);
   });
 
-  it('UAE (Tier 2, reassigned 10 Oct from Tier 1) -- $249', () => {
+  it('UAE (Tier 1, per the real order-data sheet) -- $299', () => {
     const p = resolveProductPricing(kamalahar, 'AE');
     expect(p.currency).toBe('USD');
-    expect(p.salePrice).toBe(249);
+    expect(p.salePrice).toBe(299);
+  });
+
+  it('Sri Lanka (Tier 3) -- $199, base+shipping+tax = 137+50+12', () => {
+    const p = resolveProductPricing(kamalahar, 'LK');
+    expect(p.currency).toBe('USD');
+    expect(p.salePrice).toBe(199);
+    expect(p.breakdown).toEqual({ base: 137, shipping: 50, tax: 12 });
   });
 
   it('every USD tier breakdown sums to its own salePrice', () => {

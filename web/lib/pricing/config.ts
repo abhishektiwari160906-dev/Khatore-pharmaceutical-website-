@@ -111,62 +111,88 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
  * unless the country is explicitly configured"). Every country below
  * is one the client actually named; nothing here is inferred.
  *
- * REASSIGNED 10 Oct (Vrinda, dictated instruction, confirmed explicitly
- * after being shown it reverses part of the 9 Oct World Bank-based
- * mapping) -- this REPLACES the 9 Oct version:
- *   Tier 1: G7 + Europe + Singapore + Romania
- *   Tier 2: UAE, Nigeria, Ghana        (UAE down from Tier 1; Nigeria/
- *                                        Ghana UP from Tier 3)
- *   Tier 3: Malaysia, Kenya, Uganda, Tanzania  (Malaysia down from
- *                                        Tier 2; Kenya/Uganda/Tanzania
- *                                        unchanged)
- *   Tier 4: India, unchanged
+ * REPLACED 10 Oct with Vrinda's own real-order-data tier sheet
+ * (Kamalahar_Pricing_Tiers_Simple.xlsx, "Country Tiers" tab) --
+ * supersedes every prior round today (the 9 Oct World Bank-income
+ * version and the same-day-earlier G7/dictated version). 57 countries
+ * total: every country with at least one real website order
+ * (1,558 orders analyzed), placed by Vrinda based on order volume,
+ * average amount paid, and income level. Her sheet's own note: "a
+ * working proposal (10 Oct 2026)... It is a test, not final" -- real
+ * and authoritative for now, but flagged here in case that changes.
  *
- * "G7 + Europe + Eastern Europe" was not given as an exhaustive country
- * list -- rather than invent one (guessing which of ~40 European
- * countries count is exactly the kind of guess Section 2 prohibits),
- * the G7 members plus the countries already explicitly live are named
- * below, and DEFAULT_TIER_ID (Tier 1, see below) already covers "the
- * rest of Europe" for any European country not named here -- so the
- * stated intent ("Europe defaults to Tier 1") is satisfied without
- * fabricating a country-by-country list nobody actually gave me.
+ * Her sheet also flags Russia, Sudan, Iran and Somalia with "check
+ * payment and shipping restrictions" -- that's an operational/legal
+ * question for Khatore to resolve, not something this code can
+ * determine, so it's priced here exactly as given and flagged back in
+ * the delivery report rather than silently included or excluded.
  *
- * Two gaps flagged, not silently resolved: Philippines was in no list
- * this time (left on Tier 2, where it already was, rather than falling
- * to the Tier 1 default and getting a real price increase nobody
- * asked for) -- confirm if that's still correct. Vietnam was used as a
- * spoken example assuming it lands on Tier 2/3, but was never actually
- * named in any tier -- it is NOT in this map, so it resolves to the
- * Tier 1 default today; add it explicitly here if that's wrong.
+ * Any country NOT in this list (e.g. Vietnam, raised earlier as a
+ * hypothetical) has no real order history behind it and falls to
+ * DEFAULT_TIER_ID (Tier 1) below -- consistent with the sheet itself
+ * only covering countries with actual orders.
  */
 export const COUNTRY_TIER_MAP: Record<string, PricingTierId> = {
-  // Tier 1 -- G7 + Singapore + Romania (explicitly named); every other
-  // European country not listed here already falls to DEFAULT_TIER_ID
-  // (Tier 1) below, so "the rest of Europe" needs no separate entry.
+  // Tier 1 -- $299 (20 countries, High purchasing power)
   US: 'TIER_1',
-  CA: 'TIER_1',
   GB: 'TIER_1',
-  FR: 'TIER_1',
-  DE: 'TIER_1',
-  IT: 'TIER_1',
-  JP: 'TIER_1',
+  AU: 'TIER_1',
+  CA: 'TIER_1',
+  AE: 'TIER_1',
   SG: 'TIER_1',
-  RO: 'TIER_1',
-  AU: 'TIER_1', // unchanged from 9 Oct -- not reassigned by this instruction
-  // Tier 2
-  AE: 'TIER_2',
-  NG: 'TIER_2',
+  DE: 'TIER_1',
+  ES: 'TIER_1',
+  SE: 'TIER_1',
+  NL: 'TIER_1',
+  NZ: 'TIER_1',
+  KR: 'TIER_1',
+  BE: 'TIER_1',
+  JP: 'TIER_1',
+  FI: 'TIER_1',
+  IE: 'TIER_1',
+  NO: 'TIER_1',
+  KW: 'TIER_1',
+  MT: 'TIER_1',
+  HK: 'TIER_1',
+  // Tier 2 -- $249 (14 countries, strong demand / mid purchasing power)
   GH: 'TIER_2',
-  // Tier 3
-  MY: 'TIER_3',
+  NG: 'TIER_2',
+  MY: 'TIER_2',
+  RO: 'TIER_2',
+  NA: 'TIER_2',
+  TR: 'TIER_2',
+  EE: 'TIER_2',
+  HU: 'TIER_2',
+  AL: 'TIER_2',
+  CN: 'TIER_2',
+  TH: 'TIER_2',
+  ZA: 'TIER_2',
+  AR: 'TIER_2',
+  RU: 'TIER_2', // flagged in source sheet: check payment and shipping restrictions
+  // Tier 3 -- $199 (22 countries, lower purchasing power)
+  PH: 'TIER_3',
   KE: 'TIER_3',
-  UG: 'TIER_3',
   TZ: 'TIER_3',
-  // Philippines: not named in this round's instruction either way --
-  // left where it already was (Tier 2) rather than silently defaulting
-  // to Tier 1. Flagged above; confirm or move explicitly.
-  PH: 'TIER_2',
-  // Tier 4 -- India
+  LK: 'TIER_3',
+  UG: 'TIER_3',
+  JO: 'TIER_3',
+  CM: 'TIER_3',
+  PG: 'TIER_3',
+  ZW: 'TIER_3',
+  LR: 'TIER_3',
+  KH: 'TIER_3',
+  ID: 'TIER_3',
+  MW: 'TIER_3',
+  SD: 'TIER_3', // flagged in source sheet: check payment and shipping restrictions
+  IR: 'TIER_3', // flagged in source sheet: check payment and shipping restrictions
+  CD: 'TIER_3',
+  RW: 'TIER_3',
+  SO: 'TIER_3', // flagged in source sheet: check payment and shipping restrictions
+  AO: 'TIER_3',
+  ZM: 'TIER_3',
+  PK: 'TIER_3',
+  LA: 'TIER_3',
+  // Tier 4 -- India (home market), ₹12,999
   IN: 'TIER_4_INDIA',
 };
 

@@ -11,31 +11,82 @@ export type CurrencyCode = string;
 
 /**
  * ISO 4217 currency for each explicitly-configured pricing-tier country
- * (Master Pricing pass, 7 Oct local-currency build). Same explicit
- * allow-list philosophy as lib/pricing/config.ts's COUNTRY_TIER_MAP --
- * only the countries the client actually named get a local currency;
- * nothing is inferred for a country not in this list.
+ * (Master Pricing pass, 7 Oct local-currency build; extended 10 Oct to
+ * all 57 countries in Vrinda's real order-data tier sheet). Same
+ * explicit allow-list philosophy as lib/pricing/config.ts's
+ * COUNTRY_TIER_MAP -- only a country actually named (here, by that
+ * sheet) gets a local currency; nothing is inferred for a country not
+ * in this list. Unlike the tier assignment itself, this file is pure
+ * ISO 4217 fact (which currency a country uses), not a business
+ * decision -- filled in directly for every one of the 57 so the
+ * local-currency display line (Vrinda, 9-10 Oct: "has to be shown...
+ * for every IP address she tests") actually covers the full list.
  */
 export const COUNTRY_CURRENCY_MAP: Record<string, string> = {
+  // Tier 1
   US: 'USD',
   GB: 'GBP',
-  CA: 'CAD',
   AU: 'AUD',
-  DE: 'EUR',
-  SG: 'SGD',
+  CA: 'CAD',
   AE: 'AED',
-  NG: 'NGN',
+  SG: 'SGD',
+  DE: 'EUR',
+  ES: 'EUR',
+  SE: 'SEK',
+  NL: 'EUR',
+  NZ: 'NZD',
+  KR: 'KRW',
+  BE: 'EUR',
+  JP: 'JPY',
+  FI: 'EUR',
+  IE: 'EUR',
+  NO: 'NOK',
+  KW: 'KWD',
+  MT: 'EUR',
+  HK: 'HKD',
+  // Tier 2
   GH: 'GHS',
-  RO: 'RON',
+  NG: 'NGN',
   MY: 'MYR',
+  RO: 'RON',
+  NA: 'NAD',
+  TR: 'TRY',
+  EE: 'EUR',
+  HU: 'HUF',
+  AL: 'ALL',
+  CN: 'CNY',
+  TH: 'THB',
+  ZA: 'ZAR',
+  AR: 'ARS',
+  RU: 'RUB',
+  // Tier 3
   PH: 'PHP',
   KE: 'KES',
-  UG: 'UGX',
   TZ: 'TZS',
+  LK: 'LKR',
+  UG: 'UGX',
+  JO: 'JOD',
+  CM: 'XAF',
+  PG: 'PGK',
+  ZW: 'ZWL',
+  LR: 'LRD',
+  KH: 'KHR',
+  ID: 'IDR',
+  MW: 'MWK',
+  SD: 'SDG',
+  IR: 'IRR',
+  CD: 'CDF',
+  RW: 'RWF',
+  SO: 'SOS',
+  AO: 'AOA',
+  ZM: 'ZMW',
+  PK: 'PKR',
+  LA: 'LAK',
+  // Tier 4
   IN: 'INR',
 };
 
-/** Display symbol/prefix for each currency this app can show. Used instead of a generic currency-code prefix so prices read naturally (£299, not GBP299). */
+/** Display symbol/prefix for each currency this app can show. Used instead of a generic currency-code prefix so prices read naturally (£299, not GBP299). Any currency not listed here falls back to printing its own code (getCurrencySymbol below) -- a safe default, not a missing feature. */
 export const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: '$',
   GBP: '£',
@@ -53,6 +104,20 @@ export const CURRENCY_SYMBOLS: Record<string, string> = {
   UGX: 'USh ',
   TZS: 'TSh ',
   INR: '₹',
+  NZD: 'NZ$',
+  JPY: '¥',
+  HKD: 'HK$',
+  CNY: '¥',
+  THB: '฿',
+  ZAR: 'R',
+  TRY: '₺',
+  RUB: '₽',
+  LKR: 'Rs ',
+  IDR: 'Rp ',
+  PKR: 'Rs ',
+  KRW: '₩',
+  SEK: 'kr ',
+  NOK: 'kr ',
 };
 
 /**
@@ -66,6 +131,17 @@ export const CURRENCY_SYMBOLS: Record<string, string> = {
  * this list, show the tier's own base currency (USD) instead of
  * converting to a currency neither gateway can actually charge --
  * never show a price the visitor could not pay in.
+ *
+ * 10 Oct: every currency newly added for the 57-country real-data tier
+ * sheet is included here too, DELIBERATELY, even ones likely actually
+ * supported by PayPal (JPY, SEK, NOK, HKD, HUF, THB, NZD are probably
+ * fine going by PayPal's public currency list from memory) -- "probably
+ * fine from memory" is exactly the kind of unverified claim this build
+ * has repeatedly refused to ship as a real charge. These show the live
+ * local-currency ESTIMATE (safe, display-only) but charge in USD until
+ * each is actually checked against a live PayPal/PayU call, the same
+ * way GBP/CAD/AUD/EUR/SGD/MYR/PHP were individually verified on 8 Oct
+ * before being trusted to charge for real.
  */
 export const GATEWAY_UNSUPPORTED_CURRENCIES: readonly string[] = [
   'AED',
@@ -75,6 +151,40 @@ export const GATEWAY_UNSUPPORTED_CURRENCIES: readonly string[] = [
   'KES',
   'UGX',
   'TZS',
+  'SEK',
+  'NZD',
+  'KRW',
+  'JPY',
+  'NOK',
+  'KWD',
+  'HKD',
+  'NAD',
+  'TRY',
+  'HUF',
+  'ALL',
+  'CNY',
+  'THB',
+  'ZAR',
+  'ARS',
+  'RUB',
+  'LKR',
+  'JOD',
+  'XAF',
+  'PGK',
+  'ZWL',
+  'LRD',
+  'KHR',
+  'IDR',
+  'MWK',
+  'SDG',
+  'IRR',
+  'CDF',
+  'RWF',
+  'SOS',
+  'AOA',
+  'ZMW',
+  'PKR',
+  'LAK',
 ];
 
 export function getCurrencyForCountry(countryCode: string): string | undefined {
