@@ -110,6 +110,11 @@ export function Footer() {
               </a>
             </li>
             <li>
+              <a href="https://a.co/d/0bbrs1eI" target="_blank" rel="noopener">
+                Amazon USA
+              </a>
+            </li>
+            <li>
               <a href="https://www.khatorepharma.com/contactus" target="_blank" rel="noopener">
                 Contact Form
               </a>

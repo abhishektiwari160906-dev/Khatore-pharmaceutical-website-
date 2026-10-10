@@ -127,10 +127,11 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
  * determine, so it's priced here exactly as given and flagged back in
  * the delivery report rather than silently included or excluded.
  *
- * Any country NOT in this list (e.g. Vietnam, raised earlier as a
- * hypothetical) has no real order history behind it and falls to
- * DEFAULT_TIER_ID (Tier 1) below -- consistent with the sheet itself
- * only covering countries with actual orders.
+ * Vietnam added 10 Oct as an explicit 58th entry, confirmed by Vrinda
+ * directly (Tier 2) -- not in the original sheet's 57, but given
+ * individually rather than left to the Tier 1 default. Any OTHER
+ * country not in this list has no real order history behind it and
+ * falls to DEFAULT_TIER_ID (Tier 1) below.
  */
 export const COUNTRY_TIER_MAP: Record<string, PricingTierId> = {
   // Tier 1 -- $299 (20 countries, High purchasing power)
@@ -169,6 +170,7 @@ export const COUNTRY_TIER_MAP: Record<string, PricingTierId> = {
   ZA: 'TIER_2',
   AR: 'TIER_2',
   RU: 'TIER_2', // flagged in source sheet: check payment and shipping restrictions
+  VN: 'TIER_2', // Vietnam -- added 10 Oct, confirmed directly by Vrinda, not in the original 57-country sheet
   // Tier 3 -- $199 (22 countries, lower purchasing power)
   PH: 'TIER_3',
   KE: 'TIER_3',

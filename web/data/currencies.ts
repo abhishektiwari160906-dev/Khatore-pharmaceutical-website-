@@ -59,6 +59,7 @@ export const COUNTRY_CURRENCY_MAP: Record<string, string> = {
   ZA: 'ZAR',
   AR: 'ARS',
   RU: 'RUB',
+  VN: 'VND',
   // Tier 3
   PH: 'PHP',
   KE: 'KES',
@@ -110,6 +111,7 @@ export const CURRENCY_SYMBOLS: Record<string, string> = {
   CNY: '¥',
   THB: '฿',
   ZAR: 'R',
+  VND: '₫',
   TRY: '₺',
   RUB: '₽',
   LKR: 'Rs ',
@@ -167,6 +169,7 @@ export const GATEWAY_UNSUPPORTED_CURRENCIES: readonly string[] = [
   'ZAR',
   'ARS',
   'RUB',
+  'VND',
   'LKR',
   'JOD',
   'XAF',

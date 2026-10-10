@@ -40,7 +40,19 @@ describe('resolveLocalCurrencyPricing', () => {
     expect(pricing.baseAmount).toBeUndefined(); // no conversion happened at all
   });
 
-  it('does not convert when the country is not in the explicit currency allow-list at all (Vietnam -- no real order history, so no currency mapping either)', async () => {
+  it('does not convert when the country is not in the explicit currency allow-list at all (Mexico -- no real order history or explicit assignment, so no currency mapping either)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }),
+    );
+    const { resolveLocalCurrencyPricing } = await import('./resolve');
+
+    const pricing = await resolveLocalCurrencyPricing(kamalahar, 'MX');
+    expect(pricing.currency).toBe('USD'); // Tier 1 fallback, no MXN conversion invented
+    expect(pricing.baseAmount).toBeUndefined();
+  });
+
+  it('does not convert for Vietnam -- it IS configured now (Tier 2, VND), but VND is gateway-unsupported, so it stays USD ($249) same as the Japan case below', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }),
@@ -48,7 +60,8 @@ describe('resolveLocalCurrencyPricing', () => {
     const { resolveLocalCurrencyPricing } = await import('./resolve');
 
     const pricing = await resolveLocalCurrencyPricing(kamalahar, 'VN');
-    expect(pricing.currency).toBe('USD'); // Tier 1 fallback, no VND conversion invented
+    expect(pricing.currency).toBe('USD');
+    expect(pricing.salePrice).toBe(249);
     expect(pricing.baseAmount).toBeUndefined();
   });
 
@@ -143,9 +156,9 @@ describe('resolveDisplayEstimate (Vrinda, 9 Oct -- "$199 USD (≈ local)", displ
     expect(await resolveDisplayEstimate(12999, 'IN')).toBeNull();
   });
 
-  it('is null for a country with no known local currency -- never guesses one (Vietnam: used as a spoken test example, but has no currency mapping at all, same as its tier)', async () => {
+  it('is null for a country with no known local currency -- never guesses one (Mexico, unconfigured)', async () => {
     const { resolveDisplayEstimate } = await import('./resolve');
-    expect(await resolveDisplayEstimate(299, 'VN')).toBeNull();
+    expect(await resolveDisplayEstimate(299, 'MX')).toBeNull();
   });
 
   it('gives a JPY estimate for Japan -- newly added for the 57-country sheet, charge still stays USD (JPY is in GATEWAY_UNSUPPORTED_CURRENCIES, not yet individually verified as chargeable)', async () => {

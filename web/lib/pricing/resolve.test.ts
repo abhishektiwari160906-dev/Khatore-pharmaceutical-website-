@@ -12,14 +12,18 @@ const nonTiered = getProductBySlug('k-mens')!;
 // one with real website-order history. Supersedes both the 9 Oct
 // World Bank-income version and the same-day-earlier G7/dictated
 // version. See lib/pricing/config.ts's own COUNTRY_TIER_MAP comment.
+// Vietnam added as an explicit 58th entry (Tier 2), confirmed directly
+// by Vrinda -- not part of the original sheet's 57.
 const TIER_1_COUNTRIES = ['US', 'GB', 'AU', 'CA', 'AE', 'SG', 'DE', 'ES', 'SE', 'NL', 'NZ', 'KR', 'BE', 'JP', 'FI', 'IE', 'NO', 'KW', 'MT', 'HK'];
-const TIER_2_COUNTRIES = ['GH', 'NG', 'MY', 'RO', 'NA', 'TR', 'EE', 'HU', 'AL', 'CN', 'TH', 'ZA', 'AR', 'RU'];
+const TIER_2_COUNTRIES = ['GH', 'NG', 'MY', 'RO', 'NA', 'TR', 'EE', 'HU', 'AL', 'CN', 'TH', 'ZA', 'AR', 'RU', 'VN'];
 const TIER_3_COUNTRIES = ['PH', 'KE', 'TZ', 'LK', 'UG', 'JO', 'CM', 'PG', 'ZW', 'LR', 'KH', 'ID', 'MW', 'SD', 'IR', 'CD', 'RW', 'SO', 'AO', 'ZM', 'PK', 'LA'];
 
 describe('resolveTierForCountry', () => {
   it('maps India to TIER_4_INDIA', () => expect(resolveTierForCountry('IN')).toBe('TIER_4_INDIA'));
-  it('falls back to TIER_1 for a country with no real order history (Vietnam -- not in the 57-country sheet)', () =>
-    expect(resolveTierForCountry('VN')).toBe('TIER_1'));
+  it('maps Vietnam to TIER_2 (confirmed directly by Vrinda, 10 Oct -- not in the original 57-country sheet)', () =>
+    expect(resolveTierForCountry('VN')).toBe('TIER_2'));
+  it('falls back to TIER_1 for a country with no real order history or explicit assignment (Mexico)', () =>
+    expect(resolveTierForCountry('MX')).toBe('TIER_1'));
   it('falls back to TIER_1 when no country is known at all', () => expect(resolveTierForCountry(undefined)).toBe('TIER_1'));
 
   it('maps all 20 Tier 1 countries from the real order-data sheet', () => {
@@ -28,8 +32,8 @@ describe('resolveTierForCountry', () => {
       expect(resolveTierForCountry(code)).toBe('TIER_1');
     }
   });
-  it('maps all 14 Tier 2 countries from the real order-data sheet', () => {
-    expect(TIER_2_COUNTRIES).toHaveLength(14);
+  it('maps all 15 Tier 2 countries (14 from the sheet + Vietnam)', () => {
+    expect(TIER_2_COUNTRIES).toHaveLength(15);
     for (const code of TIER_2_COUNTRIES) {
       expect(resolveTierForCountry(code)).toBe('TIER_2');
     }
@@ -40,12 +44,12 @@ describe('resolveTierForCountry', () => {
       expect(resolveTierForCountry(code)).toBe('TIER_3');
     }
   });
-  it('totals 57 countries + India, matching the source sheet\'s own count', () => {
-    expect(TIER_1_COUNTRIES.length + TIER_2_COUNTRIES.length + TIER_3_COUNTRIES.length).toBe(56);
+  it('totals 57 countries (the sheet) + Vietnam + India = 59', () => {
+    expect(TIER_1_COUNTRIES.length + TIER_2_COUNTRIES.length + TIER_3_COUNTRIES.length).toBe(57);
   });
 
   it('is deterministic -- the same country resolves to the same tier every time', () => {
-    for (const code of [...TIER_1_COUNTRIES, ...TIER_2_COUNTRIES, ...TIER_3_COUNTRIES, 'IN', 'VN']) {
+    for (const code of [...TIER_1_COUNTRIES, ...TIER_2_COUNTRIES, ...TIER_3_COUNTRIES, 'IN', 'MX']) {
       const first = resolveTierForCountry(code);
       for (let i = 0; i < 20; i++) {
         expect(resolveTierForCountry(code)).toBe(first);
