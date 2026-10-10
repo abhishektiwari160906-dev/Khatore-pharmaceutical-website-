@@ -9,23 +9,38 @@ const nonTiered = getProductBySlug('k-mens')!;
 describe('resolveTierForCountry', () => {
   it('maps India to TIER_4_INDIA', () => expect(resolveTierForCountry('IN')).toBe('TIER_4_INDIA'));
   it('maps the US to TIER_1', () => expect(resolveTierForCountry('US')).toBe('TIER_1'));
-  it('maps Malaysia to TIER_2', () => expect(resolveTierForCountry('MY')).toBe('TIER_2'));
-  it('falls back to TIER_1 for an unlisted country', () => expect(resolveTierForCountry('JP')).toBe('TIER_1'));
+  it('falls back to TIER_1 for a genuinely unlisted country (Vietnam -- never named in any tier, despite being used as a spoken test example)', () =>
+    expect(resolveTierForCountry('VN')).toBe('TIER_1'));
   it('falls back to TIER_1 when no country is known at all', () => expect(resolveTierForCountry(undefined)).toBe('TIER_1'));
 
-  // Income-based reassignment, 9 Oct (World Bank Country and Lending
-  // Groups): Nigeria/Ghana move DOWN from Tier 1, Kenya/Tanzania/Uganda
-  // move DOWN from Tier 2 -- all land on the new Tier 3. Philippines and
-  // Malaysia (Upper-middle income) stay on Tier 2.
-  it('maps Nigeria to TIER_3 (reassigned from TIER_1)', () => expect(resolveTierForCountry('NG')).toBe('TIER_3'));
-  it('maps Ghana to TIER_3 (reassigned from TIER_1)', () => expect(resolveTierForCountry('GH')).toBe('TIER_3'));
-  it('maps Kenya to TIER_3 (reassigned from TIER_2)', () => expect(resolveTierForCountry('KE')).toBe('TIER_3'));
-  it('maps Tanzania to TIER_3 (reassigned from TIER_2)', () => expect(resolveTierForCountry('TZ')).toBe('TIER_3'));
-  it('maps Uganda to TIER_3 (reassigned from TIER_2)', () => expect(resolveTierForCountry('UG')).toBe('TIER_3'));
-  it('keeps the Philippines on TIER_2', () => expect(resolveTierForCountry('PH')).toBe('TIER_2'));
+  // 10 Oct reassignment (Vrinda, dictated, confirmed explicitly after
+  // being shown it reverses part of the 9 Oct World Bank mapping):
+  // UAE down from Tier 1 to Tier 2; Nigeria/Ghana UP from Tier 3 to
+  // Tier 2; Malaysia DOWN from Tier 2 to Tier 3; Kenya/Tanzania/Uganda
+  // unchanged on Tier 3; Philippines left on Tier 2 (not named either
+  // way this round -- see lib/pricing/config.ts's own flagged note).
+  it('maps G7 members to TIER_1 (Canada, UK, France, Germany, Italy, Japan)', () => {
+    for (const code of ['CA', 'GB', 'FR', 'DE', 'IT', 'JP']) {
+      expect(resolveTierForCountry(code)).toBe('TIER_1');
+    }
+  });
+  it('maps Singapore and Romania to TIER_1', () => {
+    expect(resolveTierForCountry('SG')).toBe('TIER_1');
+    expect(resolveTierForCountry('RO')).toBe('TIER_1');
+  });
+  it('maps the UAE to TIER_2 (reassigned from TIER_1)', () => expect(resolveTierForCountry('AE')).toBe('TIER_2'));
+  it('maps Nigeria to TIER_2 (reassigned from TIER_3)', () => expect(resolveTierForCountry('NG')).toBe('TIER_2'));
+  it('maps Ghana to TIER_2 (reassigned from TIER_3)', () => expect(resolveTierForCountry('GH')).toBe('TIER_2'));
+  it('maps Malaysia to TIER_3 (reassigned from TIER_2)', () => expect(resolveTierForCountry('MY')).toBe('TIER_3'));
+  it('keeps Kenya, Tanzania, Uganda on TIER_3', () => {
+    for (const code of ['KE', 'TZ', 'UG']) {
+      expect(resolveTierForCountry(code)).toBe('TIER_3');
+    }
+  });
+  it('keeps the Philippines on TIER_2 (not reassigned this round)', () => expect(resolveTierForCountry('PH')).toBe('TIER_2'));
 
   it('is deterministic -- the same country resolves to the same tier every time', () => {
-    for (const code of ['US', 'MY', 'NG', 'GH', 'KE', 'TZ', 'UG', 'IN', 'JP']) {
+    for (const code of ['US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'SG', 'RO', 'AE', 'NG', 'GH', 'MY', 'KE', 'TZ', 'UG', 'PH', 'IN', 'VN']) {
       const first = resolveTierForCountry(code);
       for (let i = 0; i < 20; i++) {
         expect(resolveTierForCountry(code)).toBe(first);
@@ -49,19 +64,26 @@ describe('resolveProductPricing -- correct price per tier', () => {
     expect(p.salePrice).toBe(299);
   });
 
-  it('Malaysia (Tier 2) -- $399 -> $249', () => {
+  it('Malaysia (Tier 3, reassigned 10 Oct) -- $199, base+shipping+tax = 137+50+12', () => {
     const p = resolveProductPricing(kamalahar, 'MY');
-    expect(p.currency).toBe('USD');
-    expect(p.regularPrice).toBe(399);
-    expect(p.salePrice).toBe(249);
-  });
-
-  it('Nigeria (Tier 3, reassigned) -- $199, base+shipping+tax = 137+50+12', () => {
-    const p = resolveProductPricing(kamalahar, 'NG');
     expect(p.currency).toBe('USD');
     expect(p.salePrice).toBe(199);
     expect(p.breakdown).toEqual({ base: 137, shipping: 50, tax: 12 });
     expect(p.breakdown!.base + p.breakdown!.shipping + p.breakdown!.tax).toBe(p.salePrice);
+  });
+
+  it('Nigeria (Tier 2, reassigned 10 Oct) -- $249, base+shipping+tax = 187+50+12', () => {
+    const p = resolveProductPricing(kamalahar, 'NG');
+    expect(p.currency).toBe('USD');
+    expect(p.salePrice).toBe(249);
+    expect(p.breakdown).toEqual({ base: 187, shipping: 50, tax: 12 });
+    expect(p.breakdown!.base + p.breakdown!.shipping + p.breakdown!.tax).toBe(p.salePrice);
+  });
+
+  it('UAE (Tier 2, reassigned 10 Oct from Tier 1) -- $249', () => {
+    const p = resolveProductPricing(kamalahar, 'AE');
+    expect(p.currency).toBe('USD');
+    expect(p.salePrice).toBe(249);
   });
 
   it('every USD tier breakdown sums to its own salePrice', () => {

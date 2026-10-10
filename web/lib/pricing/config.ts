@@ -111,32 +111,61 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
  * unless the country is explicitly configured"). Every country below
  * is one the client actually named; nothing here is inferred.
  *
- * Reassigned 9 Oct per World Bank income classification (client-
- * supplied table, sourced from
- * https://datahelpdesk.worldbank.org/knowledgebase/articles/906519):
- * Nigeria and Ghana move DOWN from Tier 1 ($299) to Tier 3 ($199);
- * Kenya, Tanzania and Uganda move DOWN from Tier 2 ($249) to Tier 3
- * ($199). Philippines and Malaysia (Upper-middle income) stay on Tier 2.
+ * REASSIGNED 10 Oct (Vrinda, dictated instruction, confirmed explicitly
+ * after being shown it reverses part of the 9 Oct World Bank-based
+ * mapping) -- this REPLACES the 9 Oct version:
+ *   Tier 1: G7 + Europe + Singapore + Romania
+ *   Tier 2: UAE, Nigeria, Ghana        (UAE down from Tier 1; Nigeria/
+ *                                        Ghana UP from Tier 3)
+ *   Tier 3: Malaysia, Kenya, Uganda, Tanzania  (Malaysia down from
+ *                                        Tier 2; Kenya/Uganda/Tanzania
+ *                                        unchanged)
+ *   Tier 4: India, unchanged
+ *
+ * "G7 + Europe + Eastern Europe" was not given as an exhaustive country
+ * list -- rather than invent one (guessing which of ~40 European
+ * countries count is exactly the kind of guess Section 2 prohibits),
+ * the G7 members plus the countries already explicitly live are named
+ * below, and DEFAULT_TIER_ID (Tier 1, see below) already covers "the
+ * rest of Europe" for any European country not named here -- so the
+ * stated intent ("Europe defaults to Tier 1") is satisfied without
+ * fabricating a country-by-country list nobody actually gave me.
+ *
+ * Two gaps flagged, not silently resolved: Philippines was in no list
+ * this time (left on Tier 2, where it already was, rather than falling
+ * to the Tier 1 default and getting a real price increase nobody
+ * asked for) -- confirm if that's still correct. Vietnam was used as a
+ * spoken example assuming it lands on Tier 2/3, but was never actually
+ * named in any tier -- it is NOT in this map, so it resolves to the
+ * Tier 1 default today; add it explicitly here if that's wrong.
  */
 export const COUNTRY_TIER_MAP: Record<string, PricingTierId> = {
-  // Tier 1 -- primary international markets (High income)
+  // Tier 1 -- G7 + Singapore + Romania (explicitly named); every other
+  // European country not listed here already falls to DEFAULT_TIER_ID
+  // (Tier 1) below, so "the rest of Europe" needs no separate entry.
   US: 'TIER_1',
-  GB: 'TIER_1',
   CA: 'TIER_1',
-  AU: 'TIER_1',
+  GB: 'TIER_1',
+  FR: 'TIER_1',
   DE: 'TIER_1',
+  IT: 'TIER_1',
+  JP: 'TIER_1',
   SG: 'TIER_1',
-  AE: 'TIER_1',
   RO: 'TIER_1',
-  // Tier 2 -- secondary international markets (Upper-middle income)
-  MY: 'TIER_2',
-  PH: 'TIER_2',
-  // Tier 3 -- income-based lower tier (Low / Lower-middle income)
-  NG: 'TIER_3',
-  GH: 'TIER_3',
+  AU: 'TIER_1', // unchanged from 9 Oct -- not reassigned by this instruction
+  // Tier 2
+  AE: 'TIER_2',
+  NG: 'TIER_2',
+  GH: 'TIER_2',
+  // Tier 3
+  MY: 'TIER_3',
   KE: 'TIER_3',
   UG: 'TIER_3',
   TZ: 'TIER_3',
+  // Philippines: not named in this round's instruction either way --
+  // left where it already was (Tier 2) rather than silently defaulting
+  // to Tier 1. Flagged above; confirm or move explicitly.
+  PH: 'TIER_2',
   // Tier 4 -- India
   IN: 'TIER_4_INDIA',
 };

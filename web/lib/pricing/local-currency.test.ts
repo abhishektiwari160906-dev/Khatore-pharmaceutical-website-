@@ -72,10 +72,11 @@ describe('resolveLocalCurrencyPricing', () => {
 
     const pricing = await resolveLocalCurrencyPricing(kamalahar, 'NG');
     expect(pricing.currency).toBe('USD');
-    // $199, not $299 -- Nigeria was reassigned Tier 1 -> Tier 3 on 9 Oct
-    // (World Bank income classification); the USD-fallback behavior
-    // under test here is unaffected by which tier it's falling back to.
-    expect(pricing.salePrice).toBe(199);
+    // $249, not $299/$199 -- Nigeria has moved tiers twice now: Tier 1
+    // -> Tier 3 (9 Oct, World Bank) -> Tier 2 (10 Oct, latest explicit
+    // instruction). The USD-fallback behavior under test here is
+    // unaffected by which tier it's falling back to.
+    expect(pricing.salePrice).toBe(249);
     expect(pricing.baseAmount).toBeUndefined(); // no conversion attempted at all
   });
 
@@ -88,7 +89,8 @@ describe('resolveLocalCurrencyPricing', () => {
 
     const pricing = await resolveLocalCurrencyPricing(kamalahar, 'AE');
     expect(pricing.currency).toBe('USD');
-    expect(pricing.salePrice).toBe(299);
+    // $249, not $299 -- UAE reassigned Tier 1 -> Tier 2 on 10 Oct.
+    expect(pricing.salePrice).toBe(249);
   });
 });
 
@@ -102,11 +104,12 @@ describe('resolveDisplayEstimate (Vrinda, 9 Oct -- "$199 USD (≈ local)", displ
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => FAKE_RATES_RESPONSE }));
     const { resolveDisplayEstimate } = await import('./resolve');
 
-    const estimate = await resolveDisplayEstimate(199, 'NG');
+    // 249, not 199 -- Nigeria is Tier 2 as of the 10 Oct reassignment.
+    const estimate = await resolveDisplayEstimate(249, 'NG');
     expect(estimate).not.toBeNull();
     expect(estimate!.currency).toBe('NGN');
-    // 199 USD * 1328.1 -> 264,291.9 -> rounds to 264292
-    expect(estimate!.amount).toBe(264292);
+    // 249 USD * 1328.1 -> 330,696.9 -> rounds to 330697
+    expect(estimate!.amount).toBe(330697);
   });
 
   it('is null for the UK -- GBP is ALREADY the real charged currency there, not an estimate to show alongside it', async () => {
@@ -126,15 +129,15 @@ describe('resolveDisplayEstimate (Vrinda, 9 Oct -- "$199 USD (≈ local)", displ
     expect(await resolveDisplayEstimate(12999, 'IN')).toBeNull();
   });
 
-  it('is null for an unlisted country -- never guesses a currency', async () => {
+  it('is null for a country with no known local currency -- never guesses one (Vietnam: used as a spoken test example, but has no currency mapping at all, same as its tier)', async () => {
     const { resolveDisplayEstimate } = await import('./resolve');
-    expect(await resolveDisplayEstimate(299, 'JP')).toBeNull();
+    expect(await resolveDisplayEstimate(299, 'VN')).toBeNull();
   });
 
   it('is null (never invented) when the live rate source is unreachable', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
     const { resolveDisplayEstimate } = await import('./resolve');
 
-    expect(await resolveDisplayEstimate(199, 'NG')).toBeNull();
+    expect(await resolveDisplayEstimate(249, 'NG')).toBeNull();
   });
 });
