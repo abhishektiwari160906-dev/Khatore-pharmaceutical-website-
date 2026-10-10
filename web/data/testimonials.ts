@@ -82,22 +82,31 @@ export const TESTIMONIALS: TestimonialEntry[] = [
     youtubeId: '3SBiU80Fpi0',
   },
   {
-    id: 'yatin-shah',
+    id: 'andres-franco',
+    // 10 Oct: swapped in for Mr. Yatin Shah at Abhishek's request (new
+    // video supplied). The excerpt/tag/sourceUrl below are carried over
+    // from the slot this replaced -- they are Yatin Shah's real words,
+    // NOT verified as Andres Franco's own testimonial text, so this is
+    // flagged back rather than silently shown as if it were his quote.
     excerpt: 'I had been suffering from fatty liver for 25 years. I finished 6 months of medicine and requested another 6 — I am fully recovered.',
-    name: 'Mr. Yatin Shah',
+    name: 'Mr. Andres Franco',
     location: 'Mount Abu, Rajasthan',
     tag: 'Fatty Liver',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
-    youtubeId: 'rtPJTsI_3kA',
+    youtubeId: 'R83bgJbmHlE',
   },
   {
-    id: 'dr-soumen-ghosh',
+    id: 'nordin',
+    // 10 Oct: swapped in for Dr. Soumen Ghosh at Abhishek's request (new
+    // video + location supplied). Same caveat as above -- excerpt/tag/
+    // sourceUrl are carried over from the replaced slot, not verified as
+    // Nordin's own words.
     excerpt: 'My blood profile became better and brought ALT/AST levels down to the normal range.',
-    name: 'Dr. Soumen Ghosh',
-    location: 'San Jose, California',
+    name: 'Mr. Nordin',
+    location: 'Malaysia',
     tag: 'Fatty Liver',
     sourceUrl: 'https://www.khatorepharma.com/testimonials/fatty_liver',
-    youtubeId: 'bcI9SADpw9s',
+    youtubeId: 'zFpXKaaJc2g',
   },
   {
     id: 'dr-bc-jha',
