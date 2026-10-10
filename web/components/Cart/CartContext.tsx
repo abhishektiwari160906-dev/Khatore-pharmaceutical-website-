@@ -100,6 +100,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             country: resolvedPricing.country,
             taxIncluded: resolvedPricing.taxIncluded,
             shippingIncluded: resolvedPricing.shippingIncluded,
+            breakdown: resolvedPricing.breakdown,
+            breakdownCurrency: resolvedPricing.baseCurrency ?? resolvedPricing.currency,
           }
         : {};
 

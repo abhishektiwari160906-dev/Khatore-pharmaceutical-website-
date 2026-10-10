@@ -40,6 +40,9 @@
   letter-spacing: 0.06em;
   color: var(--muted-lt);
 }
+.itemBreakdown {
+  display: block;
+}
 .qtyRow {
   display: flex;
   align-items: center;

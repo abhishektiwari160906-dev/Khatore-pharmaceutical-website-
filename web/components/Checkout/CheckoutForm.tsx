@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/components/Cart/CartContext';
 import { trackEvent } from '@/lib/events/client';
 import { formatMoney } from '@/components/Pricing/PriceTag';
+import type { CurrencyCode } from '@/data/currencies';
 import { COUNTRIES } from '@/data/countries';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { CONTACT } from '@/lib/config';
@@ -322,6 +323,26 @@ export function CheckoutForm() {
     );
   }
 
+  // Base/Shipping/Tax breakdown (10 Oct: "Total computed from those
+  // three, never hardcode Total separately"), aggregated across every
+  // line and scaled by quantity -- only shown when every line in the
+  // cart actually has one (today: a Kamalahar-only cart on Tier 1/2/3).
+  // A cart with no breakdown at all (e.g. India/Tier 4, flat by design,
+  // or a non-tiered product) falls back to the existing Shipping/Tax
+  // text below, completely unchanged.
+  const hasFullBreakdown = items.length > 0 && items.every((i) => i.breakdown);
+  const breakdownTotals = hasFullBreakdown
+    ? items.reduce(
+        (acc, i) => ({
+          base: acc.base + i.breakdown!.base * i.quantity,
+          shipping: acc.shipping + i.breakdown!.shipping * i.quantity,
+          tax: acc.tax + i.breakdown!.tax * i.quantity,
+        }),
+        { base: 0, shipping: 0, tax: 0 },
+      )
+    : null;
+  const breakdownCurrency: CurrencyCode = items[0]?.breakdownCurrency ?? items[0]?.price?.currency ?? 'USD';
+
   return (
     <div className={styles.layout}>
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -468,17 +489,31 @@ export function CheckoutForm() {
           <span>Subtotal</span>
           <span>{subtotal === null ? 'Contact for pricing' : formatMoney(subtotal.amount, subtotal.currency)}</span>
         </div>
+        {breakdownTotals ? (
+          <div className={styles.summaryRow}>
+            <span>Base price</span>
+            <span>{formatMoney(breakdownTotals.base, breakdownCurrency)}</span>
+          </div>
+        ) : null}
         <div className={styles.summaryRow}>
           <span>Shipping</span>
-          <span className={styles.summaryMuted}>
-            {items.every((i) => i.shippingIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
-          </span>
+          {breakdownTotals ? (
+            <span>{formatMoney(breakdownTotals.shipping, breakdownCurrency)}</span>
+          ) : (
+            <span className={styles.summaryMuted}>
+              {items.every((i) => i.shippingIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
+            </span>
+          )}
         </div>
         <div className={styles.summaryRow}>
           <span>Tax</span>
-          <span className={styles.summaryMuted}>
-            {items.every((i) => i.taxIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
-          </span>
+          {breakdownTotals ? (
+            <span>{formatMoney(breakdownTotals.tax, breakdownCurrency)}</span>
+          ) : (
+            <span className={styles.summaryMuted}>
+              {items.every((i) => i.taxIncluded) && items.length > 0 ? 'Included in price' : 'Calculated separately'}
+            </span>
+          )}
         </div>
         <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
           <span>Total</span>

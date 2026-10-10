@@ -66,6 +66,16 @@
   font-style: italic;
   margin-top: 0.6rem;
 }
+.breakdownRows {
+  padding-top: 0.5rem;
+}
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted-lt);
+  padding: 0.2rem 0;
+}
 .totalRow {
   display: flex;
   justify-content: space-between;

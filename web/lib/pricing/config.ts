@@ -50,30 +50,49 @@ export interface PricingTierDefinition {
   discountEndsAt?: string; // ISO 8601
 }
 
+/**
+ * 10 Oct: the per-tier Base/Shipping/Tax split is now shown to the
+ * customer everywhere a price appears (product page, cart, checkout,
+ * order confirmation) -- Abhishek/Vrinda, 10 Oct: "show a full price
+ * breakdown ... Total computed from those three. Never hardcode Total
+ * separately." totalOf() is the single place that sum happens; every
+ * tier's salePrice below is DERIVED from its own breakdown rather than
+ * typed in twice, so the displayed breakdown and the charged total can
+ * never drift apart. (regularPrice/discountPercent are untouched --
+ * no pre-discount breakdown exists, same as before.)
+ */
+function totalOf(breakdown: { base: number; shipping: number; tax: number }): number {
+  return breakdown.base + breakdown.shipping + breakdown.tax;
+}
+
+const TIER_1_BREAKDOWN = { base: 237, shipping: 50, tax: 12 };
+const TIER_2_BREAKDOWN = { base: 187, shipping: 50, tax: 12 };
+const TIER_3_BREAKDOWN = { base: 137, shipping: 50, tax: 12 };
+
 export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
   TIER_1: {
     id: 'TIER_1',
     label: 'International',
     currency: 'USD',
     regularPrice: 399,
-    salePrice: 299,
+    salePrice: totalOf(TIER_1_BREAKDOWN),
     discountPercent: 25.062656641604,
     taxIncluded: true,
     shippingIncluded: true,
-    notes: 'Includes taxes and shipping, no hidden charges. (Reverted 9 Oct: the itemized $50 shipping / $15 tax tried earlier the same day was rolled back to this single flat total, same treatment as India.)',
-    breakdown: { base: 237, shipping: 50, tax: 12 },
+    notes: 'Includes taxes and shipping, no hidden charges. Base/Shipping/Tax breakdown shown to the customer everywhere a price appears (10 Oct).',
+    breakdown: TIER_1_BREAKDOWN,
   },
   TIER_2: {
     id: 'TIER_2',
     label: 'International (Test Markets)',
     currency: 'USD',
     regularPrice: 399,
-    salePrice: 249,
+    salePrice: totalOf(TIER_2_BREAKDOWN),
     discountPercent: 37.593984962406,
     taxIncluded: true,
     shippingIncluded: true,
-    notes: 'Test-discount tier -- revisit once more order volume comes in. Includes taxes and shipping, same reverted treatment as TIER_1.',
-    breakdown: { base: 187, shipping: 50, tax: 12 },
+    notes: 'Test-discount tier -- revisit once more order volume comes in. Includes taxes and shipping, same breakdown treatment as TIER_1.',
+    breakdown: TIER_2_BREAKDOWN,
   },
   TIER_3: {
     id: 'TIER_3',
@@ -83,13 +102,13 @@ export const PRICING_TIERS: Record<PricingTierId, PricingTierDefinition> = {
     // the whole number Vrinda supplied, not a discounted-from figure,
     // so regularPrice == salePrice and there is no discount badge
     // (Section: never invent a discount percentage that wasn't given).
-    regularPrice: 199,
-    salePrice: 199,
+    regularPrice: totalOf(TIER_3_BREAKDOWN),
+    salePrice: totalOf(TIER_3_BREAKDOWN),
     discountPercent: 0,
     taxIncluded: true,
     shippingIncluded: true,
     notes: 'Income-based tier (Vrinda, 9 Oct, World Bank Country and Lending Groups classification: Low/Lower-middle income) -- a reassignment of countries previously on Tier 1/2, not a new addition.',
-    breakdown: { base: 137, shipping: 50, tax: 12 },
+    breakdown: TIER_3_BREAKDOWN,
   },
   TIER_4_INDIA: {
     id: 'TIER_4_INDIA',

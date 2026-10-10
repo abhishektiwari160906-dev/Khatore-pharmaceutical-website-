@@ -118,6 +118,20 @@ describe('resolveProductPricing -- correct price per tier', () => {
     expect(p.breakdown).toEqual({ base: 137, shipping: 50, tax: 12 });
   });
 
+  it('sums the three breakdown fields to the exact literal total for every tier (10 Oct: never hardcode Total separately)', () => {
+    expect(PRICING_TIERS.TIER_1.breakdown).toEqual({ base: 237, shipping: 50, tax: 12 });
+    expect(237 + 50 + 12).toBe(299);
+    expect(PRICING_TIERS.TIER_1.salePrice).toBe(299);
+
+    expect(PRICING_TIERS.TIER_2.breakdown).toEqual({ base: 187, shipping: 50, tax: 12 });
+    expect(187 + 50 + 12).toBe(249);
+    expect(PRICING_TIERS.TIER_2.salePrice).toBe(249);
+
+    expect(PRICING_TIERS.TIER_3.breakdown).toEqual({ base: 137, shipping: 50, tax: 12 });
+    expect(137 + 50 + 12).toBe(199);
+    expect(PRICING_TIERS.TIER_3.salePrice).toBe(199);
+  });
+
   it('every USD tier breakdown sums to its own salePrice', () => {
     for (const tierId of ['TIER_1', 'TIER_2', 'TIER_3'] as const) {
       const tier = PRICING_TIERS[tierId];

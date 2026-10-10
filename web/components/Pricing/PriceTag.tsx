@@ -36,6 +36,35 @@ export function formatMoney(amount: number, currency: CurrencyCode): string {
 }
 
 /**
+ * Base + Shipping + Tax = Total line, shared by every surface that shows
+ * a price (product page, cart, checkout, order confirmation -- 10 Oct:
+ * "this must be consistent across all of them"). Total is always
+ * rendered as the sum of the three fields passed in, never a separate
+ * prop, so it can never drift from what's actually shown. `currency` is
+ * the tier's own BASE currency (breakdown amounts are never themselves
+ * converted -- see ResolvedPricing.breakdown's doc comment), which may
+ * differ from the order/cart line's displayed/charged currency when a
+ * real local-currency conversion happened.
+ */
+export function BreakdownLine({
+  breakdown,
+  currency,
+  className,
+}: {
+  breakdown: { base: number; shipping: number; tax: number };
+  currency: CurrencyCode;
+  className?: string;
+}) {
+  const total = breakdown.base + breakdown.shipping + breakdown.tax;
+  return (
+    <span className={`${styles.breakdown} ${className ?? ''}`}>
+      Base {formatMoney(breakdown.base, currency)} + Shipping {formatMoney(breakdown.shipping, currency)} + Tax{' '}
+      {formatMoney(breakdown.tax, currency)} = {formatMoney(total, currency)}
+    </span>
+  );
+}
+
+/**
  * Regular (struck through) / Final (prominent) / Discount% display,
  * resolved from the single pricing source (lib/pricing/resolve.ts),
  * never a flat `$amount` render (Master Pricing pass, Section 4).
@@ -97,6 +126,9 @@ export function PriceTag({ product, size = 'md' }: { product: Product; size?: 's
         </span>
       ) : null}
       {includedNote ? <span className={styles.note}>{includedNote}</span> : null}
+      {pricing.breakdown ? (
+        <BreakdownLine breakdown={pricing.breakdown} currency={pricing.baseCurrency ?? pricing.currency} />
+      ) : null}
       {!pricing.isTiered && product.priceNote ? <span className={styles.note}>{product.priceNote}</span> : null}
       {displayEstimate ? (
         <span className={styles.note}>

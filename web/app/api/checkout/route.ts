@@ -160,6 +160,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       ...(pricing.baseAmount !== undefined
         ? { baseAmount: pricing.baseAmount, baseCurrency: pricing.baseCurrency, fxRate: pricing.fxRate }
         : {}),
+      // Customer-visible breakdown (10 Oct) -- same tier.breakdown already
+      // used for internalMeta.tierBreakdown below, now also attached
+      // directly to the line item so the confirmation page/order record
+      // can show it without needing internal-only data.
+      ...(pricing.breakdown ? { breakdown: pricing.breakdown } : {}),
     });
   }
 

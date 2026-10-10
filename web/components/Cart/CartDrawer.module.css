@@ -148,6 +148,10 @@
   color: var(--muted-lt);
   margin-bottom: 0.5rem;
 }
+.itemBreakdown {
+  display: block;
+  margin-bottom: 0.5rem;
+}
 .qtyRow {
   display: flex;
   align-items: center;

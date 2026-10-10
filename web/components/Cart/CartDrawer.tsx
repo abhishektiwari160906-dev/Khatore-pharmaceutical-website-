@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useCart } from './CartContext';
 import { trackEvent } from '@/lib/events/client';
 import { CONTACT } from '@/lib/config';
-import { formatMoney } from '@/components/Pricing/PriceTag';
+import { formatMoney, BreakdownLine } from '@/components/Pricing/PriceTag';
 import styles from './CartDrawer.module.css';
 
 const WHATSAPP_PHONE = CONTACT.whatsappIndiaWorld;
@@ -104,6 +104,17 @@ export function CartDrawer() {
                     ) : (
                       <span className={styles.itemPriceNote}>Contact for pricing</span>
                     )}
+                    {item.breakdown ? (
+                      <BreakdownLine
+                        breakdown={{
+                          base: item.breakdown.base * item.quantity,
+                          shipping: item.breakdown.shipping * item.quantity,
+                          tax: item.breakdown.tax * item.quantity,
+                        }}
+                        currency={item.breakdownCurrency ?? item.price?.currency ?? 'USD'}
+                        className={styles.itemBreakdown}
+                      />
+                    ) : null}
                     <div className={styles.qtyRow}>
                       <button
                         type="button"

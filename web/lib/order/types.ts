@@ -42,6 +42,15 @@ export interface OrderLineItem {
   baseAmount?: number;
   baseCurrency?: CurrencyCode;
   fxRate?: number;
+  /**
+   * Customer-visible Base/Shipping/Tax split, per unit, in the tier's
+   * own base currency (see baseCurrency above when this line was
+   * locally converted -- the breakdown itself is never converted, same
+   * design as internalMeta.tierBreakdown below). Undefined for
+   * TIER_4_INDIA (flat, all-inclusive by design) and for any non-tiered
+   * product (10 Oct: "show a full price breakdown ... for EVERY tier").
+   */
+  breakdown?: { base: number; shipping: number; tax: number };
 }
 
 export interface CustomerInfo {

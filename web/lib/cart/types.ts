@@ -31,4 +31,13 @@ export interface CartItem {
   country?: string;
   taxIncluded?: boolean;
   shippingIncluded?: boolean;
+  /**
+   * Per-unit Base/Shipping/Tax split, in `breakdownCurrency` below --
+   * never converted itself even when `price` was (10 Oct: "show a full
+   * price breakdown ... Total computed from those three"). Undefined
+   * for TIER_4_INDIA and for a non-tiered product.
+   */
+  breakdown?: { base: number; shipping: number; tax: number };
+  /** The currency `breakdown` above is expressed in -- the tier's own base currency, which may differ from `price.currency` when a local-currency conversion happened. Falls back to `price.currency` when undefined (no conversion happened, so they're the same). */
+  breakdownCurrency?: CurrencyCode;
 }

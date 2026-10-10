@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { WhatsAppCta } from '@/components/WhatsAppCta';
 import { CONTACT } from '@/lib/config';
 import { formatMoney } from '@/components/Pricing/PriceTag';
+import type { CurrencyCode } from '@/data/currencies';
 import { getCountryName } from '@/data/countries';
 import type { Order } from '@/lib/order/types';
 import styles from './OrderConfirmationClient.module.css';
@@ -56,6 +57,26 @@ export function OrderConfirmationClient() {
 
   const whatsappMessage = `Hi, I've just placed order ${order.orderId} on the Khatore website and would like to arrange payment.`;
 
+  // Base/Shipping/Tax breakdown (10 Oct: "every order record stored or
+  // displayed must carry the breakdown"), aggregated across every line
+  // -- per-unit breakdown.base/shipping/tax already come scaled to
+  // line.quantity here since app/api/checkout/route.ts stores them per
+  // unit, same as unitPrice. Undefined for a Tier 4 India order (flat,
+  // no breakdown by design) or a non-tiered product -- falls back to
+  // just the Total row, unchanged from before.
+  const hasFullBreakdown = order.items.length > 0 && order.items.every((i) => i.breakdown);
+  const breakdownTotals = hasFullBreakdown
+    ? order.items.reduce(
+        (acc, i) => ({
+          base: acc.base + i.breakdown!.base * i.quantity,
+          shipping: acc.shipping + i.breakdown!.shipping * i.quantity,
+          tax: acc.tax + i.breakdown!.tax * i.quantity,
+        }),
+        { base: 0, shipping: 0, tax: 0 },
+      )
+    : null;
+  const breakdownCurrency: CurrencyCode = order.items[0]?.baseCurrency ?? order.items[0]?.unitPrice.currency ?? order.total.currency;
+
   return (
     <div className={styles.wrap}>
       <span className={styles.check} aria-hidden="true">
@@ -86,6 +107,22 @@ export function OrderConfirmationClient() {
           </li>
         ))}
       </ul>
+      {breakdownTotals ? (
+        <div className={styles.breakdownRows}>
+          <div className={styles.breakdownRow}>
+            <span>Base price</span>
+            <span>{formatMoney(breakdownTotals.base, breakdownCurrency)}</span>
+          </div>
+          <div className={styles.breakdownRow}>
+            <span>Shipping</span>
+            <span>{formatMoney(breakdownTotals.shipping, breakdownCurrency)}</span>
+          </div>
+          <div className={styles.breakdownRow}>
+            <span>Tax</span>
+            <span>{formatMoney(breakdownTotals.tax, breakdownCurrency)}</span>
+          </div>
+        </div>
+      ) : null}
       <div className={styles.totalRow}>
         <span>Total</span>
         <span>{formatMoney(order.total.amount, order.total.currency)}</span>
